@@ -115,4 +115,25 @@ app.post("/api/checkout", async (req, res) => {
   }
 });
 
+/* Open the Stripe Customer Portal so a subscriber can manage/cancel/update billing.
+   Looks the customer up by email (interim — real auth ties this to the logged-in user in the accounts phase). */
+app.post("/api/portal", async (req, res) => {
+  if (!stripe) return res.status(503).json({ error: "stripe_unconfigured", message: "Stripe is not set up on the server yet." });
+  try {
+    const email = (req.body && typeof req.body.email === "string") ? req.body.email.trim() : "";
+    if (!email) return res.status(400).json({ error: "no_email", message: "Email is required." });
+    const customers = await stripe.customers.list({ email, limit: 1 });
+    const customer = customers.data[0];
+    if (!customer) return res.status(404).json({ error: "no_customer", message: "No Stripe customer found for that email." });
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customer.id,
+      return_url: `${PUBLIC_URL}/chat.html`
+    });
+    res.json({ url: session.url });
+  } catch (e) {
+    console.error("Portal error:", e.message);
+    res.status(500).json({ error: "portal_failed", message: e.message });
+  }
+});
+
 app.listen(PORT, "127.0.0.1", () => console.log(`Crown backend on 127.0.0.1:${PORT} | model ${MODEL} | stripe ${!!stripe}`));

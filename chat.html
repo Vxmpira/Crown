@@ -589,7 +589,20 @@ function renderAccount(){
 }
 function editName(){ if(!S.account) return; openInput("Profile","Display name","Your name",S.account.username,v=>{ S.account.username=v; toast("Name updated"); render(); renderAccount(); }); }
 function signOut(){ S.account=null; S.tier="free"; S.tokensUsed=0; closeAccount(); render(); toast("Signed out"); }
-function manageSub(){ toast("Stripe billing portal — coming soon"); }
+async function manageSub(){
+  if(!S.account?.email){ toast("Sign in to manage billing"); return; }
+  const isPreview = /(^|\.)claude\.ai$|(^|\.)anthropic\.com$/.test(location.hostname);
+  if(isPreview){ toast("Billing portal opens on your live site"); return; }
+  toast("Opening billing portal…");
+  try{
+    const r = await fetch("/api/portal", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email:S.account.email}) });
+    const d = await r.json().catch(()=>({}));
+    if(r.ok && d.url){ window.location.href = d.url; return; }
+    if(r.status===404){ toast("No subscription found for "+S.account.email); return; }
+    if(r.status===503){ toast("Stripe isn't set up yet"); return; }
+    throw new Error(d.message || ("HTTP "+r.status));
+  }catch(e){ toast("Couldn't open the billing portal"); }
+}
 
 /* ===== generic input modal (rename chat / edit name) ===== */
 let inputCb=null;
