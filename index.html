@@ -114,18 +114,27 @@
   .why-card h3{font-family:var(--display);font-weight:600;font-size:1.2rem;margin:8px 0 8px;letter-spacing:.01em}
   .why-card p{color:var(--muted);font-size:.94rem}
 
-  /* COMPARE */
-  .compare{padding:clamp(50px,8vw,80px) 0}
-  .cmp{max-width:920px;margin:0 auto;border:1px solid var(--line-soft);border-radius:18px;overflow:hidden;background:linear-gradient(180deg,var(--panel),var(--obsidian-2))}
-  .cmp-row{display:grid;grid-template-columns:1.25fr 1fr 1fr}
-  .cmp-row+.cmp-row{border-top:1px solid var(--line-soft)}
-  .cmp-cell{padding:clamp(12px,2.4vw,17px) clamp(10px,2.4vw,20px);font-size:clamp(.76rem,2vw,.93rem);line-height:1.4}
-  .cmp-cell.feat{color:var(--muted);font-weight:600}
-  .cmp-cell.them{color:var(--muted-2);border-left:1px solid var(--line-soft)}
-  .cmp-cell.us{color:var(--ivory);font-weight:600;background:rgba(212,175,55,.05);border-left:1px solid var(--line-soft)}
-  .cmp-head .cmp-cell{font-family:var(--display);letter-spacing:.06em;text-transform:uppercase;font-size:clamp(.62rem,1.7vw,.78rem)}
-  .cmp-head .them{color:var(--muted)}.cmp-head .us{color:var(--gold-bright)}
-  .cmp-cell.us .ck{display:inline-block;color:var(--gold);margin-right:6px;font-weight:700}
+  /* COMPARE — featured Crown column */
+  .compare{padding:clamp(50px,8vw,90px) 0}
+  .cmp{max-width:860px;margin:0 auto;display:grid;grid-template-columns:1.15fr 1fr 1fr;
+    border-radius:20px;overflow:hidden;border:1px solid var(--line-soft);
+    background:linear-gradient(180deg,var(--panel),var(--obsidian-2));
+    box-shadow:0 40px 100px -50px rgba(0,0,0,.9)}
+  .cmp .c{padding:clamp(13px,2.6vw,18px) clamp(11px,2.6vw,22px);display:flex;align-items:center;gap:9px;
+    font-size:clamp(.78rem,2vw,.93rem);line-height:1.35;border-top:1px solid var(--line-soft);min-width:0}
+  .cmp .c.r1{border-top:none}
+  .cmp .feat{color:var(--ivory);font-weight:600}
+  .cmp .them{color:var(--muted-2)}
+  .cmp .them .ic{color:var(--garnet-soft);opacity:.6;flex-shrink:0}
+  .cmp .us{background:linear-gradient(180deg,rgba(212,175,55,.10),rgba(212,175,55,.04));
+    color:var(--ivory);font-weight:600;border-left:1px solid var(--line)}
+  .cmp .us .ic{color:var(--gold);flex-shrink:0}
+  .cmp .h{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  .cmp .h.feat{color:var(--muted-2);font-size:clamp(.6rem,1.6vw,.7rem)}
+  .cmp .h.them{color:var(--muted);font-size:clamp(.64rem,1.7vw,.76rem)}
+  .cmp .h.us{color:#1a1405;background:linear-gradient(115deg,var(--gold-deep),var(--gold) 55%,var(--gold-bright));
+    font-size:clamp(.66rem,1.8vw,.8rem);box-shadow:0 8px 30px -10px rgba(212,175,55,.6)}
+  .cmp .h.us .ic{color:#1a1405}
 
   /* CTA BAND */
   .cta-band{position:relative;text-align:center;padding:clamp(60px,10vw,100px) 0;border-top:1px solid var(--line-soft);overflow:hidden}
@@ -239,16 +248,29 @@
   <section class="compare wrap">
     <div class="sec-head"><div class="eyebrow">Crown vs. Ordinary AI</div><h2>The same models. A better way to use them.</h2><p>Everyone rents the same frontier intelligence. The difference is what's built around it.</p></div>
     <div class="cmp">
-      <div class="cmp-row cmp-head">
-        <div class="cmp-cell feat">&nbsp;</div>
-        <div class="cmp-cell them">Ordinary AI chatbots</div>
-        <div class="cmp-cell us">Crown</div>
-      </div>
-      <div class="cmp-row"><div class="cmp-cell feat">Your data</div><div class="cmp-cell them">May train the model</div><div class="cmp-cell us"><span class="ck">✦</span>Never trained on</div></div>
-      <div class="cmp-row"><div class="cmp-cell feat">Your history</div><div class="cmp-cell them">Endless scroll</div><div class="cmp-cell us"><span class="ck">✦</span>Organized into Projects</div></div>
-      <div class="cmp-row"><div class="cmp-cell feat">Pricing</div><div class="cmp-cell them">Credits &amp; caps</div><div class="cmp-cell us"><span class="ck">✦</span>Flat &amp; unlimited (Pro)</div></div>
-      <div class="cmp-row"><div class="cmp-cell feat">Experience</div><div class="cmp-cell them">Generic &amp; cluttered</div><div class="cmp-cell us"><span class="ck">✦</span>Refined &amp; focused</div></div>
-      <div class="cmp-row"><div class="cmp-cell feat">Getting started</div><div class="cmp-cell them">Sign up first</div><div class="cmp-cell us"><span class="ck">✦</span>Start instantly</div></div>
+      <div class="c h feat r1">&nbsp;</div>
+      <div class="c h them r1">Ordinary AI</div>
+      <div class="c h us r1"><svg class="ic" width="14" height="11" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg> Crown</div>
+
+      <div class="c feat">Your data</div>
+      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> May train the model</div>
+      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Never trained on</div>
+
+      <div class="c feat">Your history</div>
+      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Endless scroll</div>
+      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Organized into Projects</div>
+
+      <div class="c feat">Pricing</div>
+      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Credits &amp; caps</div>
+      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Flat &amp; unlimited (Pro)</div>
+
+      <div class="c feat">Experience</div>
+      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Generic &amp; cluttered</div>
+      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Refined &amp; focused</div>
+
+      <div class="c feat">Getting started</div>
+      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Sign up first</div>
+      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Start instantly</div>
     </div>
   </section>
 
@@ -308,8 +330,8 @@
       <p style="color:var(--muted);font-size:.88rem">Your private AI workspace. Refined, organized, and yours — hosted on AWS.</p>
     </div>
     <div class="col"><h4>Product</h4><a href="chat.html">Console</a><a href="#why">Why Crown</a><a href="#features">Features</a><a href="#pricing">Pricing</a></div>
-    <div class="col"><h4>Company</h4><a>About</a><a>Contact</a><a>Careers</a></div>
-    <div class="col"><h4>Legal</h4><a>Terms</a><a>Privacy</a><a>Acceptable Use</a></div>
+    <div class="col"><h4>Company</h4><a href="about.html">About</a><a href="contact.html">Contact</a><a href="careers.html">Careers</a></div>
+    <div class="col"><h4>Legal</h4><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="acceptable-use.html">Acceptable Use</a></div>
   </div>
   <div class="foot-note"><span>© <span id="yr"></span> BlackCrown VxJ, LLC. All rights reserved.</span><span>Built on AWS · Powered by frontier AI</span></div>
 </div></footer>
