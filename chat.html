@@ -428,10 +428,42 @@ async function refreshMe(){
   try{
     const r = await fetch("/api/me", { credentials:"include" });
     const d = await r.json().catch(()=>({}));
-    if(d && d.user){ S.account={username:d.user.username,email:d.user.email}; S.tier=d.user.tier; S.tokensUsed=d.user.tokensUsed||0; S.freeLimit=d.user.limit||S.freeLimit; }
-    else { S.account=null; S.tier="free"; }
-    render();
+    if(d && d.user){
+      S.account={username:d.user.username,email:d.user.email}; S.tier=d.user.tier; S.tokensUsed=d.user.tokensUsed||0; S.freeLimit=d.user.limit||S.freeLimit;
+      await loadWorkspace();   // pull this user's saved chats + projects
+    } else {
+      S.account=null; S.tier="free"; render();
+    }
   }catch(e){}
+}
+
+/* ===== workspace persistence (chats + projects, per signed-in user) ===== */
+async function loadWorkspace(){
+  if(IS_PREVIEW || !S.account){ render(); return; }
+  try{
+    const r = await fetch("/api/workspace", { credentials:"include" });
+    if(!r.ok){ render(); return; }
+    const d = await r.json().catch(()=>({}));
+    S.projects = Array.isArray(d.projects) ? d.projects : [];
+    const chats = Array.isArray(d.chats) ? d.chats : [];
+    if(chats.length){ S.chats = chats; S.activeId = chats[0].id; render(); }
+    else if(!S.chats.length){ newChat(); }   // nothing saved yet → fresh chat (persists current anon chat if any)
+    else { render(); }
+  }catch(e){ render(); }
+}
+let _saveT=null, _saving=false;
+function persist(){
+  if(IS_PREVIEW || !S.account) return;   // only signed-in users on the live site persist
+  clearTimeout(_saveT);
+  _saveT=setTimeout(async ()=>{
+    if(_saving) { persist(); return; }
+    _saving=true;
+    try{
+      const chats = S.chats.filter(c=> (c.messages && c.messages.length) || c.id===S.activeId);
+      await fetch("/api/workspace", { method:"PUT", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({ chats, projects:S.projects }) });
+    }catch(e){}
+    _saving=false;
+  }, 700);
 }
 
 /* ===== sidebar / drawer ===== */
@@ -457,7 +489,7 @@ function toggleProject(id){ const p=S.projects.find(x=>x.id===id); if(p){ p.coll
 function deleteProject(id){ S.chats.forEach(c=>{ if(c.projectId===id) c.projectId=null; }); S.projects=S.projects.filter(p=>p.id!==id); render(); }
 
 /* ===== render ===== */
-function render(){ renderSidebar(); renderPlan(); renderProfile(); renderHead(); renderChat(); }
+function render(){ renderSidebar(); renderPlan(); renderProfile(); renderHead(); renderChat(); persist(); }
 
 function chatRow(c){
   const active = c.id===S.activeId ? " active" : "";
@@ -623,7 +655,9 @@ function renderAccount(){
 function editName(){ if(!S.account) return; openInput("Profile","Display name","Your name",S.account.username,v=>{ S.account.username=v; toast("Name updated"); render(); renderAccount(); }); }
 async function signOut(){
   if(!IS_PREVIEW){ try{ await fetch("/api/logout",{method:"POST",credentials:"include"}); }catch(e){} }
-  S.account=null; S.tier="free"; S.tokensUsed=0; S.freeLimit=CONFIG.FREE_TOKEN_LIMIT; closeAccount(); render(); toast("Signed out");
+  S.account=null; S.tier="free"; S.tokensUsed=0; S.freeLimit=CONFIG.FREE_TOKEN_LIMIT;
+  S.chats=[]; S.projects=[]; S.activeId=null; newChat();
+  closeAccount(); toast("Signed out");
 }
 async function manageSub(){
   if(IS_PREVIEW){ toast("Billing portal opens on your live site"); return; }
@@ -764,7 +798,8 @@ async function send(){
   const t=document.createElement("div"); t.className="msg bot typing"; t.innerHTML='<div class="av">'+CROWN_AV+'</div><div class="mcol"><div class="mname">Crown</div><div class="bubble"><i></i><i></i><i></i></div></div>';
   chat.appendChild(t); chat.scrollTop=chat.scrollHeight;
   try{
-    const reply=await callModel(c.messages);
+    const history = c.messages.filter(m=>!m.image && m.content).map(m=>({role:m.role, content:m.content}));
+    const reply=await callModel(history);
     c.messages.push({role:"assistant",content:reply||"…"});
     if(IS_PREVIEW && S.tier==="free"){ S.tokensUsed += est(text)+est(reply); }  // live usage comes from the server
     render();

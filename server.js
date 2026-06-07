@@ -74,6 +74,11 @@ CREATE TABLE IF NOT EXISTS anon_usage (
   tokens_used INTEGER NOT NULL DEFAULT 0,
   period_start INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS workspaces (
+  user_id INTEGER PRIMARY KEY,
+  data TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);
 `);
 
 const q = {
@@ -91,6 +96,8 @@ const q = {
   delSession:     db.prepare("DELETE FROM sessions WHERE token = ?"),
   anonGet:        db.prepare("SELECT * FROM anon_usage WHERE ip = ?"),
   anonUpsert:     db.prepare("INSERT INTO anon_usage (ip,tokens_used,period_start) VALUES (?,?,?) ON CONFLICT(ip) DO UPDATE SET tokens_used=excluded.tokens_used, period_start=excluded.period_start"),
+  getWorkspace:   db.prepare("SELECT data FROM workspaces WHERE user_id = ?"),
+  upsertWorkspace:db.prepare("INSERT INTO workspaces (user_id,data,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data, updated_at=excluded.updated_at"),
 };
 
 const now      = () => Date.now();
@@ -158,7 +165,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req,
   res.json({ received: true });
 });
 
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "5mb" }));
 
 app.get("/api/health", (_req, res) =>
   res.json({ ok:true, model:MODEL, keyLoaded:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, db:true, accounts:true, images:!!IMAGE_KEY }));
@@ -199,6 +206,28 @@ app.post("/api/logout", (req, res) => {
 app.get("/api/me", (req, res) => {
   const u = getSessionUser(req);
   res.json({ user: u ? publicUser(u) : null });
+});
+
+// ---- per-user workspace (chats + projects persistence) ----
+app.get("/api/workspace", (req, res) => {
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
+  const row = q.getWorkspace.get(u.id);
+  if (!row) return res.json({ chats:[], projects:[] });
+  try {
+    const d = JSON.parse(row.data);
+    res.json({ chats: Array.isArray(d.chats) ? d.chats : [], projects: Array.isArray(d.projects) ? d.projects : [] });
+  } catch (_) { res.json({ chats:[], projects:[] }); }
+});
+app.put("/api/workspace", (req, res) => {
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
+  const chats    = Array.isArray(req.body.chats)    ? req.body.chats    : [];
+  const projects = Array.isArray(req.body.projects) ? req.body.projects : [];
+  const data = JSON.stringify({ chats, projects });
+  if (data.length > 4500000) return res.status(413).json({ error:"too_large", message:"Workspace is too large to save." });
+  q.upsertWorkspace.run(u.id, data, now());
+  res.json({ ok:true });
 });
 
 // ---- chat (rate limited + metered) ----
