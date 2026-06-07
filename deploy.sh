@@ -14,6 +14,12 @@ if ! command -v node >/dev/null 2>&1; then
   sudo dnf install -y nodejs
 fi
 
+# 1b. Build tools for native modules (better-sqlite3) + data dir for the SQLite database
+echo "==> Ensuring build tools + data directory"
+sudo dnf install -y gcc-c++ make >/dev/null 2>&1 || true
+sudo mkdir -p /var/lib/crown
+sudo chown ec2-user:ec2-user /var/lib/crown
+
 # 2. Backend dependencies
 echo "==> Installing backend dependencies"
 npm install --omit=dev
@@ -79,6 +85,7 @@ server {
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_read_timeout 120s;
     }
 }
