@@ -43,10 +43,15 @@ sudo systemctl restart crown
 # 4. Publish the static site
 echo "==> Publishing static files"
 sudo mkdir -p /var/www/crown
-sudo cp index.html /var/www/crown/index.html
+sudo cp *.html /var/www/crown/
 
 # 5. nginx: serve the site + proxy /api to the backend
 echo "==> Configuring nginx"
+if ! command -v nginx >/dev/null 2>&1; then
+  echo "==> Installing nginx"
+  sudo dnf install -y nginx
+  sudo systemctl enable nginx
+fi
 # neutralize any stock default_server so ours wins (idempotent)
 sudo cp -n /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak 2>/dev/null || true
 sudo sed -i 's/ default_server//g' /etc/nginx/nginx.conf
@@ -58,7 +63,7 @@ server {
     root /var/www/crown;
     index index.html;
 
-    location / { try_files $uri /index.html; }
+    location / { try_files $uri $uri.html /index.html; }
 
     location /api/ {
         proxy_pass http://127.0.0.1:3000;

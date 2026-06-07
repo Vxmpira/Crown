@@ -3,373 +3,193 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>BlackCrown VxJ — Intelligence, Crowned.</title>
-<meta name="description" content="BlackCrown VxJ — a refined AI console. Free to start, unlimited when you ascend." />
+<title>Crown — Your Private AI Workspace | BlackCrown VxJ</title>
+<meta name="description" content="Crown isn't another chatbot — it's your private AI workspace. Refined, organized, and yours. Free to start, unlimited with Pro." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --obsidian:#070709; --obsidian-2:#0c0c11; --panel:#13131a; --panel-2:#1a1a23; --panel-3:#21212b;
-    --gold:#d4af37; --gold-bright:#f5e0a3; --gold-deep:#9c7c1f;
-    --garnet:#8b1a2b; --garnet-soft:#b3243a;
-    --ivory:#ece7dd; --muted:#8c867a; --muted-2:#5f5b52;
-    --line:rgba(212,175,55,.16); --line-soft:rgba(236,231,221,.08);
-    --display:'Cinzel',serif; --body:'Hanken Grotesk',system-ui,sans-serif; --radius:16px;
+    --obsidian:#070709;--obsidian-2:#0c0c11;--panel:#13131a;--panel-2:#1a1a23;--panel-3:#21212b;
+    --gold:#d4af37;--gold-bright:#f5e0a3;--gold-deep:#9c7c1f;--garnet:#8b1a2b;--garnet-soft:#b3243a;
+    --ivory:#ece7dd;--muted:#8c867a;--muted-2:#5f5b52;
+    --line:rgba(212,175,55,.16);--line-soft:rgba(236,231,221,.08);
+    --display:'Cinzel',serif;--body:'Hanken Grotesk',system-ui,sans-serif;--radius:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{background:var(--obsidian);color:var(--ivory);font-family:var(--body);line-height:1.6;
-    overflow-x:hidden;-webkit-font-smoothing:antialiased}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{background:var(--obsidian);color:var(--ivory);font-family:var(--body);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
   ::selection{background:rgba(212,175,55,.3);color:#fff}
+  img,svg{max-width:100%}
 
-  /* ---------- atmosphere ---------- */
   .bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:
-      radial-gradient(55% 45% at 50% -5%, rgba(212,175,55,.13), transparent 70%),
-      radial-gradient(40% 38% at 88% 8%, rgba(139,26,43,.16), transparent 70%),
-      radial-gradient(45% 45% at 8% 75%, rgba(212,175,55,.06), transparent 70%),
+    background:radial-gradient(55% 45% at 50% -5%,rgba(212,175,55,.13),transparent 70%),
+      radial-gradient(40% 38% at 88% 8%,rgba(139,26,43,.16),transparent 70%),
+      radial-gradient(45% 45% at 8% 75%,rgba(212,175,55,.06),transparent 70%),
       linear-gradient(180deg,var(--obsidian),var(--obsidian-2))}
-  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.055;mix-blend-mode:overlay;
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
-    box-shadow:inset 0 0 240px 40px rgba(0,0,0,.7)}
   .embers{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-  .ember{position:absolute;bottom:-10px;width:3px;height:3px;border-radius:50%;
-    background:var(--gold);opacity:0;filter:blur(.4px);
-    animation:float linear infinite}
-  @keyframes float{0%{transform:translateY(0) scale(1);opacity:0}
-    12%{opacity:.7}88%{opacity:.5}100%{transform:translateY(-104vh) scale(.4);opacity:0}}
-  .crown-wm{position:fixed;z-index:0;top:44%;left:50%;transform:translate(-50%,-50%);
-    width:min(120vw,1000px);opacity:.022;pointer-events:none;color:var(--gold)}
+  .ember{position:absolute;bottom:-10px;border-radius:50%;background:var(--gold);opacity:0;filter:blur(.4px);animation:float linear infinite}
+  @keyframes float{0%{transform:translateY(0) scale(1);opacity:0}12%{opacity:.7}88%{opacity:.5}100%{transform:translateY(-104vh) scale(.4);opacity:0}}
+  .crown-wm{position:fixed;z-index:0;top:42%;left:50%;transform:translate(-50%,-50%);width:min(120vw,1000px);opacity:.022;pointer-events:none;color:var(--gold)}
+  main,nav,footer{position:relative;z-index:2}
 
-  /* ---------- shared ---------- */
-  .wrap{max-width:1200px;margin:0 auto;padding:0 28px}
-  .eyebrow{font-family:var(--display);letter-spacing:.36em;text-transform:uppercase;
-    font-size:.72rem;color:var(--gold);font-weight:600}
-  .gold-text{background:linear-gradient(115deg,var(--gold-deep),var(--gold-bright) 45%,var(--gold));
-    -webkit-background-clip:text;background-clip:text;color:transparent}
-  .btn{font-family:var(--body);font-weight:600;border:none;cursor:pointer;border-radius:999px;
-    padding:13px 28px;font-size:.94rem;transition:transform .2s,box-shadow .3s,background .3s,border-color .3s;
-    text-decoration:none;display:inline-flex;align-items:center;gap:9px;position:relative;overflow:hidden}
-  .btn-gold{background:linear-gradient(115deg,var(--gold-deep),var(--gold) 52%,var(--gold-bright));
-    color:#1a1405;box-shadow:0 6px 26px rgba(212,175,55,.3)}
-  .btn-gold::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;
-    background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg)}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 clamp(18px,4vw,28px)}
+  .eyebrow{font-family:var(--display);letter-spacing:.34em;text-transform:uppercase;font-size:clamp(.62rem,1.4vw,.72rem);color:var(--gold);font-weight:600}
+  .gold-text{background:linear-gradient(115deg,var(--gold-deep),var(--gold-bright) 45%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .btn{font-family:var(--body);font-weight:600;border:none;cursor:pointer;border-radius:999px;padding:13px 26px;font-size:.94rem;
+    transition:transform .2s,box-shadow .3s,border-color .3s;text-decoration:none;display:inline-flex;align-items:center;gap:9px;position:relative;overflow:hidden}
+  .btn-gold{background:linear-gradient(115deg,var(--gold-deep),var(--gold) 52%,var(--gold-bright));color:#1a1405;box-shadow:0 6px 26px rgba(212,175,55,.3)}
+  .btn-gold::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg)}
   .btn-gold:hover{transform:translateY(-2px);box-shadow:0 12px 38px rgba(212,175,55,.46)}
   .btn-gold:hover::after{animation:sheen .9s forwards}
   @keyframes sheen{to{left:140%}}
   .btn-ghost{background:rgba(255,255,255,.02);color:var(--ivory);border:1px solid var(--line)}
   .btn-ghost:hover{border-color:var(--gold);color:var(--gold-bright);transform:translateY(-2px)}
 
-  /* ===================== NAV ===================== */
-  .topnav{position:fixed;top:0;left:0;right:0;z-index:30;transition:background .3s,border-color .3s,padding .3s}
-  .topnav.solid{background:linear-gradient(180deg,rgba(7,7,9,.92),rgba(7,7,9,.66));
-    backdrop-filter:blur(12px);border-bottom:1px solid var(--line-soft)}
-  .nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:20px 28px;transition:padding .3s}
-  .topnav.solid .nav-inner{padding:14px 28px}
-  .brand{display:flex;align-items:center;gap:13px;text-decoration:none;color:var(--ivory);cursor:pointer}
-  .brand .crown{width:34px;height:27px;color:var(--gold);filter:drop-shadow(0 2px 10px rgba(212,175,55,.4))}
-  .brand .name{font-family:var(--display);font-weight:700;letter-spacing:.12em;font-size:1.02rem;line-height:1}
+  /* nav */
+  .topnav{position:fixed;top:0;left:0;right:0;z-index:30;transition:background .3s,border-color .3s}
+  .topnav.solid{background:linear-gradient(180deg,rgba(7,7,9,.92),rgba(7,7,9,.66));backdrop-filter:blur(12px);border-bottom:1px solid var(--line-soft)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:16px clamp(18px,4vw,28px)}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ivory);cursor:pointer}
+  .brand .crown{width:32px;height:25px;color:var(--gold);filter:drop-shadow(0 2px 10px rgba(212,175,55,.4));flex-shrink:0}
+  .brand .name{font-family:var(--display);font-weight:700;letter-spacing:.1em;font-size:clamp(.92rem,2.4vw,1.02rem);line-height:1}
   .brand .name b{color:var(--gold)}
-  .brand small{display:block;font-family:var(--body);font-weight:500;letter-spacing:.34em;
-    font-size:.5rem;color:var(--muted);text-transform:uppercase;margin-top:3px}
-  .nav-links{display:flex;align-items:center;gap:30px}
+  .brand small{display:block;font-weight:500;letter-spacing:.3em;font-size:.5rem;color:var(--muted);text-transform:uppercase;margin-top:3px}
+  .nav-links{display:flex;align-items:center;gap:clamp(16px,3vw,30px)}
   .nav-links a{color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;transition:color .25s}
   .nav-links a:hover{color:var(--ivory)}
-  @media(max-width:820px){.nav-links a:not(.btn){display:none}}
+  @media(max-width:680px){.nav-links a:not(.btn){display:none}.brand small{display:none}.btn{padding:11px 18px;font-size:.88rem}}
 
-  /* ===================== LANDING ===================== */
-  #landing{position:relative;z-index:2}
-  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center;
-    padding:170px 0 90px}
-  @media(max-width:920px){.hero{grid-template-columns:1fr;text-align:center;padding:140px 0 70px}}
+  /* hero */
+  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(30px,5vw,50px);align-items:center;padding:clamp(120px,18vw,170px) 0 clamp(60px,9vw,90px)}
+  @media(max-width:980px){.hero{grid-template-columns:1fr;text-align:center}}
+  .hero h1{font-family:var(--display);font-weight:800;line-height:1.03;font-size:clamp(2.5rem,8vw,4.7rem);margin:20px 0 0;letter-spacing:-.01em;opacity:0;animation:rise .9s .16s forwards}
   .hero .eyebrow{opacity:0;animation:rise .8s .05s forwards}
-  .hero h1{font-family:var(--display);font-weight:800;line-height:1.03;
-    font-size:clamp(2.7rem,5.6vw,4.7rem);margin:20px 0 0;letter-spacing:-.01em;
-    opacity:0;animation:rise .9s .16s forwards}
-  .hero h1 .l2{display:block}
-  .hero p.sub{max-width:520px;margin:24px 0 0;color:var(--muted);font-size:1.1rem;
-    opacity:0;animation:rise .9s .32s forwards}
-  @media(max-width:920px){.hero p.sub{margin-left:auto;margin-right:auto}}
-  .cta-row{display:flex;gap:15px;margin-top:36px;flex-wrap:wrap;opacity:0;animation:rise .9s .48s forwards}
-  @media(max-width:920px){.cta-row{justify-content:center}}
-  .trust{margin-top:26px;color:var(--muted-2);font-size:.8rem;letter-spacing:.05em;
-    opacity:0;animation:rise .9s .64s forwards;display:flex;gap:18px;flex-wrap:wrap}
-  @media(max-width:920px){.trust{justify-content:center}}
-  .trust span{display:inline-flex;align-items:center;gap:7px}
-  .trust svg{color:var(--gold)}
+  .hero p.sub{max-width:520px;margin:24px 0 0;color:var(--muted);font-size:clamp(1rem,2.5vw,1.1rem);opacity:0;animation:rise .9s .32s forwards}
+  @media(max-width:980px){.hero p.sub{margin-left:auto;margin-right:auto}}
+  .cta-row{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap;opacity:0;animation:rise .9s .48s forwards}
+  @media(max-width:980px){.cta-row{justify-content:center}}
+  .trust{margin-top:24px;color:var(--muted-2);font-size:.8rem;letter-spacing:.04em;opacity:0;animation:rise .9s .64s forwards;display:flex;gap:16px;flex-wrap:wrap}
+  @media(max-width:980px){.trust{justify-content:center}}
+  .trust span{display:inline-flex;align-items:center;gap:7px}.trust svg{color:var(--gold)}
   @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
 
-  /* hero product mockup */
-  .hero-visual{position:relative;opacity:0;animation:rise 1s .55s forwards}
-  .mock-ring{position:absolute;inset:-12% -8%;border-radius:30px;
-    background:conic-gradient(from 0deg,rgba(212,175,55,.0),rgba(212,175,55,.22),rgba(139,26,43,.18),rgba(212,175,55,.0));
-    filter:blur(38px);animation:spin 14s linear infinite}
+  .hero-visual{position:relative;opacity:0;animation:rise 1s .55s forwards;min-width:0}
+  .mock-ring{position:absolute;inset:-12% -8%;border-radius:30px;background:conic-gradient(from 0deg,rgba(212,175,55,0),rgba(212,175,55,.22),rgba(139,26,43,.18),rgba(212,175,55,0));filter:blur(38px);animation:spin 14s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .mock-frame{position:relative;background:linear-gradient(180deg,var(--panel),var(--obsidian-2));
-    border:1px solid var(--line);border-radius:18px;overflow:hidden;
-    box-shadow:0 50px 120px -40px rgba(0,0,0,.95);
-    transform:perspective(1400px) rotateY(-9deg) rotateX(3deg);transition:transform .6s}
+  .mock-frame{position:relative;background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 50px 120px -40px rgba(0,0,0,.95);transform:perspective(1400px) rotateY(-9deg) rotateX(3deg);transition:transform .6s}
   .hero-visual:hover .mock-frame{transform:perspective(1400px) rotateY(-4deg) rotateX(1deg)}
-  .mock-bar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line-soft);
-    background:linear-gradient(180deg,rgba(212,175,55,.05),transparent)}
-  .mock-bar i{width:9px;height:9px;border-radius:50%;background:var(--panel-3)}
-  .mock-bar i:first-child{background:var(--garnet)}
-  .mock-bar .mt{margin-left:8px;font-family:var(--display);font-size:.74rem;letter-spacing:.1em;color:var(--muted)}
-  .mock-body{padding:20px;display:flex;flex-direction:column;gap:13px;min-height:300px}
-  .mb{padding:11px 14px;border-radius:13px;font-size:.86rem;max-width:80%;line-height:1.5}
+  @media(max-width:980px){.mock-frame{transform:none!important;max-width:520px;margin:0 auto}}
+  .mock-bar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,rgba(212,175,55,.05),transparent)}
+  .mock-bar i{width:9px;height:9px;border-radius:50%;background:var(--panel-3)}.mock-bar i:first-child{background:var(--garnet)}
+  .mock-bar .mt{margin-left:8px;font-family:var(--display);font-size:.72rem;letter-spacing:.1em;color:var(--muted)}
+  .mock-body{padding:18px;display:flex;flex-direction:column;gap:12px;min-height:280px}
+  .mb{padding:11px 14px;border-radius:13px;font-size:.85rem;max-width:82%;line-height:1.5}
   .mb.bot{background:var(--panel-2);border:1px solid var(--line-soft);border-top-left-radius:4px;align-self:flex-start}
-  .mb.user{align-self:flex-end;border-top-right-radius:4px;color:#1a1405;
-    background:linear-gradient(115deg,var(--gold),var(--gold-bright))}
-  .mock-input{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 14px;
-    border:1px solid var(--line);border-radius:12px;color:var(--muted-2);font-size:.84rem;background:var(--obsidian)}
-  .mock-input .mi-send{margin-left:auto;width:30px;height:30px;border-radius:8px;
-    background:linear-gradient(115deg,var(--gold-deep),var(--gold-bright));display:flex;align-items:center;justify-content:center;color:#1a1405}
+  .mb.user{align-self:flex-end;border-top-right-radius:4px;color:#1a1405;background:linear-gradient(115deg,var(--gold),var(--gold-bright))}
+  .mock-input{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;color:var(--muted-2);font-size:.82rem;background:var(--obsidian)}
+  .mock-input .mi-send{margin-left:auto;width:30px;height:30px;border-radius:8px;background:linear-gradient(115deg,var(--gold-deep),var(--gold-bright));display:flex;align-items:center;justify-content:center;color:#1a1405;flex-shrink:0}
 
-  /* stat strip */
-  .stats{display:flex;justify-content:center;gap:60px;flex-wrap:wrap;padding:30px 0 10px;
-    border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+  .stats{display:flex;justify-content:center;gap:clamp(28px,6vw,60px);flex-wrap:wrap;padding:30px 0 10px;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
   .stat{text-align:center}
-  .stat b{font-family:var(--display);font-weight:800;font-size:1.9rem;display:block}
-  .stat span{color:var(--muted);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase}
+  .stat b{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,4vw,1.9rem);display:block}
+  .stat span{color:var(--muted);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase}
 
-  section h2{font-family:var(--display);font-weight:700;font-size:clamp(1.9rem,4vw,2.9rem);
-    text-align:center;margin-top:14px;letter-spacing:-.01em}
-  .sec-head{text-align:center;margin-bottom:54px}
-  .sec-head p{color:var(--muted);max-width:560px;margin:14px auto 0}
+  section h2{font-family:var(--display);font-weight:700;font-size:clamp(1.8rem,5vw,2.9rem);text-align:center;margin-top:14px;letter-spacing:-.01em}
+  .sec-head{text-align:center;margin-bottom:clamp(36px,6vw,54px)}
+  .sec-head p{color:var(--muted);max-width:580px;margin:14px auto 0;font-size:clamp(.95rem,2.4vw,1.05rem)}
 
-  .features{padding:110px 0}
-  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-  @media(max-width:860px){.feat-grid{grid-template-columns:1fr}}
-  .feat{background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);
-    border-radius:var(--radius);padding:32px 28px;transition:border .3s,transform .3s,box-shadow .3s}
+  /* WHY CROWN */
+  .why{padding:clamp(70px,11vw,110px) 0 clamp(40px,6vw,60px)}
+  .why-lead{max-width:760px;margin:0 auto clamp(40px,6vw,56px);text-align:center}
+  .why-lead .big{font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,4.5vw,2.4rem);line-height:1.2;margin-top:14px}
+  .why-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;max-width:1000px;margin:0 auto}
+  @media(max-width:760px){.why-grid{grid-template-columns:1fr}}
+  .why-card{position:relative;background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);border-radius:var(--radius);padding:30px 28px 30px 32px;overflow:hidden;transition:border .3s,transform .3s}
+  .why-card::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:3px;border-radius:3px;background:linear-gradient(180deg,var(--gold),var(--garnet))}
+  .why-card:hover{border-color:var(--line);transform:translateY(-4px)}
+  .why-card .wn{font-family:var(--display);font-size:.8rem;color:var(--gold);letter-spacing:.2em}
+  .why-card h3{font-family:var(--display);font-weight:600;font-size:1.2rem;margin:8px 0 8px;letter-spacing:.01em}
+  .why-card p{color:var(--muted);font-size:.94rem}
+
+  /* features */
+  .features{padding:clamp(60px,9vw,90px) 0}
+  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:860px){.feat-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.feat-grid{grid-template-columns:1fr}}
+  .feat{background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);border-radius:var(--radius);padding:28px 24px;transition:border .3s,transform .3s,box-shadow .3s}
   .feat:hover{border-color:var(--line);transform:translateY(-5px);box-shadow:0 30px 60px -40px rgba(212,175,55,.4)}
-  .feat .ic{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(120deg,rgba(212,175,55,.16),rgba(139,26,43,.12));border:1px solid var(--line);
-    color:var(--gold-bright);margin-bottom:20px}
-  .feat h3{font-family:var(--display);font-weight:600;font-size:1.14rem;margin-bottom:9px;letter-spacing:.02em}
-  .feat p{color:var(--muted);font-size:.93rem}
+  .feat .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,rgba(212,175,55,.16),rgba(139,26,43,.12));border:1px solid var(--line);color:var(--gold-bright);margin-bottom:18px}
+  .feat h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin-bottom:8px;letter-spacing:.02em}
+  .feat p{color:var(--muted);font-size:.92rem}
 
-  .pricing{padding:50px 0 120px}
-  .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:900px;margin:0 auto}
+  /* pricing */
+  .pricing{padding:clamp(50px,8vw,70px) 0 clamp(80px,12vw,120px)}
+  .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:900px;margin:0 auto}
   @media(max-width:760px){.price-grid{grid-template-columns:1fr}}
-  .plan{background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);
-    border-radius:20px;padding:38px 34px;position:relative;overflow:hidden}
+  .plan{background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);border-radius:20px;padding:clamp(28px,4vw,38px) clamp(24px,4vw,34px);position:relative;overflow:hidden}
   .plan.pro{border-color:var(--line);box-shadow:0 40px 100px -50px rgba(212,175,55,.55)}
-  .plan.pro::before{content:"";position:absolute;inset:0;
-    background:radial-gradient(80% 60% at 50% 0%,rgba(212,175,55,.09),transparent 70%);pointer-events:none}
-  .badge{position:absolute;top:22px;right:-36px;transform:rotate(45deg);
-    background:linear-gradient(120deg,var(--gold-deep),var(--gold-bright));
-    color:#1a1405;font-size:.64rem;font-weight:800;letter-spacing:.18em;padding:6px 46px}
-  .plan .tier{font-family:var(--display);font-weight:700;font-size:1.34rem;letter-spacing:.06em}
+  .plan.pro::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(212,175,55,.09),transparent 70%);pointer-events:none}
+  .badge{position:absolute;top:22px;right:-36px;transform:rotate(45deg);background:linear-gradient(120deg,var(--gold-deep),var(--gold-bright));color:#1a1405;font-size:.62rem;font-weight:800;letter-spacing:.18em;padding:6px 46px}
+  .plan .tier{font-family:var(--display);font-weight:700;font-size:1.3rem;letter-spacing:.06em}
   .plan .desc{color:var(--muted);font-size:.9rem;margin-top:7px;min-height:42px}
-  .plan .amt{margin:22px 0 4px;font-family:var(--display)}
-  .plan .amt b{font-size:3.1rem;font-weight:800}
-  .plan .amt span{color:var(--muted);font-size:.95rem;font-family:var(--body)}
-  .plan ul{list-style:none;margin:24px 0 30px;display:flex;flex-direction:column;gap:14px}
-  .plan li{display:flex;gap:11px;align-items:flex-start;font-size:.93rem}
-  .plan li svg{flex-shrink:0;margin-top:3px;color:var(--gold)}
+  .plan .amt{margin:20px 0 4px;font-family:var(--display)}.plan .amt b{font-size:clamp(2.6rem,7vw,3.1rem);font-weight:800}.plan .amt span{color:var(--muted);font-size:.95rem;font-family:var(--body)}
+  .plan ul{list-style:none;margin:22px 0 28px;display:flex;flex-direction:column;gap:13px}
+  .plan li{display:flex;gap:11px;align-items:flex-start;font-size:.92rem}.plan li svg{flex-shrink:0;margin-top:3px;color:var(--gold)}
   .plan li.muted{color:var(--muted-2)}.plan li.muted svg{color:var(--muted-2)}
   .plan .btn{width:100%;justify-content:center}
 
-  footer{border-top:1px solid var(--line-soft);padding:56px 0 42px;position:relative;z-index:2}
-  .foot{display:flex;justify-content:space-between;align-items:flex-start;gap:32px;flex-wrap:wrap}
-  .foot .col h4{font-family:var(--display);letter-spacing:.1em;font-size:.76rem;color:var(--gold);
-    text-transform:uppercase;margin-bottom:15px}
+  footer{border-top:1px solid var(--line-soft);padding:clamp(40px,6vw,56px) 0 40px}
+  .foot{display:flex;justify-content:space-between;align-items:flex-start;gap:30px;flex-wrap:wrap}
+  .foot .col h4{font-family:var(--display);letter-spacing:.1em;font-size:.74rem;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
   .foot .col a{display:block;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:9px;transition:color .2s;cursor:pointer}
   .foot .col a:hover{color:var(--ivory)}
-  .foot-note{margin-top:42px;padding-top:24px;border-top:1px solid var(--line-soft);
-    color:var(--muted-2);font-size:.8rem;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
-
-  /* ===================== CHAT APP ===================== */
-  #chatapp{display:none;position:fixed;inset:0;z-index:40;height:100vh;
-    grid-template-columns:288px 1fr;background:var(--obsidian)}
-  body.chat-open #chatapp{display:grid}
-  body.chat-open .topnav{display:none}
-  body.chat-open{overflow:hidden}
-
-  .sidebar{display:flex;flex-direction:column;border-right:1px solid var(--line-soft);
-    background:linear-gradient(180deg,var(--obsidian-2),var(--obsidian));padding:18px 16px;gap:16px;
-    transition:transform .3s}
-  .side-brand{display:flex;align-items:center;gap:11px;padding:4px 6px;cursor:pointer}
-  .side-brand .crown{width:28px;height:22px;color:var(--gold)}
-  .side-brand .name{font-family:var(--display);font-weight:700;letter-spacing:.1em;font-size:.92rem}
-  .side-brand .name b{color:var(--gold)}
-  .newchat{display:flex;align-items:center;gap:10px;justify-content:center;padding:12px;border-radius:12px;
-    border:1px solid var(--line);background:rgba(212,175,55,.05);color:var(--ivory);
-    font-weight:600;font-size:.9rem;cursor:pointer;transition:border-color .25s,background .25s}
-  .newchat:hover{border-color:var(--gold);background:rgba(212,175,55,.1)}
-  .side-label{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-2);padding:0 6px;margin-top:4px}
-  .convs{display:flex;flex-direction:column;gap:4px;overflow-y:auto;flex:1}
-  .conv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);
-    font-size:.88rem;cursor:pointer;transition:background .2s,color .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .conv:hover{background:var(--panel);color:var(--ivory)}
-  .conv.active{background:var(--panel-2);color:var(--ivory);border:1px solid var(--line-soft)}
-  .conv svg{flex-shrink:0;color:var(--muted-2)}
-
-  .tier-card{border:1px solid var(--line);border-radius:14px;padding:15px;
-    background:linear-gradient(180deg,rgba(212,175,55,.07),rgba(139,26,43,.05))}
-  .tier-card .tc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-  .tier-pill{font-family:var(--display);font-size:.68rem;font-weight:700;letter-spacing:.14em;
-    padding:4px 11px;border-radius:999px;border:1px solid var(--line);color:var(--gold-bright)}
-  .tier-pill.pro{background:linear-gradient(120deg,var(--garnet),var(--garnet-soft));color:#fff;border:none}
-  .tc-meter{height:6px;border-radius:999px;background:var(--obsidian);overflow:hidden;border:1px solid var(--line-soft);margin:6px 0 8px}
-  .tc-meter .fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-bright));transition:width .5s,background .3s}
-  .tc-meter .fill.warn{background:linear-gradient(90deg,var(--garnet),var(--garnet-soft))}
-  .tc-usage{font-size:.74rem;color:var(--muted);font-variant-numeric:tabular-nums}
-  .tc-usage .inf{color:var(--gold-bright);font-weight:700}
-  .upgrade-btn{width:100%;justify-content:center;margin-top:13px;padding:11px}
-
-  .main{display:flex;flex-direction:column;height:100vh;min-width:0}
-  .main-head{display:flex;align-items:center;justify-content:space-between;gap:14px;
-    padding:16px 24px;border-bottom:1px solid var(--line-soft);
-    background:linear-gradient(180deg,rgba(212,175,55,.03),transparent)}
-  .mh-left{display:flex;align-items:center;gap:12px;min-width:0}
-  .hamb{display:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
-    background:transparent;color:var(--ivory);cursor:pointer;align-items:center;justify-content:center}
-  .mh-title{font-family:var(--display);font-weight:600;letter-spacing:.05em;font-size:1rem;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mh-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
-  .model-pill{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted);
-    padding:7px 13px;border-radius:999px;border:1px solid var(--line-soft);background:var(--obsidian)}
-  .model-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);animation:pulse 2.4s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  @media(max-width:680px){.model-pill{display:none}}
-
-  .chat{flex:1;overflow-y:auto;padding:30px 24px;display:flex;flex-direction:column;gap:18px}
-  .chat::-webkit-scrollbar{width:9px}.chat::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px}
-  .empty{margin:auto;text-align:center;max-width:560px;padding:20px}
-  .empty .ec{width:64px;height:64px;border-radius:18px;margin:0 auto 22px;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(120deg,var(--gold-deep),var(--gold-bright));color:#1a1405;
-    box-shadow:0 16px 50px -16px rgba(212,175,55,.7)}
-  .empty h2{font-family:var(--display);font-size:1.7rem;margin-bottom:8px}
-  .empty p{color:var(--muted);margin-bottom:26px}
-  .chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
-  .chip{padding:11px 16px;border-radius:12px;border:1px solid var(--line-soft);background:var(--panel);
-    color:var(--ivory);font-size:.86rem;cursor:pointer;transition:border-color .25s,transform .2s,background .25s;text-align:left}
-  .chip:hover{border-color:var(--gold);transform:translateY(-2px);background:var(--panel-2)}
-
-  .msg{display:flex;gap:13px;max-width:760px;width:100%;margin:0 auto;animation:rise .4s ease}
-  .msg.user{flex-direction:row-reverse}
-  .avatar{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-    font-family:var(--display);font-weight:700;font-size:.78rem}
-  .msg.bot .avatar{background:linear-gradient(120deg,var(--gold-deep),var(--gold-bright));color:#1a1405}
-  .msg.user .avatar{background:var(--panel-2);border:1px solid var(--line);color:var(--ivory)}
-  .bubble{padding:13px 17px;border-radius:15px;font-size:.95rem;white-space:pre-wrap;line-height:1.62}
-  .msg.bot .bubble{background:var(--panel);border:1px solid var(--line-soft);border-top-left-radius:5px}
-  .msg.user .bubble{background:linear-gradient(115deg,rgba(212,175,55,.16),rgba(212,175,55,.06));
-    border:1px solid var(--line);border-top-right-radius:5px}
-  .typing .bubble{display:flex;gap:5px;align-items:center}
-  .typing i{width:7px;height:7px;border-radius:50%;background:var(--gold);display:inline-block;animation:blink 1.2s infinite}
-  .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
-  @keyframes blink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
-
-  .composer-wrap{padding:16px 24px 22px;border-top:1px solid var(--line-soft)}
-  .composer{display:flex;gap:12px;align-items:flex-end;max-width:760px;margin:0 auto;
-    background:var(--obsidian);border:1px solid var(--line);border-radius:16px;padding:8px 8px 8px 16px;transition:border-color .25s}
-  .composer:focus-within{border-color:var(--gold)}
-  .composer textarea{flex:1;resize:none;background:transparent;color:var(--ivory);border:none;outline:none;
-    font-family:var(--body);font-size:.95rem;height:30px;max-height:140px;padding:8px 0;line-height:1.5}
-  .ic-btn{width:38px;height:38px;flex-shrink:0;border-radius:10px;border:1px solid var(--line-soft);background:transparent;
-    color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s}
-  .ic-btn:hover{color:var(--gold-bright);border-color:var(--line)}
-  .send{width:42px;height:42px;flex-shrink:0;border-radius:11px;border:none;cursor:pointer;
-    background:linear-gradient(120deg,var(--gold-deep),var(--gold-bright));color:#1a1405;
-    display:flex;align-items:center;justify-content:center;transition:transform .2s}
-  .send:hover{transform:scale(1.07)}.send:disabled{opacity:.4;cursor:not-allowed;transform:none}
-  .composer-foot{max-width:760px;margin:10px auto 0;text-align:center;font-size:.72rem;color:var(--muted-2)}
-
-  .locked{max-width:760px;margin:0 auto;padding:18px 20px;border:1px solid var(--line);border-radius:14px;text-align:center;
-    background:linear-gradient(0deg,rgba(139,26,43,.14),transparent);display:none}
-  .locked.show{display:block;animation:rise .4s}
-  .locked p{margin-bottom:12px;font-size:.94rem}.locked b{color:var(--gold-bright)}
-
-  /* ---------- modal ---------- */
-  .modal-bg{position:fixed;inset:0;z-index:60;background:rgba(4,4,6,.78);backdrop-filter:blur(8px);
-    display:none;align-items:center;justify-content:center;padding:24px;animation:fade .3s}
-  .modal-bg.show{display:flex}
-  @keyframes fade{from{opacity:0}to{opacity:1}}
-  .modal{max-width:440px;width:100%;background:linear-gradient(180deg,var(--panel),var(--obsidian-2));
-    border:1px solid var(--line);border-radius:22px;padding:38px 34px;position:relative;
-    box-shadow:0 50px 120px -30px rgba(0,0,0,.9);animation:rise .4s}
-  .modal .close{position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:9px;border:1px solid var(--line-soft);
-    background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .modal .close:hover{color:var(--ivory)}
-  .modal .mcrown{width:52px;height:42px;color:var(--gold);margin-bottom:16px;filter:drop-shadow(0 4px 16px rgba(212,175,55,.5))}
-  .modal .eyebrow{margin-bottom:6px}
-  .modal h3{font-family:var(--display);font-size:1.7rem;margin-bottom:6px}
-  .modal .mamt{font-family:var(--display);margin:14px 0}
-  .modal .mamt b{font-size:2.6rem;font-weight:800}.modal .mamt span{color:var(--muted)}
-  .modal ul{list-style:none;display:flex;flex-direction:column;gap:11px;margin:18px 0 26px}
-  .modal li{display:flex;gap:10px;align-items:flex-start;font-size:.92rem}
-  .modal li svg{color:var(--gold);flex-shrink:0;margin-top:3px}
-  .modal .btn{width:100%;justify-content:center}
-  .modal .mnote{margin-top:14px;font-size:.74rem;color:var(--muted-2);text-align:center}
-
-  /* mobile drawer */
-  @media(max-width:760px){
-    #chatapp{grid-template-columns:1fr}
-    .sidebar{position:fixed;inset:0 auto 0 0;width:280px;z-index:50;transform:translateX(-105%);box-shadow:0 0 80px rgba(0,0,0,.8)}
-    .sidebar.open{transform:none}
-    .hamb{display:flex}
-  }
+  .foot-note{margin-top:40px;padding-top:24px;border-top:1px solid var(--line-soft);color:var(--muted-2);font-size:.8rem;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 </style>
 </head>
 <body>
-<div class="bg-glow"></div>
-<div class="grain"></div>
-<div class="vignette"></div>
-<div class="embers" id="embers"></div>
-<svg class="crown-wm" viewBox="0 0 64 50" fill="currentColor" aria-hidden="true">
-  <path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/>
-</svg>
+<div class="bg-glow"></div><div class="grain"></div><div class="embers" id="embers"></div>
+<svg class="crown-wm" viewBox="0 0 64 50" fill="currentColor" aria-hidden="true"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/></svg>
 
-<!-- ============ NAV ============ -->
-<div class="topnav" id="topnav">
-  <div class="nav-inner">
-    <a class="brand" onclick="goHome()">
-      <svg class="crown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/><circle cx="10" cy="12" r="3.2"/><circle cx="32" cy="4" r="3.2"/><circle cx="54" cy="12" r="3.2"/></svg>
-      <span class="name">BLACK<b>CROWN</b> VxJ<small>LLC · Artificial Intelligence</small></span>
-    </a>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#pricing">Pricing</a>
-      <a class="btn btn-gold" onclick="openChat()">Start Chat Now →</a>
-    </div>
+<div class="topnav" id="topnav"><div class="nav-inner">
+  <a class="brand" href="index.html">
+    <svg class="crown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/><circle cx="10" cy="12" r="3.2"/><circle cx="32" cy="4" r="3.2"/><circle cx="54" cy="12" r="3.2"/></svg>
+    <span class="name">BLACK<b>CROWN</b> VxJ<small>LLC · Artificial Intelligence</small></span>
+  </a>
+  <div class="nav-links">
+    <a href="#why">Why Crown</a><a href="#features">Features</a><a href="#pricing">Pricing</a>
+    <a class="btn btn-gold" href="chat.html">Start Chat Now →</a>
   </div>
-</div>
+</div></div>
 
-<!-- ============ LANDING ============ -->
-<div id="landing">
+<main>
   <header class="hero wrap">
     <div class="hero-copy">
-      <div class="eyebrow">Sovereign Intelligence</div>
-      <h1>Intelligence,<span class="l2 gold-text">Crowned.</span></h1>
-      <p class="sub">BlackCrown VxJ is a refined AI assistant built for those who expect more. Begin free with a monthly token allotment — ascend to Pro for unlimited reign over the model.</p>
+      <div class="eyebrow">Your Private AI Workspace</div>
+      <h1>Intelligence,<span class="gold-text"> Crowned.</span></h1>
+      <p class="sub">Crown isn't another chatbot — it's a refined, private workspace for real work. Organize everything into Projects, keep your data yours, and begin free. Ascend to Pro for unlimited reign.</p>
       <div class="cta-row">
-        <a class="btn btn-gold" onclick="openChat()">Start Chat Now →</a>
+        <a class="btn btn-gold" href="chat.html">Start Chat Now →</a>
         <a class="btn btn-ghost" href="#pricing">View the Tiers</a>
       </div>
       <div class="trust">
         <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> No card to begin</span>
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Cancel anytime</span>
+        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Private by design</span>
         <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Hosted on AWS</span>
       </div>
     </div>
-
     <div class="hero-visual">
       <div class="mock-ring"></div>
       <div class="mock-frame">
         <div class="mock-bar"><i></i><i></i><i></i><span class="mt">CROWN CONSOLE</span></div>
         <div class="mock-body">
           <div class="mb user">Draft a launch announcement for our new product.</div>
-          <div class="mb bot">Of course. Here's a refined first draft — confident, concise, and on‑brand…</div>
+          <div class="mb bot">Of course. Here's a refined first draft — confident, concise, and on-brand…</div>
           <div class="mb user">Make the opening line bolder.</div>
           <div class="mb bot">Done. The new opener leads with the promise, then the proof. ✦</div>
-          <div class="mock-input">Speak, and the Crown shall answer…
-            <span class="mi-send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>
-          </div>
+          <div class="mock-input">Speak, and the Crown shall answer…<span class="mi-send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span></div>
         </div>
       </div>
     </div>
@@ -377,329 +197,90 @@
 
   <div class="wrap"><div class="stats">
     <div class="stat"><b class="gold-text">∞</b><span>Pro Tokens</span></div>
-    <div class="stat"><b class="gold-text">&lt;1s</b><span>Response Start</span></div>
-    <div class="stat"><b class="gold-text">24/7</b><span>Availability</span></div>
+    <div class="stat"><b class="gold-text">Private</b><span>Never Trained On</span></div>
+    <div class="stat"><b class="gold-text">Projects</b><span>Organized Work</span></div>
     <div class="stat"><b class="gold-text">AWS</b><span>Global Edge</span></div>
   </div></div>
 
-  <section class="features wrap" id="features">
-    <div class="sec-head">
-      <div class="eyebrow">The Regalia</div>
-      <h2>Everything in your court</h2>
-      <p>A complete toolkit beneath one crown — and far more reserved for Pro.</p>
+  <!-- WHY CROWN -->
+  <section class="why wrap" id="why">
+    <div class="why-lead">
+      <div class="eyebrow">Why Crown</div>
+      <div class="big">Most AI tools are a blank box you talk into.<br><span class="gold-text">Crown is built for real work.</span></div>
     </div>
+    <div class="why-grid">
+      <div class="why-card"><div class="wn">I</div><h3>A Private Court</h3><p>Your conversations are yours. We don't sell your data, and your work is never used to train models. What happens in Crown stays in Crown.</p></div>
+      <div class="why-card"><div class="wn">II</div><h3>Refined, Not Generic</h3><p>One executive-grade assistant tuned for polished, decision-ready output. No clutter, no endless model menus — just answers with taste.</p></div>
+      <div class="why-card"><div class="wn">III</div><h3>Built for Real Work</h3><p>Organize everything into Projects. Group your threads, keep context together, and move between work streams without losing your place.</p></div>
+      <div class="why-card"><div class="wn">IV</div><h3>Flat &amp; Unlimited</h3><p>Pro is one simple price with unlimited usage. No token anxiety, no metered surprises — just open the console and work.</p></div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features wrap" id="features">
+    <div class="sec-head"><div class="eyebrow">The Regalia</div><h2>Everything in your court</h2><p>A complete toolkit beneath one crown — and far more reserved for Pro.</p></div>
     <div class="feat-grid" id="featGrid"></div>
   </section>
 
+  <!-- PRICING -->
   <section class="pricing wrap" id="pricing">
-    <div class="sec-head">
-      <div class="eyebrow">Choose your standing</div>
-      <h2>Free to enter. Unlimited to reign.</h2>
-      <p>Start with a generous monthly allotment. Ascend the moment you need more.</p>
-    </div>
+    <div class="sec-head"><div class="eyebrow">Choose your standing</div><h2>Free to enter. Unlimited to reign.</h2><p>Start with a generous monthly allotment. Ascend the moment you need more.</p></div>
     <div class="price-grid">
       <div class="plan">
-        <div class="tier">Free</div>
-        <div class="desc">For the curious. Taste the Crown, no card required.</div>
+        <div class="tier">Free</div><div class="desc">For the curious. Taste the Crown, no card required.</div>
         <div class="amt"><b>$0</b><span> / forever</span></div>
         <ul>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> 10,000 tokens / month</li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Standard model access</li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Single conversation thread</li>
-          <li class="muted"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Priority & advanced models</li>
-          <li class="muted"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> File uploads & history</li>
+          <li class="muted"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Projects &amp; organization</li>
+          <li class="muted"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Priority &amp; advanced models</li>
         </ul>
-        <a class="btn btn-ghost" onclick="openChat()">Start Free</a>
+        <a class="btn btn-ghost" href="chat.html">Start Free</a>
       </div>
       <div class="plan pro">
         <div class="badge">CROWNED</div>
-        <div class="tier gold-text">Pro</div>
-        <div class="desc">For those who lead. Unlimited intelligence, fully unlocked.</div>
+        <div class="tier gold-text">Pro</div><div class="desc">For those who lead. Unlimited, organized, fully unlocked.</div>
         <div class="amt"><b class="gold-text">$29</b><span> / month</span></div>
         <ul>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Unlimited tokens</b> (fair‑use)</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Priority & advanced models</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Unlimited threads & full history</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> File uploads & long context</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Unlimited tokens</b> (fair-use)</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Projects</b> — organize chats your way</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Priority &amp; advanced models</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> File uploads &amp; full history</li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Priority support</li>
         </ul>
-        <a class="btn btn-gold" onclick="openUpgrade()">Ascend to Pro →</a>
+        <a class="btn btn-gold" href="chat.html#upgrade">Ascend to Pro →</a>
       </div>
     </div>
   </section>
+</main>
 
-  <footer><div class="wrap">
-    <div class="foot">
-      <div class="col" style="max-width:280px">
-        <a class="brand" onclick="goHome()" style="margin-bottom:14px">
-          <svg class="crown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/></svg>
-          <span class="name">BLACK<b>CROWN</b> VxJ</span>
-        </a>
-        <p style="color:var(--muted);font-size:.88rem">Sovereign AI for those who expect more. Crowned intelligence, hosted on AWS.</p>
-      </div>
-      <div class="col"><h4>Product</h4><a onclick="openChat()">Console</a><a href="#features">Features</a><a href="#pricing">Pricing</a></div>
-      <div class="col"><h4>Company</h4><a>About</a><a>Contact</a><a>Careers</a></div>
-      <div class="col"><h4>Legal</h4><a>Terms</a><a>Privacy</a><a>Acceptable Use</a></div>
+<footer><div class="wrap">
+  <div class="foot">
+    <div class="col" style="max-width:280px">
+      <a class="brand" href="index.html" style="margin-bottom:14px"><svg class="crown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/></svg><span class="name">BLACK<b>CROWN</b> VxJ</span></a>
+      <p style="color:var(--muted);font-size:.88rem">Your private AI workspace. Refined, organized, and yours — hosted on AWS.</p>
     </div>
-    <div class="foot-note">
-      <span>© <span id="yr"></span> BlackCrown VxJ, LLC. All rights reserved.</span>
-      <span>Built on AWS · Powered by frontier AI</span>
-    </div>
-  </div></footer>
-</div>
-
-<!-- ============ CHAT APP ============ -->
-<div id="chatapp">
-  <aside class="sidebar" id="sidebar">
-    <div class="side-brand" onclick="goHome()">
-      <svg class="crown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/></svg>
-      <span class="name">BLACK<b>CROWN</b></span>
-    </div>
-    <div class="newchat" onclick="newChat()">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-      New Chat
-    </div>
-    <div class="side-label">Recent</div>
-    <div class="convs">
-      <div class="conv active"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> New conversation</div>
-      <div class="conv"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Launch copy ideas</div>
-      <div class="conv"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Code review notes</div>
-    </div>
-    <div class="tier-card">
-      <div class="tc-top">
-        <span style="font-size:.8rem;color:var(--muted)" id="planLabel">Free plan</span>
-        <span class="tier-pill" id="tierPill">FREE</span>
-      </div>
-      <div id="meterBlock">
-        <div class="tc-meter"><div class="fill" id="meterFill"></div></div>
-        <div class="tc-usage" id="usageText">0 / 10,000 tokens</div>
-      </div>
-      <button class="btn btn-gold upgrade-btn" id="upgradeBtn" onclick="openUpgrade()">
-        <svg width="16" height="16" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg>
-        Upgrade to Pro
-      </button>
-    </div>
-  </aside>
-
-  <div class="main">
-    <div class="main-head">
-      <div class="mh-left">
-        <button class="hamb" onclick="toggleSidebar()" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
-        <span class="mh-title">Crown Console</span>
-      </div>
-      <div class="mh-right">
-        <span class="model-pill"><span class="dot"></span> <span id="modelName">Crown · Standard</span></span>
-        <span class="tier-pill" id="headPill">FREE</span>
-      </div>
-    </div>
-
-    <div class="chat" id="chat">
-      <div class="empty" id="empty">
-        <div class="ec"><svg width="30" height="24" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg></div>
-        <h2>How may the Crown serve you?</h2>
-        <p>Ask anything — drafting, code, strategy, or ideas. Choose a starting point below.</p>
-        <div class="chips" id="chips"></div>
-      </div>
-    </div>
-
-    <div class="composer-wrap">
-      <div class="locked" id="lockedBar">
-        <p>👑 You've reached your <b>Free</b> token limit. Pro members enjoy <b>unlimited usage</b>, advanced models, and more.</p>
-        <button class="btn btn-gold" onclick="openUpgrade()">Upgrade to Pro</button>
-      </div>
-      <div class="composer" id="composer">
-        <textarea id="input" placeholder="Speak, and the Crown shall answer…" rows="1"></textarea>
-        <button class="ic-btn" onclick="proGate('File uploads')" title="Attach (Pro)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
-        <button class="send" id="send" aria-label="Send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
-      </div>
-      <div class="composer-foot">BlackCrown VxJ can make mistakes. Verify important information.</div>
-    </div>
+    <div class="col"><h4>Product</h4><a href="chat.html">Console</a><a href="#why">Why Crown</a><a href="#features">Features</a><a href="#pricing">Pricing</a></div>
+    <div class="col"><h4>Company</h4><a>About</a><a>Contact</a><a>Careers</a></div>
+    <div class="col"><h4>Legal</h4><a>Terms</a><a>Privacy</a><a>Acceptable Use</a></div>
   </div>
-</div>
-
-<!-- ============ UPGRADE MODAL ============ -->
-<div class="modal-bg" id="upgradeModal">
-  <div class="modal">
-    <button class="close" onclick="closeUpgrade()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-    <svg class="mcrown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/><circle cx="10" cy="12" r="3.2"/><circle cx="32" cy="4" r="3.2"/><circle cx="54" cy="12" r="3.2"/></svg>
-    <div class="eyebrow">Ascend</div>
-    <h3 class="gold-text">BlackCrown Pro</h3>
-    <p style="color:var(--muted);font-size:.92rem">Unlimited intelligence, fully unlocked.</p>
-    <div class="mamt"><b class="gold-text">$29</b><span> / month</span></div>
-    <ul>
-      <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Unlimited tokens</b> — no monthly cap (fair‑use)</li>
-      <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Priority routing to advanced models</li>
-      <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Unlimited threads, full history & file uploads</li>
-      <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Priority support</li>
-    </ul>
-    <button class="btn btn-gold" onclick="confirmUpgrade()">Ascend to Pro →</button>
-    <div class="mnote">Demo upgrade. In production this opens secure Stripe Checkout (see DEPLOYMENT.md).</div>
-  </div>
-</div>
+  <div class="foot-note"><span>© <span id="yr"></span> BlackCrown VxJ, LLC. All rights reserved.</span><span>Built on AWS · Powered by frontier AI</span></div>
+</div></footer>
 
 <script>
-/* ============================================================
-   BLACKCROWN VxJ — CONFIG
-   BACKEND_URL: leave "" to run live in the Claude.ai preview.
-   In production set it to YOUR server endpoint so your AI key
-   stays server-side and is NEVER exposed in the browser.
-   ============================================================ */
-const CONFIG = {
-  BACKEND_URL: "/api/chat",        // your Node backend, proxied by nginx (Claude.ai preview auto-falls back)
-  MODEL: "claude-sonnet-4-20250514",
-  FREE_TOKEN_LIMIT: 10000,
-  SYSTEM: "You are Crown, the assistant for BlackCrown VxJ. You are confident, refined, and concise. Help with writing, code, strategy and ideas. Keep replies focused and well-structured."
-};
-
-let tier = "free", tokensUsed = 0, history = [], busy = false, started = false;
-const $ = id => document.getElementById(id);
-
-/* embers */
-(function(){
-  const e = $("embers"); let html = "";
-  for(let i=0;i<14;i++){
-    const l=Math.random()*100, d=8+Math.random()*10, delay=Math.random()*12, s=2+Math.random()*2.5;
-    html += `<span class="ember" style="left:${l}%;width:${s}px;height:${s}px;animation-duration:${d}s;animation-delay:${delay}s"></span>`;
-  }
-  e.innerHTML = html;
-})();
-
-$("yr").textContent = new Date().getFullYear();
-
-/* nav scroll state */
-addEventListener("scroll", () => $("topnav").classList.toggle("solid", scrollY > 30));
-
-/* view switching */
-function openChat(){
-  document.body.classList.add("chat-open");
-  if(!started) setTimeout(()=>$("input").focus(), 100);
-  scrollTo(0,0);
-}
-function goHome(){ document.body.classList.remove("chat-open"); $("sidebar").classList.remove("open"); }
-function toggleSidebar(){ $("sidebar").classList.toggle("open"); }
-function newChat(){
-  history = []; started = false;
-  $("chat").innerHTML = `<div class="empty" id="empty"><div class="ec"><svg width="30" height="24" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg></div><h2>How may the Crown serve you?</h2><p>Ask anything — drafting, code, strategy, or ideas. Choose a starting point below.</p><div class="chips" id="chips"></div></div>`;
-  renderChips(); $("sidebar").classList.remove("open"); $("input").focus();
-}
-
-/* suggestion chips */
-const CHIPS = ["Draft a launch announcement","Explain a concept simply","Write a Python script to…","Brainstorm brand names"];
-function renderChips(){
-  const c = $("chips"); if(!c) return;
-  c.innerHTML = CHIPS.map(t=>`<button class="chip">${t}</button>`).join("");
-  c.querySelectorAll(".chip").forEach((b,i)=>b.onclick=()=>{ $("input").value=CHIPS[i]; send(); });
-}
-renderChips();
-
-/* token estimate */
-const est = s => Math.max(1, Math.ceil((s||"").length/4));
-
-/* tier UI */
-function refreshTier(){
-  const pillEls = [$("tierPill"), $("headPill")];
-  if(tier === "pro"){
-    pillEls.forEach(p=>{p.textContent="PRO";p.classList.add("pro");});
-    $("planLabel").textContent = "Pro plan";
-    $("modelName").textContent = "Crown · Pro";
-    $("meterBlock").innerHTML = '<div class="tc-usage"><span class="inf">∞</span> Unlimited usage</div>';
-    $("upgradeBtn").style.display = "none";
-    $("lockedBar").classList.remove("show");
-    $("composer").style.display = "flex";
-    return;
-  }
-  pillEls.forEach(p=>{p.textContent="FREE";p.classList.remove("pro");});
-  const pct = Math.min(100,(tokensUsed/CONFIG.FREE_TOKEN_LIMIT)*100);
-  const fill = $("meterFill");
-  if(fill){ fill.style.width = pct+"%"; fill.classList.toggle("warn",pct>80); }
-  const ut = $("usageText"); if(ut) ut.textContent = `${tokensUsed.toLocaleString()} / ${CONFIG.FREE_TOKEN_LIMIT.toLocaleString()} tokens`;
-  const out = tokensUsed >= CONFIG.FREE_TOKEN_LIMIT;
-  $("lockedBar").classList.toggle("show", out);
-  $("composer").style.display = out ? "none" : "flex";
-}
-
-/* messages */
-function addMsg(role, text){
-  const e = $("empty"); if(e) e.remove();
-  const w = document.createElement("div");
-  w.className = "msg " + (role==="user"?"user":"bot");
-  w.innerHTML = `<div class="avatar">${role==="user"?"You":"C"}</div><div class="bubble"></div>`;
-  w.querySelector(".bubble").textContent = text;
-  $("chat").appendChild(w); $("chat").scrollTop = $("chat").scrollHeight;
-  return w.querySelector(".bubble");
-}
-function addTyping(){
-  const w = document.createElement("div");
-  w.className = "msg bot typing";
-  w.innerHTML = `<div class="avatar">C</div><div class="bubble"><i></i><i></i><i></i></div>`;
-  $("chat").appendChild(w); $("chat").scrollTop = $("chat").scrollHeight; return w;
-}
-
-/* model call */
-async function callModel(messages){
-  // On the Claude.ai preview, fall back to the built-in endpoint so the demo still works.
-  // On your own domain/IP, call YOUR backend (CONFIG.BACKEND_URL) so the key stays server-side.
-  const isPreview = /(^|\.)claude\.ai$|(^|\.)anthropic\.com$/.test(location.hostname);
-  const useBuiltIn = isPreview || !CONFIG.BACKEND_URL;
-  const endpoint = useBuiltIn ? "https://api.anthropic.com/v1/messages" : CONFIG.BACKEND_URL;
-  const payload = useBuiltIn
-    ? { model: CONFIG.MODEL, max_tokens: 1000, system: CONFIG.SYSTEM, messages }
-    : { messages, tier };
-  const res = await fetch(endpoint, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(payload) });
-  if(!res.ok) throw new Error("Request failed ("+res.status+")");
-  const data = await res.json();
-  if(Array.isArray(data.content)) return data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
-  return (data.reply||"").trim();
-}
-
-/* send */
-async function send(){
-  const text = $("input").value.trim();
-  if(!text || busy) return;
-  if(tier==="free" && tokensUsed>=CONFIG.FREE_TOKEN_LIMIT){ refreshTier(); return; }
-  started = true; busy = true; $("send").disabled = true;
-  addMsg("user", text); history.push({role:"user",content:text});
-  $("input").value=""; $("input").style.height="30px";
-  const typing = addTyping();
-  try{
-    const reply = await callModel(history);
-    typing.remove(); addMsg("bot", reply || "…"); history.push({role:"assistant",content:reply});
-    if(tier==="free"){ tokensUsed += est(text)+est(reply); refreshTier(); }
-  }catch(err){
-    typing.remove();
-    addMsg("bot","⚠️ The console couldn't reach a model backend.\n\nIn the live preview this works automatically. Once deployed, set CONFIG.BACKEND_URL to your own server endpoint (see DEPLOYMENT.md) — your AI key must stay server-side.\n\n("+err.message+")");
-  }finally{ busy=false; $("send").disabled=false; $("input").focus(); }
-}
-$("send").onclick = send;
-$("input").addEventListener("keydown", e => { if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(); }});
-$("input").addEventListener("input", function(){ this.style.height="30px"; this.style.height=Math.min(140,this.scrollHeight)+"px"; });
-
-/* pro gating + upgrade */
-function proGate(feature){ alert(feature + " is a Pro feature. Upgrade to unlock it."); openUpgrade(); }
-function openUpgrade(){ $("upgradeModal").classList.add("show"); }
-function closeUpgrade(){ $("upgradeModal").classList.remove("show"); }
-function confirmUpgrade(){
-  /* DEMO: flips to Pro. In production, this triggers Stripe Checkout and the
-     webhook sets tier=pro on the user record (see DEPLOYMENT.md → Payments). */
-  tier = "pro"; refreshTier(); closeUpgrade();
-  if(!document.body.classList.contains("chat-open")) openChat();
-  addMsg("bot","👑 Welcome to Pro. Your reign is now unlimited — advanced models and full features unlocked.");
-}
-$("upgradeModal").addEventListener("click", e => { if(e.target.id==="upgradeModal") closeUpgrade(); });
-
-/* features */
-const FEATURES = [
-  ["Crown Chat","M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z","Fluid, fast conversation with a refined assistant tuned to your voice."],
-  ["Token Allotment","M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6","Transparent usage on Free — every token tracked, never a surprise bill."],
-  ["Unlimited Pro","M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z","Pro removes the ceiling — reign over the model with fair‑use unlimited usage."],
-  ["Advanced Models","M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5","Pro unlocks priority routing to the most capable frontier models."],
-  ["Secure by Design","M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z","Keys stay server‑side. Auth, billing and data handled the right way."],
-  ["Hosted on AWS","M4 17h16M4 7h16M7 12h10","Global delivery via S3 + CloudFront on a scalable serverless backend."]
-];
-$("featGrid").innerHTML = FEATURES.map(([t,d,p])=>`
-  <div class="feat"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg></div><h3>${t}</h3><p>${p}</p></div>`).join("");
-
-refreshTier();
+  (function(){const e=document.getElementById("embers");let h="";for(let i=0;i<14;i++){const l=Math.random()*100,d=8+Math.random()*10,delay=Math.random()*12,s=2+Math.random()*2.5;h+=`<span class="ember" style="left:${l}%;width:${s}px;height:${s}px;animation-duration:${d}s;animation-delay:${delay}s"></span>`;}e.innerHTML=h;})();
+  document.getElementById("yr").textContent=new Date().getFullYear();
+  addEventListener("scroll",()=>document.getElementById("topnav").classList.toggle("solid",scrollY>30));
+  const FEATURES=[
+    ["Crown Chat","M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z","Fluid, fast conversation with a refined assistant tuned to your voice."],
+    ["Projects","M3 7h5l2 3h11v8a2 2 0 0 1-2 2H3z M3 7V5a2 2 0 0 1 2-2h4l2 3","Group threads into Projects so your work stays organized and in context. (Pro)"],
+    ["Private by Design","M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z","Your conversations stay yours — never sold, never used to train models."],
+    ["Advanced Models","M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5","Pro unlocks priority routing to the most capable frontier models."],
+    ["Unlimited Pro","M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z","Pro removes the ceiling — unlimited, fair-use usage at one flat price."],
+    ["Hosted on AWS","M4 17h16M4 7h16M7 12h10","Fast, reliable delivery on a scalable AWS backend you control."]
+  ];
+  document.getElementById("featGrid").innerHTML=FEATURES.map(([t,d,p])=>`<div class="feat"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg></div><h3>${t}</h3><p>${p}</p></div>`).join("");
 </script>
 </body>
 </html>
