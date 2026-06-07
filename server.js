@@ -51,7 +51,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const DB_PATH = process.env.CROWN_DB || "/var/lib/crown/crown.db";
 try { fs.mkdirSync(path.dirname(DB_PATH), { recursive: true }); } catch (_) {}
 const db = new Database(DB_PATH);
-db.pragma("journal_mode = WAL");
+db.pragma("journal_mode = WAL");   // readers don't block the writer
+db.pragma("busy_timeout = 5000");  // wait, don't error, if the DB is briefly locked (e.g. backup)
 db.exec(`
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
