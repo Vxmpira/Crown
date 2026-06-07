@@ -17,6 +17,7 @@ const fs       = require("fs");
 const path     = require("path");
 const bcrypt   = require("bcryptjs");
 const Database = require("better-sqlite3");
+const nodemailer = require("nodemailer");
 
 const KEY    = process.env.ANTHROPIC_API_KEY;
 const MODEL  = process.env.MODEL || "claude-sonnet-4-20250514";
@@ -52,6 +53,18 @@ const ADMIN_EMAILS  = String(process.env.ADMIN_EMAILS || "").split(",").map(s =>
 const PRO_PRICE_USD = parseFloat(process.env.PRO_PRICE_USD || "29");
 const isAdmin = u => !!u && ADMIN_EMAILS.includes(String(u.email).toLowerCase());
 
+// Email (AWS SES via SMTP). Dormant until SMTP_* are set in crown.env — powers password reset.
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587", 10);
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const MAIL_FROM = process.env.MAIL_FROM || "no-reply@blackcrown-intelligence.com";
+const mailer = (SMTP_HOST && SMTP_USER && SMTP_PASS)
+  ? nodemailer.createTransport({ host:SMTP_HOST, port:SMTP_PORT, secure:SMTP_PORT===465, auth:{ user:SMTP_USER, pass:SMTP_PASS } })
+  : null;
+const sha256 = s => crypto.createHash("sha256").update(String(s)).digest("hex");
+const escapeHtml = s => String(s==null?"":s).replace(/[&<>"']/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[m]));
+
 // ---- database ----
 const DB_PATH = process.env.CROWN_DB || "/var/lib/crown/crown.db";
 try { fs.mkdirSync(path.dirname(DB_PATH), { recursive: true }); } catch (_) {}
@@ -85,6 +98,12 @@ CREATE TABLE IF NOT EXISTS workspaces (
   data TEXT NOT NULL,
   updated_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS password_resets (
+  token_hash TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL,
+  used INTEGER NOT NULL DEFAULT 0
+);
 `);
 
 const q = {
@@ -108,6 +127,11 @@ const q = {
   countAll:       db.prepare("SELECT COUNT(*) AS c FROM users"),
   countPro:       db.prepare("SELECT COUNT(*) AS c FROM users WHERE tier='pro'"),
   countSince:     db.prepare("SELECT COUNT(*) AS c FROM users WHERE created_at >= ?"),
+  setPassword:    db.prepare("UPDATE users SET password_hash = ? WHERE id = ?"),
+  delUserSessions:db.prepare("DELETE FROM sessions WHERE user_id = ?"),
+  insertReset:    db.prepare("INSERT INTO password_resets (token_hash,user_id,expires_at,used) VALUES (?,?,?,0)"),
+  getReset:       db.prepare("SELECT * FROM password_resets WHERE token_hash = ?"),
+  markResetUsed:  db.prepare("UPDATE password_resets SET used = 1 WHERE token_hash = ?"),
 };
 
 const now      = () => Date.now();
@@ -135,8 +159,9 @@ function getSessionUser(req){
 function setSessionCookie(res, token){
   res.cookie("crown_session", token, { httpOnly:true, secure:true, sameSite:"lax", path:"/", maxAge: SESSION_DAYS*24*60*60*1000 });
 }
-const userLimit = u => (u.tier === "pro" ? PRO_FAIR_USE : FREE_LIMIT);
-const publicUser = u => ({ username:u.username, email:u.email, tier:u.tier, tokensUsed:u.tokens_used, limit:userLimit(u) });
+const effectiveTier = u => (isAdmin(u) ? "pro" : u.tier);   // owner/admins get full Pro access
+const userLimit = u => (effectiveTier(u) === "pro" ? PRO_FAIR_USE : FREE_LIMIT);
+const publicUser = u => ({ username:u.username, email:u.email, tier:effectiveTier(u), tokensUsed:u.tokens_used, limit:userLimit(u) });
 
 // in-memory rate limiter (per key)
 const rl = new Map();
@@ -178,7 +203,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req,
 app.use(express.json({ limit: "5mb" }));
 
 app.get("/api/health", (_req, res) =>
-  res.json({ ok:true, model:MODEL, keyLoaded:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, db:true, accounts:true, images:!!IMAGE_KEY }));
+  res.json({ ok:true, model:MODEL, keyLoaded:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, db:true, accounts:true, images:!!IMAGE_KEY, email:!!mailer }));
 
 // ---- auth ----
 app.post("/api/register", (req, res) => {
@@ -216,6 +241,50 @@ app.post("/api/logout", (req, res) => {
 app.get("/api/me", (req, res) => {
   const u = getSessionUser(req);
   res.json({ user: u ? publicUser(u) : null });
+});
+
+// ---- password reset ----
+app.post("/api/forgot", async (req, res) => {
+  if (rateLimited("auth:"+clientIp(req), 12, 60000)) return res.status(429).json({ error:"rate", message:"Too many attempts. Try again shortly." });
+  if (!mailer) return res.status(503).json({ error:"email_unconfigured", message:"Password reset isn't available yet." });
+  const email = String(req.body.email || "").trim().toLowerCase();
+  const u = validEmail(email) ? q.userByEmail.get(email) : null;
+  if (u) {
+    const token = genToken();
+    q.insertReset.run(sha256(token), u.id, now() + 3600000);  // valid 1 hour
+    const link = `${PUBLIC_URL}/reset?token=${token}`;
+    try {
+      await mailer.sendMail({
+        from: `Crown <${MAIL_FROM}>`,
+        to: u.email,
+        subject: "Reset your Crown password",
+        text: `Hi ${u.username},\n\nWe received a request to reset your Crown password. Use the link below within the next hour:\n\n${link}\n\nIf you didn't request this, you can safely ignore this email — your password won't change.\n\n— BlackCrown VxJ`,
+        html: `<div style="font-family:Arial,sans-serif;background:#070709;color:#ece7dd;padding:28px;border-radius:14px;max-width:520px;margin:auto">
+          <div style="font-size:20px;font-weight:bold;color:#d4af37;letter-spacing:1px">BLACKCROWN VxJ</div>
+          <h2 style="color:#f5e0a3;margin:18px 0 6px">Reset your password</h2>
+          <p style="color:#bfb9ad;line-height:1.6">Hi ${escapeHtml(u.username)}, we received a request to reset your Crown password. This link is valid for one hour.</p>
+          <p style="margin:22px 0"><a href="${link}" style="background:#d4af37;color:#1a1405;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:10px;display:inline-block">Reset password</a></p>
+          <p style="color:#5f5b52;font-size:13px;line-height:1.6">If the button doesn't work, paste this into your browser:<br>${link}</p>
+          <p style="color:#5f5b52;font-size:13px">If you didn't request this, ignore this email — your password won't change.</p>
+        </div>`
+      });
+    } catch (e) { console.error("Reset email failed:", e.message); }
+  }
+  // Always generic — never reveal whether an email is registered.
+  res.json({ ok:true, message:"If that email is registered, a reset link is on its way." });
+});
+
+app.post("/api/reset", (req, res) => {
+  if (rateLimited("auth:"+clientIp(req), 12, 60000)) return res.status(429).json({ error:"rate", message:"Too many attempts. Try again shortly." });
+  const token = String(req.body.token || "");
+  const password = String(req.body.password || "");
+  if (password.length < 8) return res.status(400).json({ error:"bad_password", message:"Password must be at least 8 characters." });
+  const row = token ? q.getReset.get(sha256(token)) : null;
+  if (!row || row.used || row.expires_at < now()) return res.status(400).json({ error:"bad_token", message:"This reset link is invalid or has expired." });
+  q.setPassword.run(bcrypt.hashSync(password, 10), row.user_id);
+  q.markResetUsed.run(sha256(token));
+  q.delUserSessions.run(row.user_id);   // sign out everywhere after a reset
+  res.json({ ok:true });
 });
 
 // ---- per-user workspace (chats + projects persistence) ----
@@ -267,7 +336,7 @@ app.post("/api/chat", async (req, res) => {
   const u = getSessionUser(req);
   let tier, limit, used, apply;
   if (u) {
-    tier = u.tier; limit = userLimit(u); used = u.tokens_used;
+    tier = effectiveTier(u); limit = userLimit(u); used = u.tokens_used;
     apply = n => q.addTokens.run(n, u.id);
   } else {
     const ip = clientIp(req);
@@ -359,7 +428,7 @@ app.post("/api/image", async (req, res) => {
   if (!IMAGE_KEY) return res.status(503).json({ error:"image_unconfigured", message:"Image generation is not set up on the server yet." });
   const u = getSessionUser(req);
   if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
-  if (u.tier !== "pro") return res.status(403).json({ error:"pro_only", message:"Image generation is a Pro feature." });
+  if (effectiveTier(u) !== "pro") return res.status(403).json({ error:"pro_only", message:"Image generation is a Pro feature." });
   const prompt = String(req.body.prompt || "").trim();
   if (!prompt) return res.status(400).json({ error:"no_prompt", message:"Describe the image you want." });
   if (prompt.length > 1000) return res.status(400).json({ error:"too_long", message:"Keep the prompt under 1000 characters." });

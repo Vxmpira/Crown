@@ -357,10 +357,10 @@
 
     <div class="field" id="lf-email"><label>Email</label><input id="li-email" type="email" autocomplete="email" placeholder="you@example.com"><div class="err">Enter a valid email address.</div></div>
     <div class="field" id="lf-pass"><label>Password</label><input id="li-pass" type="password" autocomplete="current-password" placeholder="Your password"><div class="err">Enter your password.</div></div>
+    <div style="text-align:right;margin:-4px 0 12px"><a onclick="forgotPassword()" style="font-size:.82rem;color:var(--muted);cursor:pointer">Forgot password?</a></div>
 
     <button class="btn btn-gold" onclick="submitLogin()">Log in →</button>
     <div class="switch">New to Crown? <a onclick="closeLogin();openUpgrade()">Create an account</a></div>
-    <div class="mnote">Demo login. In production this verifies your credentials against the backend and loads your real plan.</div>
   </div>
 </div>
 
@@ -739,6 +739,16 @@ async function submitSignup(){
 
 /* ===== login (existing users) ===== */
 function setURL(p){ try{ history.replaceState({}, "", p); }catch(e){} }
+function forgotPassword(){
+  closeLogin();
+  openInput("Account recovery","Reset your password","Email","you@example.com", async v=>{
+    const em=(v||"").trim().toLowerCase();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ toast("Enter a valid email"); return; }
+    if(IS_PREVIEW){ toast("Reset emails are sent from your live site"); return; }
+    const { d } = await apiPost("/api/forgot", { email:em });
+    toast(d.message || "If that email is registered, a reset link is on its way.");
+  });
+}
 function openLogin(){ $("loginModal").classList.add("show"); setURL("/login"); setTimeout(()=>$("li-email").focus(),60); }
 function closeLogin(){ $("loginModal").classList.remove("show"); ["lf-email","lf-pass"].forEach(id=>$(id).classList.remove("bad")); setURL("/chat"); }
 async function submitLogin(){
@@ -788,6 +798,7 @@ let busy=false;
 const est = s => Math.max(1, Math.ceil((s||"").length/4));
 async function send(){
   const text=$("input").value.trim(); if(!text||busy) return;
+  const wantsImage = /\b(create|generate|make|draw|design|render)\b[^.?!\n]{0,40}\b(image|picture|photo|logo|artwork|drawing|illustration|wallpaper)\b/i.test(text);
   if(S.tier!=="pro" && S.tokensUsed>=S.freeLimit){ renderHead(); openUpgrade(); return; }
   let c=activeChat(); if(!c){ newChat(); c=activeChat(); }
   busy=true; $("send").disabled=true;
@@ -804,6 +815,7 @@ async function send(){
     c.messages.push({role:"assistant",content:reply||"…"});
     if(IS_PREVIEW && S.tier==="free"){ S.tokensUsed += est(text)+est(reply); }  // live usage comes from the server
     render();
+    if(wantsImage) toast("Tip: tap the 🖼 image button to actually generate images");
   }catch(err){
     if(err.code==="limit"){
       c.messages.push({role:"assistant",content:"👑 "+err.message});
