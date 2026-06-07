@@ -269,6 +269,7 @@
   .btn-danger{background:transparent;border:1px solid rgba(179,36,58,.45);color:var(--garnet-soft)}
   .btn-danger:hover{border-color:var(--garnet-soft);background:rgba(139,26,43,.13)}
   .linkbtn{display:inline-block;margin-top:11px;background:none;border:none;color:var(--gold-bright);font-size:.78rem;cursor:pointer;font-family:var(--body);text-decoration:underline;text-underline-offset:3px}
+  .gold-text{background:linear-gradient(115deg,var(--gold-deep),var(--gold-bright) 50%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
 </style>
 </head>
 <body>
@@ -334,7 +335,26 @@
     <div class="field" id="f-pass"><label>Password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"><div class="err">Password must be at least 8 characters.</div></div>
 
     <button class="btn btn-gold" onclick="submitSignup()">Create account &amp; Ascend →</button>
+    <div class="switch">Already have an account? <a onclick="closeUpgrade();openLogin()">Log in</a></div>
     <div class="mnote">Demo flow. In production this creates your account on the backend and opens secure Stripe Checkout — passwords are never stored in the browser.</div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-bg" id="loginModal">
+  <div class="modal">
+    <button class="close" onclick="closeLogin()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <svg class="mcrown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/><circle cx="10" cy="12" r="3.2"/><circle cx="32" cy="4" r="3.2"/><circle cx="54" cy="12" r="3.2"/></svg>
+    <div class="eyebrow">Welcome back</div>
+    <h3 class="gold-text">Log in to Crown</h3>
+    <p class="msub">Pick up right where you left off.</p>
+
+    <div class="field" id="lf-email"><label>Email</label><input id="li-email" type="email" autocomplete="email" placeholder="you@example.com"><div class="err">Enter a valid email address.</div></div>
+    <div class="field" id="lf-pass"><label>Password</label><input id="li-pass" type="password" autocomplete="current-password" placeholder="Your password"><div class="err">Enter your password.</div></div>
+
+    <button class="btn btn-gold" onclick="submitLogin()">Log in →</button>
+    <div class="switch">New to Crown? <a onclick="closeLogin();openUpgrade()">Create an account</a></div>
+    <div class="mnote">Demo login. In production this verifies your credentials against the backend and loads your real plan.</div>
   </div>
 </div>
 
@@ -552,7 +572,7 @@ function renderAccount(){
   } else if(a){
     actions = `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Upgrade to Pro</button><button class="btn btn-danger" onclick="signOut()">Sign out</button>`;
   } else {
-    actions = `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Create account · Go Pro</button>`;
+    actions = `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Create account · Go Pro</button><button class="btn btn-ghost" onclick="closeAccount();openLogin()">Log in</button>`;
   }
   $("acctBody").innerHTML = `
     <div class="acct-head"><div class="acct-av">${initial}</div>
@@ -593,11 +613,41 @@ function submitSignup(){
   bad("f-email", !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em));
   bad("f-pass", pw.length<8);
   if(!ok) return;
-  // DEMO: create account + upgrade locally. In production: POST to backend -> create user -> Stripe Checkout.
-  S.account = { username:u, email:em };  // password is NOT stored anywhere
-  S.tier = "pro";
+  // Create the account locally (password is NOT stored), then start real Stripe checkout.
+  S.account = { username:u, email:em };
   closeUpgrade(); render();
-  toast("👑 Welcome to Pro, " + u);
+  startCheckout(em);
+}
+
+/* ===== login (existing users) ===== */
+function openLogin(){ $("loginModal").classList.add("show"); setTimeout(()=>$("li-email").focus(),60); }
+function closeLogin(){ $("loginModal").classList.remove("show"); ["lf-email","lf-pass"].forEach(id=>$(id).classList.remove("bad")); }
+function submitLogin(){
+  const em=$("li-email").value.trim(), pw=$("li-pass").value;
+  let ok=true; const bad=(id,c)=>{ $(id).classList.toggle("bad",c); if(c) ok=false; };
+  bad("lf-email", !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em));
+  bad("lf-pass", pw.length<1);
+  if(!ok) return;
+  // DEMO: in production this authenticates against the backend and loads your real plan.
+  S.account = { username: em.split("@")[0], email: em };
+  S.tier = "pro";
+  closeLogin(); render();
+  toast("👑 Welcome back, " + S.account.username);
+}
+
+/* ===== Stripe checkout (real, when the server has Stripe keys) ===== */
+async function startCheckout(email){
+  const isPreview = /(^|\.)claude\.ai$|(^|\.)anthropic\.com$/.test(location.hostname);
+  if(isPreview){ S.tier="pro"; render(); toast("👑 Demo: upgraded to Pro"); return; }
+  try{
+    const r = await fetch("/api/checkout", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({email}) });
+    const d = await r.json().catch(()=>({}));
+    if(r.ok && d.url){ window.location.href = d.url; return; }   // → Stripe hosted checkout
+    if(r.status===503){ S.tier="pro"; render(); toast("Stripe not set up yet — demo upgrade applied"); return; }
+    throw new Error(d.message || ("HTTP "+r.status));
+  }catch(e){
+    S.tier="pro"; render(); toast("Checkout unavailable — demo upgrade applied");
+  }
 }
 
 /* ===== model call (auto-detects preview vs your server) ===== */
@@ -642,17 +692,23 @@ function esc(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;'
 $("send").onclick=send;
 $("input").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); }});
 $("input").addEventListener("input",function(){ this.style.height="28px"; this.style.height=Math.min(140,this.scrollHeight)+"px"; });
-addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeUpgrade(); closeName(); closeCtx(); closeAccount(); closeInput(); }});
-[$("upgradeModal"),$("nameModal"),$("accountModal"),$("inputModal")].forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("show"); }));
+addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeUpgrade(); closeName(); closeCtx(); closeAccount(); closeInput(); closeLogin(); }});
+[$("upgradeModal"),$("nameModal"),$("accountModal"),$("inputModal"),$("loginModal")].forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("show"); }));
 $("proj-name").addEventListener("keydown",e=>{ if(e.key==="Enter") confirmProject(); });
 $("im-input").addEventListener("keydown",e=>{ if(e.key==="Enter") confirmInput(); });
+$("li-pass").addEventListener("keydown",e=>{ if(e.key==="Enter") submitLogin(); });
+$("su-pass").addEventListener("keydown",e=>{ if(e.key==="Enter") submitSignup(); });
 
 let toastT;
 function toast(msg){ const t=$("toast"); t.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+esc(msg); t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
 
 /* init */
 newChat();
+const _params = new URLSearchParams(location.search);
+if(_params.get("checkout")==="success"){ S.tier="pro"; render(); toast("👑 Payment received — welcome to Pro!"); history.replaceState({}, "", location.pathname); }
+else if(_params.get("checkout")==="cancel"){ toast("Checkout canceled — no charge was made"); history.replaceState({}, "", location.pathname); }
 if(location.hash==="#upgrade") openUpgrade();
+if(location.hash==="#login") openLogin();
 </script>
 </body>
 </html>
