@@ -716,8 +716,8 @@ async function generateImage(prompt){
     else { c.messages.push({role:"assistant", content:"⚠️ Couldn't create the image.\n\n("+err.message+")"}); render(); }
   }finally{ busy=false; $("send").disabled=false; renderHead(); }
 }
-function openUpgrade(){ $("upgradeModal").classList.add("show"); setTimeout(()=>$("su-user").focus(),60); }
-function closeUpgrade(){ $("upgradeModal").classList.remove("show"); ["f-user","f-email","f-pass"].forEach(id=>$(id).classList.remove("bad")); }
+function openUpgrade(){ $("upgradeModal").classList.add("show"); setURL("/signup"); setTimeout(()=>$("su-user").focus(),60); }
+function closeUpgrade(){ $("upgradeModal").classList.remove("show"); ["f-user","f-email","f-pass"].forEach(id=>$(id).classList.remove("bad")); setURL("/chat"); }
 async function submitSignup(){
   const u=$("su-user").value.trim(), em=$("su-email").value.trim(), pw=$("su-pass").value;
   let ok=true;
@@ -738,8 +738,9 @@ async function submitSignup(){
 }
 
 /* ===== login (existing users) ===== */
-function openLogin(){ $("loginModal").classList.add("show"); setTimeout(()=>$("li-email").focus(),60); }
-function closeLogin(){ $("loginModal").classList.remove("show"); ["lf-email","lf-pass"].forEach(id=>$(id).classList.remove("bad")); }
+function setURL(p){ try{ history.replaceState({}, "", p); }catch(e){} }
+function openLogin(){ $("loginModal").classList.add("show"); setURL("/login"); setTimeout(()=>$("li-email").focus(),60); }
+function closeLogin(){ $("loginModal").classList.remove("show"); ["lf-email","lf-pass"].forEach(id=>$(id).classList.remove("bad")); setURL("/chat"); }
 async function submitLogin(){
   const em=$("li-email").value.trim(), pw=$("li-pass").value;
   let ok=true; const bad=(id,c)=>{ $(id).classList.toggle("bad",c); if(c) ok=false; };
@@ -837,8 +838,9 @@ refreshMe();   // pull real account + plan + usage from the server (no-op in pre
 const _params = new URLSearchParams(location.search);
 if(_params.get("checkout")==="success"){ toast("👑 Payment received — welcome to Pro!"); history.replaceState({}, "", location.pathname); if(IS_PREVIEW){ S.tier="pro"; render(); } else { refreshMe(); } }
 else if(_params.get("checkout")==="cancel"){ toast("Checkout canceled — no charge was made"); history.replaceState({}, "", location.pathname); }
-if(location.hash==="#upgrade") openUpgrade();
-if(location.hash==="#login") openLogin();
+var _path = location.pathname.replace(/\/+$/,"");
+if(location.hash==="#upgrade" || location.hash==="#signup" || _path==="/signup") openUpgrade();
+else if(location.hash==="#login" || _path==="/login") openLogin();
 </script>
 </body>
 </html>

@@ -47,6 +47,11 @@ const OPENAI_IMG_URL = process.env.IMAGE_API_URL || "https://api.openai.com/v1/i
 const PICSART_T2I    = "https://genai-api.picsart.io/v1/text2image";
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+// Admin portal: a logged-in user whose email is in ADMIN_EMAILS (comma-separated) gets admin access.
+const ADMIN_EMAILS  = String(process.env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+const PRO_PRICE_USD = parseFloat(process.env.PRO_PRICE_USD || "29");
+const isAdmin = u => !!u && ADMIN_EMAILS.includes(String(u.email).toLowerCase());
+
 // ---- database ----
 const DB_PATH = process.env.CROWN_DB || "/var/lib/crown/crown.db";
 try { fs.mkdirSync(path.dirname(DB_PATH), { recursive: true }); } catch (_) {}
@@ -99,6 +104,10 @@ const q = {
   anonUpsert:     db.prepare("INSERT INTO anon_usage (ip,tokens_used,period_start) VALUES (?,?,?) ON CONFLICT(ip) DO UPDATE SET tokens_used=excluded.tokens_used, period_start=excluded.period_start"),
   getWorkspace:   db.prepare("SELECT data FROM workspaces WHERE user_id = ?"),
   upsertWorkspace:db.prepare("INSERT INTO workspaces (user_id,data,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data, updated_at=excluded.updated_at"),
+  adminUsers:     db.prepare("SELECT username, email, tier, created_at FROM users ORDER BY created_at DESC LIMIT 2000"),
+  countAll:       db.prepare("SELECT COUNT(*) AS c FROM users"),
+  countPro:       db.prepare("SELECT COUNT(*) AS c FROM users WHERE tier='pro'"),
+  countSince:     db.prepare("SELECT COUNT(*) AS c FROM users WHERE created_at >= ?"),
 };
 
 const now      = () => Date.now();
@@ -231,7 +240,26 @@ app.put("/api/workspace", (req, res) => {
   res.json({ ok:true });
 });
 
-// ---- chat (rate limited + metered) ----
+// ---- admin portal (allowlisted by ADMIN_EMAILS) ----
+app.get("/api/admin/overview", (req, res) => {
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in." });
+  if (!isAdmin(u)) return res.status(403).json({ error:"forbidden", message:"Admin access only." });
+  const DAY = 86400000;
+  const total = q.countAll.get().c;
+  const pro   = q.countPro.get().c;
+  const free  = total - pro;
+  const d7    = q.countSince.get(now() - 7  * DAY).c;
+  const d30   = q.countSince.get(now() - 30 * DAY).c;
+  res.json({
+    statuses: { anthropic:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, images:!!IMAGE_KEY, db:true },
+    stats:    { total, pro, free, signups7d:d7, signups30d:d30, conversionPct: total ? Math.round((pro/total)*1000)/10 : 0 },
+    revenue:  { proCount:pro, pricePerMonth:PRO_PRICE_USD, mrr: Math.round(pro*PRO_PRICE_USD*100)/100, annualRunRate: Math.round(pro*PRO_PRICE_USD*12*100)/100, currency:"USD" },
+    users:    q.adminUsers.all()
+  });
+});
+
+
 app.post("/api/chat", async (req, res) => {
   if (rateLimited("chat:"+clientIp(req), 30, 60000)) return res.status(429).json({ error:"rate", message:"You're going a bit fast — give it a moment." });
   if (!KEY) return res.status(500).json({ error:"no_key", message:"ANTHROPIC_API_KEY not set on the server." });

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Crown Admin — BlackCrown VxJ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 56'%3E%3Cpath d='M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z' fill='%23d4af37'/%3E%3Crect x='4' y='44' width='56' height='8' fill='%23d4af37'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --obsidian:#070709;--obsidian-2:#0c0c11;--panel:#13131a;--panel-2:#1a1a23;--panel-3:#21212b;
+    --gold:#d4af37;--gold-bright:#f5e0a3;--gold-deep:#9c7c1f;--garnet:#8b1a2b;
+    --ivory:#ece7dd;--muted:#8c867a;--muted-2:#5f5b52;
+    --green:#3fb27f;--red:#c0445a;
+    --line:rgba(212,175,55,.16);--line-soft:rgba(236,231,221,.08);
+    --display:'Cinzel',serif;--body:'Hanken Grotesk',system-ui,sans-serif;--radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--obsidian);color:var(--ivory);font-family:var(--body);min-height:100vh;
+    background-image:radial-gradient(1200px 500px at 50% -10%,rgba(212,175,55,.07),transparent);}
+  a{color:var(--gold);text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 22px 60px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand svg{color:var(--gold)}
+  .brand h1{font-family:var(--display);font-weight:800;font-size:1.35rem;letter-spacing:.02em}
+  .brand .sub{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted-2)}
+  .hbtns{display:flex;gap:10px;align-items:center}
+  .btn{font-family:var(--body);font-weight:600;font-size:.86rem;border-radius:11px;padding:9px 16px;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.02);color:var(--ivory);transition:border-color .15s ease,color .15s ease,background-color .15s ease}
+  .btn:hover{border-color:var(--gold);color:var(--gold-bright)}
+  .eyebrow{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:30px 0 12px}
+  .eyebrow:first-of-type{margin-top:6px}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .tile{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line-soft);border-radius:14px;padding:14px 16px}
+  .tile .lbl{font-size:.78rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .dot.ok{background:var(--green);box-shadow:0 0 10px rgba(63,178,127,.6)}
+  .dot.off{background:var(--red);box-shadow:0 0 10px rgba(192,68,90,.5)}
+  .tile .st{font-family:var(--display);font-weight:700;font-size:1.05rem;margin-top:7px}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .stat{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line-soft);border-radius:14px;padding:18px}
+  .stat .n{font-family:var(--display);font-weight:800;font-size:2rem;line-height:1}
+  .stat .n.gold{color:var(--gold-bright)}
+  .stat .c{font-size:.76rem;color:var(--muted);margin-top:9px;letter-spacing:.04em;text-transform:uppercase}
+
+  .rev{background:linear-gradient(135deg,rgba(212,175,55,.10),rgba(212,175,55,.02));border:1px solid var(--line);border-radius:16px;padding:22px 24px;display:flex;flex-wrap:wrap;gap:30px;align-items:flex-end}
+  .rev .big{font-family:var(--display);font-weight:900;font-size:2.5rem;color:var(--gold-bright);line-height:1}
+  .rev .biglbl{font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .rev .side{font-size:.9rem;color:var(--ivory)}
+  .rev .side span{color:var(--muted)}
+  .note{font-size:.76rem;color:var(--muted-2);margin-top:10px;line-height:1.5}
+
+  .tablewrap{border:1px solid var(--line-soft);border-radius:16px;overflow:hidden;background:var(--panel)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:13px 16px;border-bottom:1px solid var(--line-soft)}
+  th{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--obsidian-2)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:rgba(255,255,255,.015)}
+  td.email{color:var(--muted)}
+  .badge{font-size:.68rem;font-weight:700;letter-spacing:.06em;padding:4px 10px;border-radius:999px;display:inline-block}
+  .badge.pro{background:linear-gradient(115deg,var(--gold-deep),var(--gold));color:#1a1405}
+  .badge.free{background:rgba(236,231,221,.07);color:var(--muted);border:1px solid var(--line-soft)}
+  .search{width:100%;max-width:280px;background:var(--obsidian);border:1px solid var(--line);border-radius:11px;color:var(--ivory);font-family:var(--body);font-size:.86rem;padding:9px 13px;outline:none;margin-bottom:12px}
+  .search:focus{border-color:var(--gold)}
+
+  .gate{max-width:440px;margin:14vh auto 0;text-align:center;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:18px;padding:38px 30px}
+  .gate svg{color:var(--gold)}
+  .gate h2{font-family:var(--display);font-weight:800;font-size:1.5rem;margin:14px 0 8px}
+  .gate p{color:var(--muted);font-size:.92rem;line-height:1.6;margin-bottom:20px}
+  .gate .btn{display:inline-block}
+  .muted{color:var(--muted)}
+  .hidden{display:none}
+  @media(max-width:640px){ .rev .big{font-size:2rem} .stat .n{font-size:1.6rem} }
+</style>
+</head>
+<body>
+<script>/*urlclean*/try{var _p=location.pathname;if(/\.html$/.test(_p))history.replaceState(null,"",_p.replace(/index\.html$/,"").replace(/\.html$/,"")+location.search+location.hash);}catch(e){}</script>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg width="34" height="27" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg>
+      <div>
+        <h1>Crown Admin</h1>
+        <div class="sub">BlackCrown VxJ · Console</div>
+      </div>
+    </div>
+    <div class="hbtns" id="hbtns">
+      <a class="btn" href="/chat">← Back to Crown</a>
+      <button class="btn" id="refreshBtn" onclick="load()">Refresh</button>
+    </div>
+  </header>
+
+  <!-- access gate (shown when not logged in / not admin) -->
+  <div class="gate hidden" id="gate">
+    <svg width="44" height="35" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg>
+    <h2 id="gate-title">Admin access only</h2>
+    <p id="gate-msg">Sign in with an authorized administrator account to view the console.</p>
+    <a class="btn" id="gate-action" href="/login">Log in</a>
+  </div>
+
+  <!-- dashboard -->
+  <div id="dash" class="hidden">
+    <div class="eyebrow">System &amp; API status</div>
+    <div class="tiles" id="tiles"></div>
+
+    <div class="eyebrow">Users</div>
+    <div class="stats" id="stats"></div>
+
+    <div class="eyebrow">Revenue (estimated)</div>
+    <div class="rev">
+      <div>
+        <div class="biglbl">Monthly recurring revenue</div>
+        <div class="big" id="mrr">—</div>
+      </div>
+      <div class="side">
+        <div><span>Pro accounts:</span> <b id="r-pro">—</b></div>
+        <div><span>Price / month:</span> <b id="r-price">—</b></div>
+        <div><span>Annual run rate:</span> <b id="r-arr">—</b></div>
+      </div>
+    </div>
+    <div class="note">Estimated from active Pro accounts in the database (Pro count × monthly price). Your Stripe dashboard remains the source of truth for actual charges, refunds, failed payments, and proration.</div>
+
+    <div class="eyebrow">Signed-up users <span class="muted" id="usercount"></span></div>
+    <input class="search" id="search" placeholder="Filter by username or email…" oninput="renderUsers()">
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Username</th><th>Email</th><th>Signed up</th><th>Status</th></tr></thead>
+        <tbody id="users"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const IS_PREVIEW = /(^|\.)claude\.ai$|(^|\.)anthropic\.com$/.test(location.hostname);
+let DATA = null;
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function money(n){ return "$" + Number(n||0).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function when(ms){ const d=new Date(ms); return isNaN(d) ? "—" : d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}); }
+
+function showGate(title,msg,actionText,actionHref){
+  $("dash").classList.add("hidden");
+  $("gate").classList.remove("hidden");
+  $("gate-title").textContent=title; $("gate-msg").textContent=msg;
+  const a=$("gate-action"); a.textContent=actionText; a.href=actionHref;
+}
+
+async function load(){
+  if(IS_PREVIEW){
+    // demo data so the dashboard is viewable in the preview sandbox
+    DATA = {
+      statuses:{anthropic:true,stripe:true,priceSet:true,images:true,db:true},
+      stats:{total:128,pro:23,free:105,signups7d:14,signups30d:61,conversionPct:18},
+      revenue:{proCount:23,pricePerMonth:29,mrr:667,annualRunRate:8004,currency:"USD"},
+      users:[
+        {username:"Demo User",email:"demo@example.com",tier:"pro",created_at:Date.now()-2*86400000},
+        {username:"Sample",email:"sample@example.com",tier:"free",created_at:Date.now()-9*86400000}
+      ]
+    };
+    paint(); return;
+  }
+  try{
+    const r = await fetch("/api/admin/overview", { credentials:"include" });
+    if(r.status===401){ showGate("Admin access","Please log in with your administrator account to view the console.","Log in","/login"); return; }
+    if(r.status===403){ showGate("Not authorized","This account isn't an administrator. Sign in with an authorized admin account.","Back to Crown","/chat"); return; }
+    if(!r.ok){ showGate("Unavailable","Couldn't load the admin console right now. Try again shortly.","Retry","/admin"); return; }
+    DATA = await r.json();
+    paint();
+  }catch(e){
+    showGate("Unavailable","Couldn't reach the server. Try again shortly.","Retry","/admin");
+  }
+}
+
+function paint(){
+  $("gate").classList.add("hidden");
+  $("dash").classList.remove("hidden");
+  // status tiles
+  const labels = { anthropic:"Anthropic API", stripe:"Stripe", priceSet:"Pro price", images:"Image gen", db:"Database" };
+  $("tiles").innerHTML = Object.keys(labels).map(k=>{
+    const ok = !!DATA.statuses[k];
+    return `<div class="tile"><div class="lbl"><span class="dot ${ok?'ok':'off'}"></span>${labels[k]}</div><div class="st">${ok?'Online':'Off'}</div></div>`;
+  }).join("");
+  // stats
+  const s = DATA.stats;
+  const cards = [
+    {n:s.total,c:"Total users"},
+    {n:s.pro,c:"Pro accounts",gold:true},
+    {n:s.free,c:"Free accounts"},
+    {n:s.conversionPct+"%",c:"Pro conversion"},
+    {n:s.signups7d,c:"Signups · 7 days"},
+    {n:s.signups30d,c:"Signups · 30 days"}
+  ];
+  $("stats").innerHTML = cards.map(c=>`<div class="stat"><div class="n ${c.gold?'gold':''}">${esc(c.n)}</div><div class="c">${esc(c.c)}</div></div>`).join("");
+  // revenue
+  const rv = DATA.revenue;
+  $("mrr").textContent = money(rv.mrr);
+  $("r-pro").textContent = rv.proCount;
+  $("r-price").textContent = money(rv.pricePerMonth);
+  $("r-arr").textContent = money(rv.annualRunRate);
+  renderUsers();
+}
+
+function renderUsers(){
+  if(!DATA) return;
+  const term = ($("search").value||"").toLowerCase().trim();
+  const list = DATA.users.filter(u=> !term || (u.username||"").toLowerCase().includes(term) || (u.email||"").toLowerCase().includes(term));
+  $("usercount").textContent = "· " + list.length + (list.length===1?" account":" accounts");
+  $("users").innerHTML = list.map(u=>`<tr>
+    <td>${esc(u.username)}</td>
+    <td class="email">${esc(u.email)}</td>
+    <td>${when(u.created_at)}</td>
+    <td><span class="badge ${u.tier==='pro'?'pro':'free'}">${u.tier==='pro'?'PRO':'FREE'}</span></td>
+  </tr>`).join("") || `<tr><td colspan="4" class="muted" style="padding:22px 16px">No users yet.</td></tr>`;
+}
+
+load();
+</script>
+</body>
+</html>
