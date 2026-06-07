@@ -177,6 +177,98 @@
     .overlay.show{display:block}
     .hamb{display:flex}
   }
+
+  /* ====================== REDESIGN v2 ====================== */
+  /* atmosphere */
+  .bg-glow{background:
+    radial-gradient(58% 44% at 80% -8%,rgba(212,175,55,.13),transparent 72%),
+    radial-gradient(46% 46% at -2% 104%,rgba(139,26,43,.14),transparent 72%),
+    radial-gradient(120% 90% at 50% 40%,transparent 55%,rgba(0,0,0,.5))}
+
+  /* sidebar */
+  .sidebar{background:linear-gradient(180deg,#0a0a10,#070709);box-shadow:inset -1px 0 0 var(--line-soft),inset -22px 0 50px -38px rgba(212,175,55,.3)}
+  .side-brand{padding:6px 6px 12px;border-bottom:1px solid var(--line-soft)}
+  .side-brand .crown{filter:drop-shadow(0 3px 11px rgba(212,175,55,.55))}
+  .newchat{background:linear-gradient(180deg,rgba(212,175,55,.11),rgba(212,175,55,.03));box-shadow:0 7px 22px -13px rgba(212,175,55,.55)}
+  .newchat:hover{box-shadow:0 9px 26px -10px rgba(212,175,55,.65)}
+
+  .side-foot{display:flex;flex-direction:column;gap:11px}
+  .profile-btn{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:14px;border:1px solid var(--line-soft);background:rgba(255,255,255,.015);cursor:pointer;transition:border-color .25s,background .25s;width:100%}
+  .profile-btn:hover{border-color:var(--line);background:rgba(212,175,55,.05)}
+  .profile-btn .pf-av{width:34px;height:34px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:.8rem;background:linear-gradient(120deg,var(--gold-deep),var(--gold-bright));color:#1a1405}
+  .profile-btn .pf-meta{flex:1;min-width:0;text-align:left}
+  .profile-btn .pf-name{display:block;font-size:.85rem;color:var(--ivory);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .profile-btn .pf-sub{display:block;font-size:.7rem;color:var(--muted-2)}
+  .profile-btn .pf-chev{color:var(--muted-2);flex-shrink:0}
+
+  /* header */
+  .main-head{backdrop-filter:blur(10px);background:linear-gradient(180deg,rgba(22,17,7,.45),rgba(7,7,9,.15));border-bottom:1px solid var(--line)}
+  .mh-title{font-size:1.04rem}
+  .avatar{cursor:pointer;border:1px solid rgba(255,255,255,.16);transition:transform .2s,box-shadow .3s}
+  .avatar:hover{transform:translateY(-1px);box-shadow:0 7px 20px -7px rgba(212,175,55,.75)}
+
+  /* empty state */
+  .chat{padding:34px 22px}
+  .empty .ec{width:84px;height:84px;border-radius:24px;position:relative;box-shadow:0 22px 64px -16px rgba(212,175,55,.7),inset 0 0 0 1px rgba(255,255,255,.22)}
+  .empty .ec::after{content:"";position:absolute;inset:-22px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,.28),transparent 70%);z-index:-1;filter:blur(7px)}
+  .empty .eyebrow2{font-family:var(--display);letter-spacing:.34em;text-transform:uppercase;font-size:.66rem;color:var(--gold);font-weight:600;margin-bottom:14px}
+  .empty h2{font-size:clamp(1.55rem,4.4vw,2.05rem);background:linear-gradient(120deg,var(--ivory),#fff 42%,var(--muted));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .empty p{margin-bottom:26px}
+  .chips{display:grid;grid-template-columns:1fr 1fr;gap:11px;max-width:540px;margin:0 auto}
+  .chip{display:flex;align-items:center;gap:11px;text-align:left;padding:15px 16px;border-radius:14px;background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);transition:border-color .25s,transform .2s,box-shadow .3s}
+  .chip .ci{color:var(--gold);flex-shrink:0;opacity:.92}
+  .chip .ct{flex:1;min-width:0}
+  .chip .ca{color:var(--muted-2);opacity:0;transform:translateX(-4px);transition:.2s;flex-shrink:0}
+  .chip:hover{border-color:var(--line);transform:translateY(-2px);box-shadow:0 16px 34px -20px rgba(212,175,55,.6)}
+  .chip:hover .ca{opacity:1;transform:none;color:var(--gold-bright)}
+  @media(max-width:540px){.chips{grid-template-columns:1fr}}
+
+  /* messages */
+  .msg{gap:14px;align-items:flex-start}
+  .av{box-shadow:0 4px 14px -7px rgba(0,0,0,.85)}
+  .msg.bot .av{box-shadow:0 5px 18px -7px rgba(212,175,55,.6)}
+  .mcol{display:flex;flex-direction:column;gap:5px;min-width:0;max-width:calc(100% - 47px)}
+  .msg.user .mcol{align-items:flex-end}
+  .mname{font-family:var(--display);font-size:.67rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted-2);padding:0 4px}
+  .msg.bot .mname{color:var(--gold)}
+  .bubble{box-shadow:0 12px 32px -24px rgba(0,0,0,.9);max-width:100%}
+  .msg.bot .bubble{background:linear-gradient(180deg,var(--panel-2),var(--panel));border-color:var(--line-soft)}
+  .mactions{padding:0 4px}
+  .copy{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--muted-2);font-size:.72rem;cursor:pointer;font-family:var(--body);padding:3px 5px;border-radius:7px;opacity:0;transition:opacity .2s,color .2s}
+  .msg.bot:hover .copy{opacity:1}
+  .copy:hover{color:var(--gold-bright)}
+
+  /* composer redesign */
+  .composer-wrap{padding:8px 22px 18px;background:linear-gradient(0deg,var(--obsidian) 35%,transparent);border-top:none}
+  .composer{align-items:flex-end;gap:7px;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:20px;padding:8px 9px 8px 7px;box-shadow:0 22px 54px -32px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.045);transition:border-color .25s,box-shadow .3s}
+  .composer:focus-within{border-color:var(--gold);box-shadow:0 24px 58px -28px rgba(212,175,55,.5),inset 0 1px 0 rgba(255,255,255,.07)}
+  .composer textarea{padding:10px 6px;font-size:.96rem;overflow-y:auto}
+  .composer textarea::-webkit-scrollbar{width:8px}
+  .composer textarea::-webkit-scrollbar-button{display:none;height:0;width:0}
+  .composer textarea::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+  .ic-btn{width:40px;height:40px;border-radius:12px;border:none;background:transparent}
+  .ic-btn:hover{background:var(--panel-3);color:var(--gold-bright)}
+  .send{width:44px;height:44px;border-radius:13px;box-shadow:0 9px 24px -9px rgba(212,175,55,.7)}
+  .send:hover{transform:translateY(-1px) scale(1.04)}
+  .composer-foot{margin-top:11px;letter-spacing:.02em}
+
+  /* account modal */
+  .acct-head{display:flex;align-items:center;gap:14px;margin:8px 0 4px}
+  .acct-av{width:58px;height:58px;border-radius:17px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:1.35rem;background:linear-gradient(120deg,var(--gold-deep),var(--gold-bright));color:#1a1405;box-shadow:0 14px 36px -12px rgba(212,175,55,.7)}
+  .acct-id{min-width:0}
+  .acct-id .an{font-family:var(--display);font-size:1.32rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+  .acct-id .ae{color:var(--muted);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .acct-rows{margin-top:18px;border:1px solid var(--line-soft);border-radius:14px;overflow:hidden}
+  .arow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px}
+  .arow+.arow{border-top:1px solid var(--line-soft)}
+  .arow .k{color:var(--muted);font-size:.8rem;letter-spacing:.04em}
+  .arow .v{color:var(--ivory);font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px}
+  .arow .v .pill{padding:3px 9px}
+  .acct-actions{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+  .acct-actions .btn{width:100%;padding:12px}
+  .btn-danger{background:transparent;border:1px solid rgba(179,36,58,.45);color:var(--garnet-soft)}
+  .btn-danger:hover{border-color:var(--garnet-soft);background:rgba(139,26,43,.13)}
+  .linkbtn{display:inline-block;margin-top:11px;background:none;border:none;color:var(--gold-bright);font-size:.78rem;cursor:pointer;font-family:var(--body);text-decoration:underline;text-underline-offset:3px}
 </style>
 </head>
 <body>
@@ -191,7 +283,10 @@
     </a>
     <button class="newchat" onclick="newChat()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> New Chat</button>
     <div class="side-scroll" id="sideList"></div>
-    <div class="plan-card" id="planCard"></div>
+    <div class="side-foot">
+      <div class="plan-card" id="planCard"></div>
+      <button class="profile-btn" id="profileBtn" onclick="openAccount()"></button>
+    </div>
   </aside>
 
   <main class="main">
@@ -203,7 +298,7 @@
       <div class="mh-right">
         <span class="model-pill"><span class="dot"></span> <span id="modelName">Crown · Standard</span></span>
         <span class="pill" id="tierPill">FREE</span>
-        <div class="avatar" id="avatar"><svg width="17" height="14" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg></div>
+        <div class="avatar" id="avatar" onclick="openAccount()" title="Account"><svg width="17" height="14" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg></div>
       </div>
     </header>
 
@@ -254,6 +349,26 @@
   </div>
 </div>
 
+<!-- ACCOUNT / PROFILE MODAL -->
+<div class="modal-bg" id="accountModal">
+  <div class="modal">
+    <button class="close" onclick="closeAccount()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="eyebrow">Your account</div>
+    <div id="acctBody"></div>
+  </div>
+</div>
+
+<!-- GENERIC INPUT MODAL (rename chat / edit name) -->
+<div class="modal-bg" id="inputModal">
+  <div class="modal" style="max-width:380px">
+    <button class="close" onclick="closeInput()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="eyebrow" id="im-eyebrow">Edit</div>
+    <h3 id="im-title">Rename</h3>
+    <div class="field"><label id="im-label">Name</label><input id="im-input" maxlength="80" autocomplete="off"></div>
+    <button class="btn btn-gold" onclick="confirmInput()">Save</button>
+  </div>
+</div>
+
 <div class="ctx" id="ctxMenu"></div>
 <div class="toast" id="toast"></div>
 
@@ -271,6 +386,7 @@ const S = { tier:"free", account:null, chats:[], projects:[], activeId:null, tok
 const $ = id => document.getElementById(id);
 const uid = p => p + (++S.seq) + "-" + Math.random().toString(36).slice(2,6);
 const CHIPS = ["Draft a launch announcement","Explain a concept simply","Write a Python script to…","Brainstorm brand names"];
+const CROWN_AV = '<svg width="18" height="14" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg>';
 
 /* ===== sidebar / drawer ===== */
 function openSidebar(){ $("sidebar").classList.add("open"); $("overlay").classList.add("show"); }
@@ -284,6 +400,7 @@ function newChat(projectId=null){
 function selectChat(id){ S.activeId = id; closeSidebar(); render(); }
 function activeChat(){ return S.chats.find(c=>c.id===S.activeId) || null; }
 function deleteChat(id){ S.chats = S.chats.filter(c=>c.id!==id); if(S.activeId===id) S.activeId = S.chats[0]?.id || null; render(); }
+function renameChat(id){ const c=S.chats.find(x=>x.id===id); if(!c) return; openInput("Rename","Rename chat","Chat name",c.title,v=>{ c.title=v; toast("Chat renamed"); render(); }); }
 function moveChat(id, projectId){ const c=S.chats.find(x=>x.id===id); if(c){ c.projectId=projectId; toast("Moved to project"); } render(); }
 
 /* ===== projects (Pro) ===== */
@@ -294,7 +411,7 @@ function toggleProject(id){ const p=S.projects.find(x=>x.id===id); if(p){ p.coll
 function deleteProject(id){ S.chats.forEach(c=>{ if(c.projectId===id) c.projectId=null; }); S.projects=S.projects.filter(p=>p.id!==id); render(); }
 
 /* ===== render ===== */
-function render(){ renderSidebar(); renderPlan(); renderHead(); renderChat(); }
+function render(){ renderSidebar(); renderPlan(); renderProfile(); renderHead(); renderChat(); }
 
 function chatRow(c){
   const active = c.id===S.activeId ? " active" : "";
@@ -346,6 +463,15 @@ function renderPlan(){
       <button class="btn btn-gold upgrade-btn" onclick="openUpgrade()"><svg width="15" height="12" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg> Upgrade to Pro</button>`;
   }
 }
+function renderProfile(){
+  const a=S.account, pro=S.tier==="pro";
+  const name=a?.username||"Guest";
+  const sub=pro?"Pro · Unlimited":(a?"Free plan":"Free · view account");
+  const initial=a?.username?esc(a.username[0].toUpperCase()):CROWN_AV;
+  $("profileBtn").innerHTML=`<span class="pf-av">${initial}</span>
+    <span class="pf-meta"><span class="pf-name">${esc(name)}</span><span class="pf-sub">${sub}</span></span>
+    <svg class="pf-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>`;
+}
 function renderHead(){
   const c = activeChat();
   $("headTitle").textContent = c ? c.title : "New chat";
@@ -361,20 +487,40 @@ function renderHead(){
 function renderChat(){
   const chat = $("chat"), c = activeChat();
   if(!c || c.messages.length===0){
-    chat.innerHTML = `<div class="empty"><div class="ec"><svg width="30" height="24" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg></div>
+    const icons = [
+      '<path d="M12 2 13.9 8.1 20 10 13.9 11.9 12 18 10.1 11.9 4 10 10.1 8.1Z"/>',
+      '<path d="M12 3 13.4 8.6 19 10 13.4 11.4 12 17 10.6 11.4 5 10 10.6 8.6Z"/><circle cx="18.5" cy="5.5" r="1.4"/>',
+      '<path d="M12 2 13.9 8.1 20 10 13.9 11.9 12 18 10.1 11.9 4 10 10.1 8.1Z"/><circle cx="5" cy="6" r="1.3"/>',
+      '<path d="M12 2 13.9 8.1 20 10 13.9 11.9 12 18 10.1 11.9 4 10 10.1 8.1Z"/>'
+    ];
+    chat.innerHTML = `<div class="empty"><div class="ec"><svg width="40" height="32" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg></div>
+      <div class="eyebrow2">Begin your reign</div>
       <h2>How may the Crown serve you?</h2><p>Ask anything — drafting, code, strategy, or ideas.</p>
-      <div class="chips">${CHIPS.map(t=>`<button class="chip" onclick="useChip(this)">${t}</button>`).join("")}</div></div>`;
+      <div class="chips">${CHIPS.map((t,i)=>`<button class="chip" data-q="${esc(t)}" onclick="useChip(this)"><svg class="ci" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">${icons[i]||icons[0]}</svg><span class="ct">${esc(t)}</span><svg class="ca" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`).join("")}</div></div>`;
     return;
   }
-  chat.innerHTML = c.messages.map(m=>`<div class="msg ${m.role==='user'?'user':'bot'}"><div class="av">${m.role==='user'?(S.account?.username?esc(S.account.username[0].toUpperCase()):'You'):'C'}</div><div class="bubble">${esc(m.content)}</div></div>`).join("");
+  chat.innerHTML = c.messages.map((m,i)=>{
+    const u = m.role==='user';
+    const nm = u ? (S.account?.username || "You") : "Crown";
+    const av = u ? (S.account?.username ? esc(S.account.username[0].toUpperCase()) : "You") : CROWN_AV;
+    const copy = u ? "" : `<div class="mactions"><button class="copy" onclick="copyMsg(this,${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>`;
+    return `<div class="msg ${u?'user':'bot'}"><div class="av">${av}</div><div class="mcol"><div class="mname">${esc(nm)}</div><div class="bubble">${esc(m.content)}</div>${copy}</div></div>`;
+  }).join("");
   chat.scrollTop = chat.scrollHeight;
 }
-function useChip(b){ $("input").value = b.textContent; send(); }
+function useChip(b){ $("input").value = b.dataset.q || b.textContent; send(); }
+function copyMsg(btn,i){
+  const c=activeChat(); if(!c) return;
+  const txt=c.messages[i]?.content||"";
+  const done=()=>{ const o=btn.innerHTML; btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Copied'; setTimeout(()=>btn.innerHTML=o,1400); };
+  if(navigator.clipboard?.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>toast("Copy failed")); }
+  else { const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");done();}catch(e){toast("Copy failed");} ta.remove(); }
+}
 
 /* ===== context menu ===== */
 function openCtx(e, chatId){
   const m = $("ctxMenu");
-  let html = "";
+  let html = `<button onclick="closeCtx();renameChat('${chatId}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> Rename</button><div class="sep"></div>`;
   if(S.tier==="pro" && S.projects.length){
     html += `<div class="ctx-label">Move to project</div>`;
     html += S.projects.map(p=>`<button onclick="moveChat('${chatId}','${p.id}');closeCtx()">📁 ${esc(p.name)}</button>`).join("");
@@ -385,11 +531,55 @@ function openCtx(e, chatId){
   html += `<button class="danger" onclick="deleteChat('${chatId}');closeCtx()">🗑 Delete chat</button>`;
   m.innerHTML = html;
   m.classList.add("show");
-  const x = Math.min(e.clientX, innerWidth-210), y = Math.min(e.clientY, innerHeight-160);
+  const x = Math.min(e.clientX, innerWidth-210), y = Math.min(e.clientY, innerHeight-190);
   m.style.left = x+"px"; m.style.top = y+"px";
 }
 function closeCtx(){ $("ctxMenu").classList.remove("show"); }
 addEventListener("click", e=>{ if(!e.target.closest(".ctx") && !e.target.closest(".dots")) closeCtx(); });
+
+/* ===== account / profile ===== */
+function openAccount(){ renderAccount(); $("accountModal").classList.add("show"); }
+function closeAccount(){ $("accountModal").classList.remove("show"); }
+function renderAccount(){
+  const a=S.account, pro=S.tier==="pro";
+  const name=a?.username||"Guest", email=a?.email||"Not signed in";
+  const initial=a?.username?esc(a.username[0].toUpperCase()):CROWN_AV;
+  const usage = pro ? '<span class="v"><span style="color:var(--gold-bright);font-weight:700">∞</span> Unlimited</span>'
+    : `<span class="v">${S.tokensUsed.toLocaleString()} / ${CONFIG.FREE_TOKEN_LIMIT.toLocaleString()}</span>`;
+  let actions;
+  if(pro){
+    actions = `<button class="btn btn-ghost" onclick="manageSub()">Manage subscription</button><button class="btn btn-danger" onclick="signOut()">Sign out</button>`;
+  } else if(a){
+    actions = `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Upgrade to Pro</button><button class="btn btn-danger" onclick="signOut()">Sign out</button>`;
+  } else {
+    actions = `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Create account · Go Pro</button>`;
+  }
+  $("acctBody").innerHTML = `
+    <div class="acct-head"><div class="acct-av">${initial}</div>
+      <div class="acct-id"><div class="an">${esc(name)}</div><div class="ae">${esc(email)}</div></div></div>
+    ${a?`<button class="linkbtn" onclick="editName()">Edit display name</button>`:""}
+    <div class="acct-rows">
+      <div class="arow"><span class="k">Plan</span><span class="v">${pro?'<span class="pill pro">PRO</span>':'<span class="pill">FREE</span>'}</span></div>
+      <div class="arow"><span class="k">Usage</span>${usage}</div>
+      <div class="arow"><span class="k">Model</span><span class="v">${pro?'Crown · Pro':'Crown · Standard'}</span></div>
+      <div class="arow"><span class="k">Projects</span><span class="v">${pro?'Enabled':'Pro only'}</span></div>
+    </div>
+    <div class="acct-actions">${actions}</div>
+    <div class="mnote">Demo account. In production this reflects your real account and subscription, managed via secure Stripe billing.</div>`;
+}
+function editName(){ if(!S.account) return; openInput("Profile","Display name","Your name",S.account.username,v=>{ S.account.username=v; toast("Name updated"); render(); renderAccount(); }); }
+function signOut(){ S.account=null; S.tier="free"; S.tokensUsed=0; closeAccount(); render(); toast("Signed out"); }
+function manageSub(){ toast("Stripe billing portal — coming soon"); }
+
+/* ===== generic input modal (rename chat / edit name) ===== */
+let inputCb=null;
+function openInput(eyebrow,title,label,value,cb){
+  $("im-eyebrow").textContent=eyebrow; $("im-title").textContent=title; $("im-label").textContent=label;
+  $("im-input").value=value||""; inputCb=cb;
+  $("inputModal").classList.add("show"); setTimeout(()=>{ const i=$("im-input"); i.focus(); i.select(); },50);
+}
+function confirmInput(){ const v=$("im-input").value.trim(); if(!v) return; const cb=inputCb; closeInput(); if(cb) cb(v); }
+function closeInput(){ $("inputModal").classList.remove("show"); inputCb=null; }
 
 /* ===== upgrade / signup ===== */
 function proGate(feature){ toast(feature + " is a Pro feature"); openUpgrade(); }
@@ -435,7 +625,7 @@ async function send(){
   $("input").value=""; $("input").style.height="28px";
   render();
   const chat=$("chat");
-  const t=document.createElement("div"); t.className="msg bot typing"; t.innerHTML='<div class="av">C</div><div class="bubble"><i></i><i></i><i></i></div>';
+  const t=document.createElement("div"); t.className="msg bot typing"; t.innerHTML='<div class="av">'+CROWN_AV+'</div><div class="mcol"><div class="mname">Crown</div><div class="bubble"><i></i><i></i><i></i></div></div>';
   chat.appendChild(t); chat.scrollTop=chat.scrollHeight;
   try{
     const reply=await callModel(c.messages);
@@ -452,9 +642,10 @@ function esc(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;'
 $("send").onclick=send;
 $("input").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); }});
 $("input").addEventListener("input",function(){ this.style.height="28px"; this.style.height=Math.min(140,this.scrollHeight)+"px"; });
-addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeUpgrade(); closeName(); closeCtx(); }});
-[$("upgradeModal"),$("nameModal")].forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("show"); }));
+addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeUpgrade(); closeName(); closeCtx(); closeAccount(); closeInput(); }});
+[$("upgradeModal"),$("nameModal"),$("accountModal"),$("inputModal")].forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("show"); }));
 $("proj-name").addEventListener("keydown",e=>{ if(e.key==="Enter") confirmProject(); });
+$("im-input").addEventListener("keydown",e=>{ if(e.key==="Enter") confirmInput(); });
 
 let toastT;
 function toast(msg){ const t=$("toast"); t.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'+esc(msg); t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
