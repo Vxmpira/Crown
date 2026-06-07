@@ -105,8 +105,8 @@ app.post("/api/checkout", async (req, res) => {
       line_items: [{ price, quantity: 1 }],
       customer_email: email,
       allow_promotion_codes: true,
-      success_url: `${PUBLIC_URL}/chat.html?checkout=success`,
-      cancel_url:  `${PUBLIC_URL}/chat.html?checkout=cancel`
+      success_url: `${PUBLIC_URL}/chat?checkout=success`,
+      cancel_url:  `${PUBLIC_URL}/chat?checkout=cancel`
     });
     res.json({ url: session.url });
   } catch (e) {
@@ -127,7 +127,7 @@ app.post("/api/portal", async (req, res) => {
     if (!customer) return res.status(404).json({ error: "no_customer", message: "No Stripe customer found for that email." });
     const session = await stripe.billingPortal.sessions.create({
       customer: customer.id,
-      return_url: `${PUBLIC_URL}/chat.html`
+      return_url: `${PUBLIC_URL}/chat`
     });
     res.json({ url: session.url });
   } catch (e) {

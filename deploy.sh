@@ -52,14 +52,23 @@ if ! command -v nginx >/dev/null 2>&1; then
   sudo dnf install -y nginx
   sudo systemctl enable nginx
 fi
-# neutralize any stock default_server so ours wins (idempotent)
-sudo cp -n /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak 2>/dev/null || true
-sudo sed -i 's/ default_server//g' /etc/nginx/nginx.conf
-sudo tee /etc/nginx/conf.d/crown.conf >/dev/null <<'EOF'
+# reads your domain from /etc/crown/domain (set it once); defaults to catch-all
+DOMAIN=$(cat /etc/crown/domain 2>/dev/null || echo "_")
+PRIMARY=$(echo "$DOMAIN" | awk '{print $1}')
+# Leave nginx alone if certbot owns it — detected by the ssl line OR an issued cert on disk.
+if grep -q "ssl_certificate" /etc/nginx/conf.d/crown.conf 2>/dev/null || [ -d "/etc/letsencrypt/live/$PRIMARY" ]; then
+  echo "==> HTTPS managed by certbot — leaving nginx config untouched (domain: $DOMAIN)"
+  echo "    If HTTPS is ever down, restore it with:"
+  echo "      sudo certbot --nginx -d $PRIMARY -d www.$PRIMARY"
+else
+  # neutralize any stock default_server so ours wins (idempotent)
+  sudo cp -n /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak 2>/dev/null || true
+  sudo sed -i 's/ default_server//g' /etc/nginx/nginx.conf
+  sudo tee /etc/nginx/conf.d/crown.conf >/dev/null <<'EOF'
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    server_name _;
+    server_name __DOMAIN__;
     root /var/www/crown;
     index index.html;
 
@@ -74,13 +83,15 @@ server {
     }
 }
 EOF
+  sudo sed -i "s/__DOMAIN__/$DOMAIN/" /etc/nginx/conf.d/crown.conf
+fi
 
 sudo nginx -t
-sudo systemctl restart nginx
+sudo systemctl reload nginx 2>/dev/null || sudo systemctl restart nginx
 
 echo ""
 echo "==> Done. Checks:"
 sudo systemctl is-active crown  && echo "    backend: running"
 curl -s http://127.0.0.1:3000/api/health || true
 echo ""
-echo "==> Visit your site at http://<your-elastic-ip>/"
+if [ "$PRIMARY" != "_" ]; then echo "==> Visit your site at https://$PRIMARY/"; else echo "==> Visit your site at http://<your-server-ip>/ (set /etc/crown/domain for a clean URL)"; fi
