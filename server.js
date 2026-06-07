@@ -431,7 +431,6 @@ app.post("/api/image", async (req, res) => {
   if (effectiveTier(u) !== "pro") return res.status(403).json({ error:"pro_only", message:"Image generation is a Pro feature." });
   const prompt = String(req.body.prompt || "").trim();
   if (!prompt) return res.status(400).json({ error:"no_prompt", message:"Describe the image you want." });
-  if (prompt.length > 1000) return res.status(400).json({ error:"too_long", message:"Keep the prompt under 1000 characters." });
   try {
     const image = IMAGE_PROVIDER === "openai" ? await generateOpenAI(prompt) : await generatePicsart(prompt);
     if (!image) return res.status(502).json({ error:"image_empty", message:"No image returned by the provider." });
