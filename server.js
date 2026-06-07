@@ -80,15 +80,29 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
+/* Accept either a price_… or a prod_… in STRIPE_PRICE_ID. If it's a product,
+   resolve it to that product's active price at checkout time. */
+async function resolvePriceId(){
+  if (!STRIPE_PRICE) return null;
+  if (STRIPE_PRICE.startsWith("price_")) return STRIPE_PRICE;
+  if (STRIPE_PRICE.startsWith("prod_")) {
+    const list = await stripe.prices.list({ product: STRIPE_PRICE, active: true, limit: 1 });
+    return list.data[0] ? list.data[0].id : null;
+  }
+  return STRIPE_PRICE;
+}
+
 /* Create a Stripe Checkout Session for the $29/mo Pro plan; returns the hosted checkout URL. */
 app.post("/api/checkout", async (req, res) => {
   if (!stripe || !STRIPE_PRICE)
     return res.status(503).json({ error: "stripe_unconfigured", message: "Stripe is not set up on the server yet." });
   try {
+    const price = await resolvePriceId();
+    if (!price) return res.status(503).json({ error: "no_price", message: "No active price found for the configured Stripe product." });
     const email = (req.body && typeof req.body.email === "string") ? req.body.email : undefined;
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      line_items: [{ price: STRIPE_PRICE, quantity: 1 }],
+      line_items: [{ price, quantity: 1 }],
       customer_email: email,
       allow_promotion_codes: true,
       success_url: `${PUBLIC_URL}/chat.html?checkout=success`,
