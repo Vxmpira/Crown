@@ -144,6 +144,19 @@
   .bubble.md pre code{background:none;border:none;padding:0;font-size:.86em;line-height:1.55;display:block;white-space:pre}
   .typing i{width:7px;height:7px;border-radius:50%;background:var(--gold);display:inline-block;animation:blink 1.2s infinite}
   .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+  .tdots{display:inline-flex;gap:5px;align-items:center}
+  .tdots i{width:7px;height:7px;border-radius:50%;background:var(--gold);display:inline-block;animation:blink 1.2s infinite}
+  .tdots i:nth-child(2){animation-delay:.2s}.tdots i:nth-child(3){animation-delay:.4s}
+  .stream-caret{display:inline-block;width:7px;height:1.05em;vertical-align:-2px;margin-left:1px;background:var(--gold);border-radius:1px;animation:blink 1s steps(1) infinite}
+  .att-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+  .att-chip{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;color:var(--ivory);background:var(--obsidian);border:1px solid var(--line-soft);border-radius:8px;padding:5px 9px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .att-thumb{max-width:170px;max-height:170px;border-radius:10px;border:1px solid var(--line-soft);display:block}
+  .att-thumb.sm{max-width:38px;max-height:38px;border-radius:7px}
+  .att-bar{display:none;flex-wrap:wrap;gap:8px;max-width:760px;margin:0 auto 9px;padding:0 2px}
+  .att-pending{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;color:var(--ivory);background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:10px;padding:5px 6px 5px 10px;max-width:240px}
+  .att-pending>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .att-pending button{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:.9rem;line-height:1;padding:2px 4px;border-radius:6px;flex-shrink:0}
+  .att-pending button:hover{color:var(--ivory);background:var(--obsidian)}
   @keyframes blink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
 
   .composer-wrap{padding:14px 22px 20px;border-top:1px solid var(--line-soft)}
@@ -335,9 +348,11 @@
         <p>👑 You've reached your <b>Free</b> token limit. Pro members enjoy <b>unlimited usage</b>, Projects, and advanced models.</p>
         <button class="btn btn-gold" style="padding:11px 22px" onclick="openUpgrade()">Upgrade to Pro</button>
       </div>
+      <div class="att-bar" id="attBar"></div>
+      <input id="fileInput" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.md,.markdown,.csv,.json,.js,.ts,.jsx,.tsx,.py,.rb,.go,.rs,.java,.c,.cpp,.h,.html,.css,.xml,.yml,.yaml,.sh,.sql,.log" style="display:none" onchange="onFiles(this.files)">
       <div class="composer" id="composer">
         <textarea id="input" placeholder="Speak, and the Crown shall answer…" rows="1"></textarea>
-        <button class="ic-btn" onclick="proGate('File uploads')" title="Attach (Pro)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+        <button class="ic-btn" onclick="pickFiles()" title="Attach files (Pro)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
         <button class="ic-btn" onclick="imagePrompt()" title="Create image (Pro)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-4.5-4.5L5 21"/></svg></button>
         <button class="send" id="send" aria-label="Send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
       </div>
@@ -486,7 +501,14 @@ function persist(){
     if(_saving) { persist(); return; }
     _saving=true;
     try{
-      const chats = S.chats.filter(c=> (c.messages && c.messages.length) || c.id===S.activeId);
+      const chats = S.chats.filter(c=> (c.messages && c.messages.length) || c.id===S.activeId).map(c=>({
+        ...c,
+        messages: (c.messages||[]).map(m=>{
+          const { _api, streaming, ...rest } = m;            // never persist transient/heavy fields
+          if(rest.atts) rest.atts = rest.atts.map(a=>({ name:a.name, kind:a.kind }));  // keep a light chip only
+          return rest;
+        })
+      }));
       await fetch("/api/workspace", { method:"PUT", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({ chats, projects:S.projects }) });
     }catch(e){}
     _saving=false;
@@ -635,7 +657,7 @@ function renderChat(){
       bubble = `<div class="bubble bubble-img"><img src="${m.image}" alt="${esc(m.alt||'Generated image')}" loading="lazy">${m.alt?`<div class="img-cap">${esc(m.alt)}</div>`:""}</div>`;
       actions = `<div class="mactions"><a class="copy" href="${m.image}" download="crown-image.png"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Save</a></div>`;
     } else {
-      bubble = u ? `<div class="bubble">${esc(m.content)}</div>` : `<div class="bubble md">${mdToHtml(m.content)}</div>`;
+      bubble = u ? `<div class="bubble">${attHtml(m.atts)}${esc(m.content)}</div>` : `<div class="bubble md">${mdToHtml(m.content)}</div>`;
       if(!u) actions = `<div class="mactions"><button class="copy" onclick="copyMsg(this,${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>`;
     }
     return `<div class="msg ${u?'user':'bot'}"><div class="av">${av}</div><div class="mcol"><div class="mname">${esc(nm)}</div>${bubble}${actions}</div></div>`;
@@ -699,7 +721,7 @@ function renderAccount(){
       <div class="arow"><span class="k">Projects</span><span class="v">${pro?'Enabled':'Pro only'}</span></div>
     </div>
     <div class="acct-actions">${actions}</div>
-    <div class="mnote">Demo account. In production this reflects your real account and subscription, managed via secure Stripe billing.</div>`;
+    <div class="mnote">Your subscription is managed securely through Stripe. Changes take effect immediately.</div>`;
 }
 function editName(){ if(!S.account) return; openInput("Profile","Display name","Your name",S.account.username,v=>{ S.account.username=v; toast("Name updated"); render(); renderAccount(); }); }
 async function signOut(){
@@ -835,64 +857,170 @@ async function startCheckout(){
   toast(d.message || "Couldn't start checkout");
 }
 
-/* ===== model call (auto-detects preview vs your metered backend) ===== */
-async function callModel(messages){
+/* ===== model call — streams tokens as they arrive (preview simulates the same feel) ===== */
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+function nearBottom(el){ return el.scrollHeight - el.scrollTop - el.clientHeight < 130; }
+async function previewFull(messages){
+  const res = await fetch("https://api.anthropic.com/v1/messages", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:CONFIG.MODEL, max_tokens:1000, system:CONFIG.SYSTEM, messages }) });
+  if(!res.ok) throw new Error("Request failed ("+res.status+")");
+  const data = await res.json();
+  return Array.isArray(data.content) ? data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim() : (data.reply||"").trim();
+}
+async function streamModel(messages, onToken){
+  // Preview (claude.ai sandbox): fetch full reply, then reveal it for the same typewriter feel.
   if(IS_PREVIEW || !CONFIG.BACKEND_URL){
-    const res = await fetch("https://api.anthropic.com/v1/messages", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:CONFIG.MODEL, max_tokens:1000, system:CONFIG.SYSTEM, messages }) });
-    if(!res.ok) throw new Error("Request failed ("+res.status+")");
-    const data = await res.json();
-    return Array.isArray(data.content) ? data.content.filter(b=>b.type==="text").map(b=>b.text).join("\n").trim() : (data.reply||"").trim();
+    const full = await previewFull(messages);
+    const words = full.split(/(\s+)/);
+    for(const w of words){ onToken(w); await sleep(14); }
+    return { reply: full, usage:null };
   }
   const res = await fetch(CONFIG.BACKEND_URL, { method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({ messages }) });
-  const data = await res.json().catch(()=>({}));
-  if(res.status===402 || data.error==="limit"){ const e=new Error(data.message||"Limit reached"); e.code="limit"; throw e; }
-  if(res.status===429){ const e=new Error(data.message||"You're going a bit fast — give it a moment."); e.code="rate"; throw e; }
-  if(!res.ok) throw new Error(data.message || ("Request failed ("+res.status+")"));
-  if(data.usage){ // server is authoritative on plan + usage
-    if(typeof data.usage.used==="number") S.tokensUsed=data.usage.used;
-    if(typeof data.usage.limit==="number") S.freeLimit=data.usage.limit;
-    if(data.usage.tier) S.tier=data.usage.tier;
+  if(res.status===402){ const d=await res.json().catch(()=>({})); const e=new Error(d.message||"Limit reached"); e.code="limit"; throw e; }
+  if(res.status===429){ const d=await res.json().catch(()=>({})); const e=new Error(d.message||"You're going a bit fast — give it a moment."); e.code="rate"; throw e; }
+  if(!res.ok || !res.body){ const d=await res.json().catch(()=>({})); throw new Error(d.message || ("Request failed ("+res.status+")")); }
+  const reader = res.body.getReader(), dec = new TextDecoder();
+  let buf="", full="", usage=null;
+  while(true){
+    const { value, done } = await reader.read();
+    if(done) break;
+    buf += dec.decode(value, { stream:true });
+    let nl;
+    while((nl = buf.indexOf("\n\n")) >= 0){
+      const raw = buf.slice(0,nl); buf = buf.slice(nl+2);
+      const line = raw.split("\n").find(l=>l.startsWith("data:"));
+      if(!line) continue;
+      const payload = line.slice(5).trim(); if(!payload) continue;
+      let ev; try{ ev = JSON.parse(payload); }catch{ continue; }
+      if(ev.t){ full += ev.t; onToken(ev.t); }
+      else if(ev.error){ throw new Error(ev.message || "stream error"); }
+      else if(ev.done){ usage = ev.usage || null; }
+    }
   }
-  return (data.reply||"").trim();
+  return { reply: full, usage };
 }
+
+/* ===== file attachments (Pro) ===== */
+const MAX_FILE = 4*1024*1024, MAX_TOTAL = 8*1024*1024, MAX_FILES = 4;
+let pendingAtts = [];
+function pickFiles(){ if(S.tier!=="pro") return proGate("File uploads"); $("fileInput").click(); }
+function readFile(f){
+  return new Promise((res,rej)=>{
+    const name=f.name, type=(f.type||"").toLowerCase();
+    const isImg = /^image\//.test(type) || /\.(png|jpe?g|webp|gif)$/i.test(name);
+    const isPdf = type==="application/pdf" || /\.pdf$/i.test(name);
+    const r=new FileReader(); r.onerror=()=>rej(r.error||new Error("read error"));
+    if(isImg){
+      let media = type && /^image\//.test(type) ? type : ("image/"+name.split(".").pop().toLowerCase().replace("jpg","jpeg"));
+      if(media==="image/jpg") media="image/jpeg";
+      r.onload=()=>{ const url=r.result; res({ name, kind:"image", media, data:url.split(",")[1], preview:url }); };
+      r.readAsDataURL(f);
+    } else if(isPdf){
+      r.onload=()=>res({ name, kind:"document", media:"application/pdf", data:r.result.split(",")[1] });
+      r.readAsDataURL(f);
+    } else {
+      r.onload=()=>res({ name, kind:"text", text:String(r.result).slice(0,200000) });
+      r.readAsText(f);
+    }
+  });
+}
+async function onFiles(list){
+  if(S.tier!=="pro"){ $("fileInput").value=""; return proGate("File uploads"); }
+  let total = pendingAtts.reduce((n,a)=>n+(a.data?a.data.length*0.75:(a.text?a.text.length:0)),0);
+  for(const f of [...list]){
+    if(pendingAtts.length>=MAX_FILES){ toast(`Up to ${MAX_FILES} files at a time`); break; }
+    if(f.size>MAX_FILE){ toast(`${f.name} is too large (max 4 MB)`); continue; }
+    if(total+f.size>MAX_TOTAL){ toast("Attachments total too large (max 8 MB)"); break; }
+    try{ pendingAtts.push(await readFile(f)); total+=f.size; }
+    catch(e){ toast("Couldn't read "+f.name); }
+  }
+  $("fileInput").value=""; renderAtts();
+}
+function removeAtt(i){ pendingAtts.splice(i,1); renderAtts(); }
+function renderAtts(){
+  const bar=$("attBar"); if(!bar) return;
+  if(!pendingAtts.length){ bar.style.display="none"; bar.innerHTML=""; return; }
+  bar.style.display="flex";
+  bar.innerHTML = pendingAtts.map((a,i)=>{
+    const ic = a.kind==="document"?"📄":a.kind==="image"?"🖼":"📎";
+    const inner = a.kind==="image" ? `<img class="att-thumb sm" src="${a.preview}" alt="">` : `<span>${ic} ${esc(a.name)}</span>`;
+    return `<span class="att-pending">${inner}<button onclick="removeAtt(${i})" aria-label="Remove">✕</button></span>`;
+  }).join("");
+}
+// turn the typed text + attachments into Anthropic message content (string when text-only)
+function buildUserContent(text, atts){
+  const blocks=[]; let body = text||"";
+  (atts||[]).forEach(a=>{
+    if(a.kind==="image") blocks.push({ type:"image", source:{ type:"base64", media_type:a.media, data:a.data } });
+    else if(a.kind==="document") blocks.push({ type:"document", source:{ type:"base64", media_type:"application/pdf", data:a.data } });
+    else if(a.kind==="text") body += `\n\n[Attached file: ${a.name}]\n\`\`\`\n${a.text}\n\`\`\``;
+  });
+  if(body.trim() || !blocks.length) blocks.push({ type:"text", text: body });
+  return blocks.length===1 && blocks[0].type==="text" ? blocks[0].text : blocks;
+}
+function attHtml(atts){
+  if(!atts || !atts.length) return "";
+  return `<div class="att-row">`+atts.map(a=>{
+    if(a.kind==="image" && a.preview) return `<img class="att-thumb" src="${a.preview}" alt="${esc(a.name||'')}">`;
+    const ic = a.kind==="document"?"📄":a.kind==="image"?"🖼":"📎";
+    return `<span class="att-chip">${ic} ${esc(a.name||"file")}</span>`;
+  }).join("")+`</div>`;
+}
+
 
 let busy=false;
 const est = s => Math.max(1, Math.ceil((s||"").length/4));
 async function send(){
-  const text=$("input").value.trim(); if(!text||busy) return;
+  const text=$("input").value.trim();
+  if((!text && !pendingAtts.length) || busy) return;
   if(S.tier!=="pro" && S.tokensUsed>=S.freeLimit){ renderHead(); openUpgrade(); return; }
   let c=activeChat(); if(!c){ newChat(); c=activeChat(); }
-  c.messages.push({role:"user",content:text});
-  if(c.title==="New chat") c.title = text.length>34 ? text.slice(0,34)+"…" : text;
+  const atts = pendingAtts; pendingAtts=[]; renderAtts();
+  const dispAtts = atts.map(a=>({ name:a.name, kind:a.kind, preview:a.kind==="image"?a.preview:null }));
+  const msg = { role:"user", content:text };
+  if(atts.length){ msg.atts = dispAtts; msg._api = buildUserContent(text, atts); }
+  c.messages.push(msg);
+  if(c.title==="New chat"){ const base = text || atts[0]?.name || "Shared a file"; c.title = base.length>34 ? base.slice(0,34)+"…" : base; }
   $("input").value=""; $("input").style.height="28px";
-  // If it reads like an image request, offer to generate instead of sending it to the text model.
-  const wantsImage = /\b(create|generate|make|draw|design|render|paint)\b[^.?!\n]{0,40}\b(image|picture|photo|logo|artwork|drawing|illustration|wallpaper|poster|icon)\b/i.test(text);
+  // If it reads like an image request (and nothing is attached), offer to generate instead.
+  const wantsImage = !atts.length && /\b(create|generate|make|draw|design|render|paint)\b[^.?!\n]{0,40}\b(image|picture|photo|logo|artwork|drawing|illustration|wallpaper|poster|icon)\b/i.test(text);
   if(wantsImage){ c.messages.push({role:"assistant", choice:{prompt:text}}); render(); return; }
   render();
   await modelReply(c, text);
 }
 async function modelReply(c, lastText){
   busy=true; $("send").disabled=true;
+  const idx = c.messages.push({ role:"assistant", content:"", streaming:true }) - 1;
+  render();
   const chat=$("chat");
-  const t=document.createElement("div"); t.className="msg bot typing"; t.innerHTML='<div class="av">'+CROWN_AV+'</div><div class="mcol"><div class="mname">Crown</div><div class="bubble"><i></i><i></i><i></i></div></div>';
-  chat.appendChild(t); chat.scrollTop=chat.scrollHeight;
+  const node = chat.querySelector(".msg:last-child");
+  const bubble = node ? node.querySelector(".bubble") : null;
+  if(bubble){ bubble.classList.remove("md"); bubble.innerHTML='<span class="tdots"><i></i><i></i><i></i></span>'; }
+  let started=false, paintQueued=false;
+  const paint = ()=>{ if(paintQueued) return; paintQueued=true; requestAnimationFrame(()=>{ paintQueued=false; if(!bubble) return; bubble.innerHTML = mdToHtml(c.messages[idx].content) + '<span class="stream-caret"></span>'; if(nearBottom(chat)) chat.scrollTop=chat.scrollHeight; }); };
+  const onToken = tok=>{
+    if(!started){ started=true; if(bubble){ bubble.classList.add("md"); bubble.innerHTML=""; } }
+    c.messages[idx].content += tok;
+    paint();
+  };
   try{
-    const history = c.messages.filter(m=>!m.image && !m.choice && m.content).map(m=>({role:m.role, content:m.content}));
-    const reply=await callModel(history);
-    c.messages.push({role:"assistant",content:reply||"…"});
-    if(IS_PREVIEW && S.tier==="free"){ S.tokensUsed += est(lastText||"")+est(reply); }  // live usage comes from the server
+    const history = c.messages
+      .filter((m,j)=> j!==idx && !m.image && !m.choice && (m._api || m.content))
+      .map(m=>({ role:m.role, content: m._api ? m._api : m.content }));
+    const { reply, usage } = await streamModel(history, onToken);
+    c.messages[idx].content = reply || "…"; delete c.messages[idx].streaming;
+    if(usage){
+      if(typeof usage.used==="number") S.tokensUsed=usage.used;
+      if(typeof usage.limit==="number") S.freeLimit=usage.limit;
+      if(usage.tier) S.tier=usage.tier;
+    }
+    if(IS_PREVIEW && S.tier==="free"){ S.tokensUsed += est(lastText||"")+est(reply); }
+    c.messages.forEach(m=>{ delete m._api; });   // drop heavy attachment payloads after the turn
     render();
   }catch(err){
-    if(err.code==="limit"){
-      c.messages.push({role:"assistant",content:"👑 "+err.message});
-      render(); if(S.tier!=="pro") openUpgrade();
-    }else if(err.code==="rate"){
-      c.messages.push({role:"assistant",content:err.message});
-      render();
-    }else{
-      c.messages.push({role:"assistant",content:"⚠️ Couldn't reach the model backend.\n\nOn your live site this calls /api/chat. If you see this there, check: sudo systemctl status crown — and that your API key is set in /etc/crown/crown.env.\n\n("+err.message+")"});
-      render();
-    }
+    c.messages.splice(idx,1);
+    if(err.code==="limit"){ c.messages.push({role:"assistant",content:"👑 "+err.message}); render(); if(S.tier!=="pro") openUpgrade(); }
+    else if(err.code==="rate"){ c.messages.push({role:"assistant",content:err.message}); render(); }
+    else{ c.messages.push({role:"assistant",content:"⚠️ Couldn't reach the model backend.\n\nOn your live site this calls /api/chat. If you see this there, check: sudo systemctl status crown — and that your API key is set in /etc/crown/crown.env.\n\n("+err.message+")"}); render(); }
   }finally{ busy=false; $("send").disabled=false; renderHead(); $("input").focus(); }
 }
 /* user picked an option on the "looks like an image?" prompt */

@@ -200,7 +200,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req,
   res.json({ received: true });
 });
 
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: "14mb" }));   // headroom for image/PDF attachments (base64) on /api/chat
 
 app.get("/api/health", (_req, res) =>
   res.json({ ok:true, model:MODEL, keyLoaded:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, db:true, accounts:true, images:!!IMAGE_KEY, email:!!mailer }));
@@ -355,23 +355,86 @@ app.post("/api/chat", async (req, res) => {
           : "You've reached the free trial limit. Create an account to keep going." });
   }
   try {
-    const messages = Array.isArray(req.body.messages) ? req.body.messages : [];
-    const r = await fetch("https://api.anthropic.com/v1/messages", {
+    const messages = sanitizeMessages(req.body.messages);
+    if (!messages.length) return res.status(400).json({ error:"empty", message:"Nothing to send." });
+
+    const upstream = await fetch("https://api.anthropic.com/v1/messages", {
       method:"POST",
       headers:{ "content-type":"application/json", "x-api-key":KEY, "anthropic-version":"2023-06-01" },
-      body: JSON.stringify({ model:MODEL, max_tokens:1024, system:SYSTEM, messages })
+      body: JSON.stringify({ model:MODEL, max_tokens:2048, system:SYSTEM, messages, stream:true })
     });
-    const data = await r.json();
-    if (!r.ok) return res.status(502).json({ error:"model_error", detail:data });
-    const reply = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n").trim();
-    const spent = (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
+
+    if (!upstream.ok) {
+      let detail; try { detail = await upstream.json(); } catch { detail = await upstream.text().catch(()=> ""); }
+      return res.status(502).json({ error:"model_error", detail });
+    }
+
+    // ---- Server-Sent Events stream back to the browser ----
+    res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+    res.setHeader("Cache-Control", "no-cache, no-transform");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");   // tell nginx NOT to buffer (no nginx config change needed)
+    if (res.flushHeaders) res.flushHeaders();
+    const send = obj => { try { res.write("data: " + JSON.stringify(obj) + "\n\n"); } catch {} };
+
+    const dec = new TextDecoder();
+    let buf = "", inTok = 0, outTok = 0;
+    try {
+      const reader = upstream.body.getReader();
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream:true });
+        let nl;
+        while ((nl = buf.indexOf("\n\n")) >= 0) {
+          const raw = buf.slice(0, nl); buf = buf.slice(nl + 2);
+          const line = raw.split("\n").find(l => l.startsWith("data:"));
+          if (!line) continue;
+          const payload = line.slice(5).trim();
+          if (!payload || payload === "[DONE]") continue;
+          let ev; try { ev = JSON.parse(payload); } catch { continue; }
+          if (ev.type === "message_start") { inTok = ev.message?.usage?.input_tokens || 0; }
+          else if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") { send({ t: ev.delta.text }); }
+          else if (ev.type === "message_delta" && ev.usage?.output_tokens != null) { outTok = ev.usage.output_tokens; }
+          else if (ev.type === "error") { send({ error:"model_error", message: ev.error?.message || "stream error" }); }
+        }
+      }
+    } catch (streamErr) {
+      send({ error:"stream_error", message: streamErr.message });
+    }
+
+    const spent = inTok + outTok;
     apply(spent);
     const nowUsed = used + spent;
-    res.json({ reply, usage:{ tier, used:nowUsed, limit, remaining:Math.max(0, limit - nowUsed) } });
+    send({ done:true, usage:{ tier, used:nowUsed, limit, remaining:Math.max(0, limit - nowUsed) } });
+    res.end();
   } catch (e) {
-    res.status(500).json({ error:"server_error", message:e.message });
+    if (res.headersSent) { try { res.write("data: " + JSON.stringify({ error:"server_error", message:e.message }) + "\n\n"); } catch {} res.end(); }
+    else res.status(500).json({ error:"server_error", message:e.message });
   }
 });
+
+// Keep only roles + content we trust; allow text plus image/PDF attachment blocks.
+function sanitizeMessages(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.slice(-40).map(m => {
+    const role = m && m.role === "assistant" ? "assistant" : "user";
+    if (typeof m?.content === "string") return { role, content: m.content };
+    if (Array.isArray(m?.content)) {
+      const blocks = m.content.map(b => {
+        if (!b || typeof b !== "object") return null;
+        if (b.type === "text" && typeof b.text === "string") return { type:"text", text:b.text };
+        if (b.type === "image" && b.source?.type === "base64" && typeof b.source.data === "string")
+          return { type:"image", source:{ type:"base64", media_type:String(b.source.media_type || "image/png"), data:b.source.data } };
+        if (b.type === "document" && b.source?.type === "base64" && typeof b.source.data === "string")
+          return { type:"document", source:{ type:"base64", media_type:"application/pdf", data:b.source.data } };
+        return null;
+      }).filter(Boolean);
+      return { role, content: blocks.length ? blocks : "" };
+    }
+    return { role, content:"" };
+  }).filter(m => typeof m.content === "string" ? m.content.trim() : m.content.length);
+}
 
 // Pull the first image URL (or base64) out of various provider response shapes.
 function pickImage(o){
