@@ -52,9 +52,9 @@
   .proj-head .cnt{margin-left:auto;font-size:.7rem;color:var(--muted-2);font-weight:500}
   .proj-head .padd{opacity:0;color:var(--muted);transition:opacity .2s}
   .proj-head:hover .padd{opacity:1}
-  .proj-head .pdots{opacity:0;color:var(--muted-2);transition:opacity .2s;cursor:pointer;font-size:1rem;line-height:1;padding:0 1px}
+  .proj-head .pdots{opacity:.7;color:var(--muted-2);transition:opacity .2s,color .2s;cursor:pointer;font-size:1.05rem;line-height:1;padding:0 2px}
   .proj-head:hover .pdots{opacity:1}
-  .proj-head .pdots:hover{color:var(--ivory)}
+  .proj-head .pdots:hover{color:var(--gold-bright)}
   .proj-chats{display:flex;flex-direction:column;gap:2px;padding-left:10px;margin-left:9px;border-left:1px solid var(--line-soft)}
 
   .row{display:flex;align-items:center;gap:9px;padding:9px 8px;border-radius:9px;color:var(--muted);font-size:.85rem;cursor:pointer;
@@ -532,7 +532,7 @@ function renderSidebar(){
     S.projects.forEach(p=>{
       const chats = S.chats.filter(c=>c.projectId===p.id);
       html += `<div class="proj ${p.collapsed?'collapsed':''}">
-        <div class="proj-head" onclick="toggleProject('${p.id}')">
+        <div class="proj-head" onclick="toggleProject('${p.id}')" oncontextmenu="event.preventDefault();openProjCtx(event,'${p.id}')">
           <svg class="chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           <svg class="pc" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h5l2 3h11v8a2 2 0 0 1-2 2H3z"/></svg>
           ${esc(p.name)}<span class="cnt">${chats.length}</span>
