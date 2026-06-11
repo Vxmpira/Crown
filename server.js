@@ -1,13 +1,13 @@
 /**
- * Crown — backend (Node + Express)
+ * Crown backend (Node + Express)
  * --------------------------------
  * nginx serves static files and proxies /api/* here (127.0.0.1:3000).
  * Secrets + config live in /etc/crown/crown.env (NOT in git). SQLite DB at /var/lib/crown/crown.db.
  *
- *   Accounts      — register/login/logout/me, hashed passwords, HTTP-only session cookies
- *   Metering      — per-user (and per-IP anonymous) monthly token budgets, enforced server-side
- *   Rate limiting — per-IP request caps on /api/chat and auth
- *   Billing       — Stripe Checkout + webhook writes Pro/Free to the DB, keyed to the user
+ *   Accounts      register/login/logout/me, hashed passwords, HTTP-only session cookies
+ *   Metering      per-user (and per-IP anonymous) monthly token budgets, enforced server-side
+ *   Rate limiting per-IP request caps on /api/chat and auth
+ *   Billing       Stripe Checkout + webhook writes Pro/Free to the DB, keyed to the user
  *
  * Card data NEVER touches this server. Stripe stays dormant until STRIPE_* keys are set.
  */
@@ -39,7 +39,7 @@ const PUBLIC_URL    = process.env.PUBLIC_URL || "https://blackcrown-intelligence
 const stripe = STRIPE_SECRET ? require("stripe")(STRIPE_SECRET) : null;
 
 // Image generation (Pro perk). Dormant until IMAGE_API_KEY is set in crown.env.
-// NOTE: Claude/Anthropic does NOT generate images — this calls a separate image provider.
+// NOTE: Claude/Anthropic does NOT generate images. This calls a separate image provider.
 // Default provider is PicsArt (async submit→poll). Set IMAGE_PROVIDER=openai to use OpenAI instead.
 const IMAGE_PROVIDER = (process.env.IMAGE_PROVIDER || "picsart").toLowerCase();
 const IMAGE_KEY      = process.env.IMAGE_API_KEY;
@@ -53,7 +53,7 @@ const ADMIN_EMAILS  = String(process.env.ADMIN_EMAILS || "").split(",").map(s =>
 const PRO_PRICE_USD = parseFloat(process.env.PRO_PRICE_USD || "19.99");
 const isAdmin = u => !!u && ADMIN_EMAILS.includes(String(u.email).toLowerCase());
 
-// Email (AWS SES via SMTP). Dormant until SMTP_* are set in crown.env — powers password reset.
+// Email (AWS SES via SMTP). Dormant until SMTP_* are set in crown.env. Powers password reset.
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || "587", 10);
 const SMTP_USER = process.env.SMTP_USER;
@@ -176,7 +176,7 @@ if (sweep.unref) sweep.unref();
 const app = express();
 app.disable("x-powered-by");
 
-/* Stripe webhook — RAW body, registered BEFORE express.json() */
+/* Stripe webhook: RAW body, registered BEFORE express.json() */
 app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req, res) => {
   if (!stripe || !STRIPE_WHSEC) return res.status(400).send("Stripe not configured");
   let event;
@@ -258,19 +258,19 @@ app.post("/api/forgot", async (req, res) => {
         from: `Crown <${MAIL_FROM}>`,
         to: u.email,
         subject: "Reset your Crown password",
-        text: `Hi ${u.username},\n\nWe received a request to reset your Crown password. Use the link below within the next hour:\n\n${link}\n\nIf you didn't request this, you can safely ignore this email — your password won't change.\n\n— BlackCrown VxJ`,
+        text: `Hi ${u.username},\n\nWe received a request to reset your Crown password. Use the link below within the next hour:\n\n${link}\n\nIf you didn't request this, you can safely ignore this email, your password won't change.\n\nBlackCrown VxJ`,
         html: `<div style="font-family:Arial,sans-serif;background:#070709;color:#ece7dd;padding:28px;border-radius:14px;max-width:520px;margin:auto">
           <div style="font-size:20px;font-weight:bold;color:#d4af37;letter-spacing:1px">BLACKCROWN VxJ</div>
           <h2 style="color:#f5e0a3;margin:18px 0 6px">Reset your password</h2>
           <p style="color:#bfb9ad;line-height:1.6">Hi ${escapeHtml(u.username)}, we received a request to reset your Crown password. This link is valid for one hour.</p>
           <p style="margin:22px 0"><a href="${link}" style="background:#d4af37;color:#1a1405;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:10px;display:inline-block">Reset password</a></p>
           <p style="color:#5f5b52;font-size:13px;line-height:1.6">If the button doesn't work, paste this into your browser:<br>${link}</p>
-          <p style="color:#5f5b52;font-size:13px">If you didn't request this, ignore this email — your password won't change.</p>
+          <p style="color:#5f5b52;font-size:13px">If you didn't request this, ignore this email, your password won't change.</p>
         </div>`
       });
     } catch (e) { console.error("Reset email failed:", e.message); }
   }
-  // Always generic — never reveal whether an email is registered.
+  // Always generic, never reveal whether an email is registered.
   res.json({ ok:true, message:"If that email is registered, a reset link is on its way." });
 });
 
@@ -330,7 +330,7 @@ app.get("/api/admin/overview", (req, res) => {
 
 
 app.post("/api/chat", async (req, res) => {
-  if (rateLimited("chat:"+clientIp(req), 30, 60000)) return res.status(429).json({ error:"rate", message:"You're going a bit fast — give it a moment." });
+  if (rateLimited("chat:"+clientIp(req), 30, 60000)) return res.status(429).json({ error:"rate", message:"You're going a bit fast. Give it a moment." });
   if (!KEY) return res.status(500).json({ error:"no_key", message:"ANTHROPIC_API_KEY not set on the server." });
 
   const u = getSessionUser(req);
@@ -507,7 +507,7 @@ async function generateOpenAI(prompt){
 
 // ---- image generation (Pro only; dormant until IMAGE_API_KEY is set) ----
 app.post("/api/image", async (req, res) => {
-  if (rateLimited("img:"+clientIp(req), 20, 60000)) return res.status(429).json({ error:"rate", message:"You're generating images quickly — give it a moment." });
+  if (rateLimited("img:"+clientIp(req), 20, 60000)) return res.status(429).json({ error:"rate", message:"You're generating images quickly. Give it a moment." });
   if (!IMAGE_KEY) return res.status(503).json({ error:"image_unconfigured", message:"Image generation is not set up on the server yet." });
   const u = getSessionUser(req);
   if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });

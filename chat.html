@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Crown Console — BlackCrown VxJ</title>
+<title>Crown Console | BlackCrown VxJ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -384,7 +384,7 @@
       <div class="field" id="f-pass"><label>Password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"><div class="err">Password must be at least 8 characters.</div></div>
       <button class="btn btn-gold" onclick="submitSignup()">Create account &amp; Ascend →</button>
       <div class="switch">Already have an account? <a onclick="closeUpgrade();openLogin()">Log in</a></div>
-      <div class="mnote">Secure checkout via Stripe — your password is never stored in your browser.</div>
+      <div class="mnote">Secure checkout via Stripe. Your password is never stored in your browser.</div>
     </div>
 
     <div id="su-buy" style="display:none">
@@ -448,7 +448,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===== CONFIG (same as landing — your backend, with Claude.ai preview fallback) ===== */
+/* ===== CONFIG (same as landing, your backend, with Claude.ai preview fallback) ===== */
 const CONFIG = {
   BACKEND_URL: "/api/chat",
   MODEL: "claude-sonnet-4-20250514",
@@ -650,7 +650,7 @@ function renderChat(){
     ];
     chat.innerHTML = `<div class="empty"><div class="ec"><svg width="40" height="32" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg></div>
       <div class="eyebrow2">Begin your reign</div>
-      <h2>How may the Crown serve you?</h2><p>Ask anything — drafting, code, strategy, or ideas.</p>
+      <h2>How may the Crown serve you?</h2><p>Ask anything: drafting, code, strategy, or ideas.</p>
       <div class="chips">${CHIPS.map((t,i)=>`<button class="chip" data-q="${esc(t)}" onclick="useChip(this)"><svg class="ci" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">${icons[i]||icons[0]}</svg><span class="ct">${esc(t)}</span><svg class="ca" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`).join("")}</div></div>`;
     return;
   }
@@ -781,7 +781,7 @@ function toggleWeb(){
   webOn = !webOn;
   try{ if(!IS_PREVIEW) localStorage.setItem("crown_web", webOn ? "1" : "0"); }catch(e){}
   renderWebBtn();
-  toast(webOn ? "🌐 Web access on — Crown can search the web" : "Web access off");
+  toast(webOn ? "🌐 Web access on. Crown can search the web" : "Web access off");
 }
 
 /* ===== image generation (Pro) ===== */
@@ -812,7 +812,7 @@ async function generateImage(prompt, skipUser){
     if(err.code==="preview"){ c.messages.push({role:"assistant", content:"🎨 Image generation runs on your live Crown server for Pro members. Deploy and open your site to try it."}); render(); }
     else if(err.code==="auth"){ c.messages.push({role:"assistant", content:"Please log in to generate images."}); render(); openLogin(); }
     else if(err.code==="pro"){ c.messages.push({role:"assistant", content:"👑 Image generation is part of Pro."}); render(); openUpgrade(); }
-    else if(err.code==="off"){ c.messages.push({role:"assistant", content:"Image generation isn't switched on yet — add an image API key on the server to enable it."}); render(); }
+    else if(err.code==="off"){ c.messages.push({role:"assistant", content:"Image generation isn't switched on yet. Add an image API key on the server to enable it."}); render(); }
     else if(err.code==="rate"){ c.messages.push({role:"assistant", content:err.message}); render(); }
     else { c.messages.push({role:"assistant", content:"⚠️ Couldn't create the image.\n\n("+err.message+")"}); render(); }
   }finally{ busy=false; $("send").disabled=false; renderHead(); }
@@ -822,7 +822,7 @@ function applyUpgradeMode(){
   $("su-fields").style.display = loggedIn ? "none" : "";
   $("su-buy").style.display = loggedIn ? "" : "none";
   $("up-eyebrow").textContent = loggedIn ? "Ascend to Pro" : "Create your account · Ascend to Pro";
-  if(loggedIn) $("su-buy-who").textContent = "Signed in as " + (S.account.email || S.account.username) + " — upgrade to unlock everything.";
+  if(loggedIn) $("su-buy-who").textContent = "Signed in as " + (S.account.email || S.account.username) + ". Upgrade to unlock everything.";
 }
 function openUpgrade(){
   if(S.tier==="pro"){ toast("👑 You're already on Pro"); setURL("/chat"); return; }
@@ -870,7 +870,7 @@ async function submitLogin(){
   bad("lf-email", !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em));
   bad("lf-pass", pw.length<1);
   if(!ok) return;
-  if(IS_PREVIEW){ S.account={username:em.split("@")[0],email:em}; S.tier="free"; closeLogin(); render(); toast("Demo login — real sign-in runs on your live site"); return; }
+  if(IS_PREVIEW){ S.account={username:em.split("@")[0],email:em}; S.tier="free"; closeLogin(); render(); toast("Demo login. Real sign-in runs on your live site"); return; }
   const { ok:good, d } = await apiPost("/api/login", { email:em, password:pw });
   if(!good){ $("lf-email").classList.add("bad"); $("lf-pass").classList.add("bad"); toast(d.message || "Wrong email or password"); return; }
   closeLogin(); await refreshMe(); toast("👑 Welcome back, " + (S.account?.username || ""));
@@ -886,7 +886,7 @@ async function startCheckout(){
   toast(d.message || "Couldn't start checkout");
 }
 
-/* ===== model call — streams tokens as they arrive (preview simulates the same feel) ===== */
+/* ===== model call: streams tokens as they arrive (preview simulates the same feel) ===== */
 const sleep = ms => new Promise(r=>setTimeout(r,ms));
 function nearBottom(el){ return el.scrollHeight - el.scrollTop - el.clientHeight < 130; }
 async function previewFull(messages){
@@ -905,7 +905,7 @@ async function streamModel(messages, { onToken, onStatus }){
   }
   const res = await fetch(CONFIG.BACKEND_URL, { method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({ messages, web: webOn }) });
   if(res.status===402){ const d=await res.json().catch(()=>({})); const e=new Error(d.message||"Limit reached"); e.code="limit"; throw e; }
-  if(res.status===429){ const d=await res.json().catch(()=>({})); const e=new Error(d.message||"You're going a bit fast — give it a moment."); e.code="rate"; throw e; }
+  if(res.status===429){ const d=await res.json().catch(()=>({})); const e=new Error(d.message||"You're going a bit fast. Give it a moment."); e.code="rate"; throw e; }
   if(!res.ok || !res.body){ const d=await res.json().catch(()=>({})); throw new Error(d.message || ("Request failed ("+res.status+")")); }
   const reader = res.body.getReader(), dec = new TextDecoder();
   let buf="", full="", usage=null, sources=[];
@@ -1054,7 +1054,7 @@ async function modelReply(c, lastText){
     c.messages.splice(idx,1);
     if(err.code==="limit"){ c.messages.push({role:"assistant",content:"👑 "+err.message}); render(); if(S.tier!=="pro") openUpgrade(); }
     else if(err.code==="rate"){ c.messages.push({role:"assistant",content:err.message}); render(); }
-    else{ c.messages.push({role:"assistant",content:"⚠️ Couldn't reach the model backend.\n\nOn your live site this calls /api/chat. If you see this there, check: sudo systemctl status crown — and that your API key is set in /etc/crown/crown.env.\n\n("+err.message+")"}); render(); }
+    else{ c.messages.push({role:"assistant",content:"⚠️ Couldn't reach the model backend.\n\nOn your live site this calls /api/chat. If you see this there, check: sudo systemctl status crown, and that your API key is set in /etc/crown/crown.env.\n\n("+err.message+")"}); render(); }
   }finally{ busy=false; $("send").disabled=false; renderHead(); $("input").focus(); }
 }
 /* user picked an option on the "looks like an image?" prompt */
@@ -1120,8 +1120,8 @@ const _path = location.pathname.replace(/\/+$/,"");
 const _wantLogin  = (location.hash==="#login" || _path==="/login");
 const _wantSignup = (location.hash==="#upgrade" || location.hash==="#signup" || _path==="/signup");
 
-if(_params.get("checkout")==="success"){ toast("👑 Payment received — welcome to Pro!"); history.replaceState({}, "", location.pathname); if(IS_PREVIEW){ S.tier="pro"; render(); } }
-else if(_params.get("checkout")==="cancel"){ toast("Checkout canceled — no charge was made"); history.replaceState({}, "", location.pathname); }
+if(_params.get("checkout")==="success"){ toast("👑 Payment received. Welcome to Pro!"); history.replaceState({}, "", location.pathname); if(IS_PREVIEW){ S.tier="pro"; render(); } }
+else if(_params.get("checkout")==="cancel"){ toast("Checkout canceled. No charge was made"); history.replaceState({}, "", location.pathname); }
 
 (async function(){
   await refreshMe();                       // resolve the real session first (no-op in preview)

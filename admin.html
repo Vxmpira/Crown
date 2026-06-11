@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<title>Crown Admin — BlackCrown VxJ</title>
+<title>Crown Admin | BlackCrown VxJ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -116,12 +116,12 @@
     <div class="rev">
       <div>
         <div class="biglbl">Monthly recurring revenue</div>
-        <div class="big" id="mrr">—</div>
+        <div class="big" id="mrr">…</div>
       </div>
       <div class="side">
-        <div><span>Pro accounts:</span> <b id="r-pro">—</b></div>
-        <div><span>Price / month:</span> <b id="r-price">—</b></div>
-        <div><span>Annual run rate:</span> <b id="r-arr">—</b></div>
+        <div><span>Pro accounts:</span> <b id="r-pro">…</b></div>
+        <div><span>Price / month:</span> <b id="r-price">…</b></div>
+        <div><span>Annual run rate:</span> <b id="r-arr">…</b></div>
       </div>
     </div>
     <div class="note">Estimated from active Pro accounts in the database (Pro count × monthly price). Your Stripe dashboard remains the source of truth for actual charges, refunds, failed payments, and proration.</div>
@@ -144,7 +144,7 @@ let DATA = null;
 
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function money(n){ return "$" + Number(n||0).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2}); }
-function when(ms){ const d=new Date(ms); return isNaN(d) ? "—" : d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}); }
+function when(ms){ const d=new Date(ms); return isNaN(d) ? "-" : d.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}); }
 
 function showGate(title,msg,actionText,actionHref){
   $("dash").classList.add("hidden");
