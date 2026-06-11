@@ -351,18 +351,25 @@
   <div class="modal">
     <button class="close" onclick="closeUpgrade()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     <svg class="mcrown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/><circle cx="10" cy="12" r="3.2"/><circle cx="32" cy="4" r="3.2"/><circle cx="54" cy="12" r="3.2"/></svg>
-    <div class="eyebrow">Create your account · Ascend to Pro</div>
+    <div class="eyebrow" id="up-eyebrow">Create your account · Ascend to Pro</div>
     <h3 class="gold-text">BlackCrown Pro</h3>
-    <p class="msub">Unlimited usage, Projects, and advanced models.</p>
+    <p class="msub">Unlimited usage, Projects, image generation, and advanced models.</p>
     <div class="mamt"><b class="gold-text">$29</b><span> / month</span></div>
 
-    <div class="field" id="f-user"><label>Username</label><input id="su-user" autocomplete="username" placeholder="yourname"><div class="err">Choose a username (3+ characters).</div></div>
-    <div class="field" id="f-email"><label>Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@example.com"><div class="err">Enter a valid email address.</div></div>
-    <div class="field" id="f-pass"><label>Password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"><div class="err">Password must be at least 8 characters.</div></div>
+    <div id="su-fields">
+      <div class="field" id="f-user"><label>Username</label><input id="su-user" autocomplete="username" placeholder="yourname"><div class="err">Choose a username (3+ characters).</div></div>
+      <div class="field" id="f-email"><label>Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@example.com"><div class="err">Enter a valid email address.</div></div>
+      <div class="field" id="f-pass"><label>Password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"><div class="err">Password must be at least 8 characters.</div></div>
+      <button class="btn btn-gold" onclick="submitSignup()">Create account &amp; Ascend →</button>
+      <div class="switch">Already have an account? <a onclick="closeUpgrade();openLogin()">Log in</a></div>
+      <div class="mnote">Secure checkout via Stripe — your password is never stored in your browser.</div>
+    </div>
 
-    <button class="btn btn-gold" onclick="submitSignup()">Create account &amp; Ascend →</button>
-    <div class="switch">Already have an account? <a onclick="closeUpgrade();openLogin()">Log in</a></div>
-    <div class="mnote">Demo flow. In production this creates your account on the backend and opens secure Stripe Checkout — passwords are never stored in the browser.</div>
+    <div id="su-buy" style="display:none">
+      <p class="msub" id="su-buy-who" style="margin:2px 0 16px"></p>
+      <button class="btn btn-gold" onclick="startCheckout()">Continue to secure checkout →</button>
+      <div class="mnote">You'll be taken to Stripe to complete your subscription. Cancel anytime.</div>
+    </div>
   </div>
 </div>
 
@@ -759,7 +766,19 @@ async function generateImage(prompt, skipUser){
     else { c.messages.push({role:"assistant", content:"⚠️ Couldn't create the image.\n\n("+err.message+")"}); render(); }
   }finally{ busy=false; $("send").disabled=false; renderHead(); }
 }
-function openUpgrade(){ $("upgradeModal").classList.add("show"); setURL("/signup"); setTimeout(()=>$("su-user").focus(),60); }
+function applyUpgradeMode(){
+  const loggedIn = !!S.account;
+  $("su-fields").style.display = loggedIn ? "none" : "";
+  $("su-buy").style.display = loggedIn ? "" : "none";
+  $("up-eyebrow").textContent = loggedIn ? "Ascend to Pro" : "Create your account · Ascend to Pro";
+  if(loggedIn) $("su-buy-who").textContent = "Signed in as " + (S.account.email || S.account.username) + " — upgrade to unlock everything.";
+}
+function openUpgrade(){
+  if(S.tier==="pro"){ toast("👑 You're already on Pro"); setURL("/chat"); return; }
+  applyUpgradeMode();
+  $("upgradeModal").classList.add("show"); setURL("/signup");
+  if(!S.account) setTimeout(()=>$("su-user").focus(),60);
+}
 function closeUpgrade(){ $("upgradeModal").classList.remove("show"); ["f-user","f-email","f-pass"].forEach(id=>$(id).classList.remove("bad")); setURL("/chat"); }
 async function submitSignup(){
   const u=$("su-user").value.trim(), em=$("su-email").value.trim(), pw=$("su-pass").value;
