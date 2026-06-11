@@ -1,381 +1,524 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Crown: Your Private AI Workspace | BlackCrown VxJ</title>
-<meta name="description" content="Crown isn't another chatbot. It's your private AI workspace. Refined, organized, and yours. Free to start, unlimited with Pro." />
-<link rel="canonical" href="https://blackcrown-intelligence.com/" />
-<meta name="theme-color" content="#070709" />
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content="Crown | BlackCrown VxJ" />
-<meta property="og:title" content="Crown: Your Private AI Workspace" />
-<meta property="og:description" content="A private AI workspace where your data stays yours, your work stays organized, and Pro is flat-out unlimited." />
-<meta property="og:url" content="https://blackcrown-intelligence.com/" />
-<meta property="og:image" content="https://blackcrown-intelligence.com/og-image.png" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Crown: Your Private AI Workspace" />
-<meta name="twitter:description" content="A private AI workspace where your data stays yours, your work stays organized, and Pro is flat-out unlimited." />
-<meta name="twitter:image" content="https://blackcrown-intelligence.com/og-image.png" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackCrown | Intelligence and tools for independent operators</title>
+<meta name="description" content="BlackCrown builds market intelligence, a personal AI, and a private network for independent traders, founders, and operators across trading, AI, and commerce.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/favicon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --obsidian:#070709;--obsidian-2:#0c0c11;--panel:#13131a;--panel-2:#1a1a23;--panel-3:#21212b;
-    --gold:#d4af37;--gold-bright:#f5e0a3;--gold-deep:#9c7c1f;--garnet:#8b1a2b;--garnet-soft:#b3243a;
-    --ivory:#ece7dd;--muted:#8c867a;--muted-2:#5f5b52;
-    --line:rgba(212,175,55,.16);--line-soft:rgba(236,231,221,.08);
-    --display:'Cinzel',serif;--body:'Hanken Grotesk',system-ui,sans-serif;--radius:16px;
+    --vanta:#000000;
+    --ink-2:#060608;
+    --ink-3:#0A0A0D;
+    --white:#FFFFFF;
+    --bone:#E8E8EF;
+    --mute:#85838F;
+    --pink:#FF2D95;
+    --pink-soft:#FF6FB6;
+    --pink-deep:#C81E73;
+    --line:rgba(255,45,149,.20);
+    --line-soft:rgba(255,255,255,.07);
+    --glow-pink:0 0 6px rgba(255,45,149,.36), 0 0 18px rgba(255,45,149,.16);
+    --glow-white:0 0 8px rgba(255,255,255,.24);
+    --logo-glow:0 0 11px rgba(255,255,255,.38);
+    --max:1200px;
+    --pad:clamp(1.25rem,5vw,4.5rem);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-  body{background:var(--obsidian);color:var(--ivory);font-family:var(--body);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-  ::selection{background:rgba(212,175,55,.3);color:#fff}
-  img,svg{max-width:100%}
+  html{scroll-behavior:smooth}
+  body{background:var(--vanta);color:var(--bone);font-family:'Manrope',system-ui,sans-serif;font-size:17px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:var(--pink);color:#0A0008}
+  :focus-visible{outline:2px solid var(--pink);outline-offset:3px;border-radius:3px}
+  .wrap{max-width:var(--max);margin:0 auto;padding-left:var(--pad);padding-right:var(--pad)}
 
-  .bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:radial-gradient(55% 45% at 50% -5%,rgba(212,175,55,.13),transparent 70%),
-      radial-gradient(40% 38% at 88% 8%,rgba(139,26,43,.16),transparent 70%),
-      radial-gradient(45% 45% at 8% 75%,rgba(212,175,55,.06),transparent 70%),
-      linear-gradient(180deg,var(--obsidian),var(--obsidian-2))}
-  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-  .embers{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-  .ember{position:absolute;bottom:-10px;border-radius:50%;background:var(--gold);opacity:0;filter:blur(.4px);animation:float linear infinite}
-  @keyframes float{0%{transform:translateY(0) scale(1);opacity:0}12%{opacity:.7}88%{opacity:.5}100%{transform:translateY(-104vh) scale(.4);opacity:0}}
-  .crown-wm{position:fixed;z-index:0;top:42%;left:50%;transform:translate(-50%,-50%);width:min(120vw,1000px);opacity:.022;pointer-events:none;color:var(--gold)}
-  main,nav,footer{position:relative;z-index:2}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--pink);text-shadow:var(--glow-pink)}
+  .display{font-family:'Space Grotesk',sans-serif;font-weight:700;line-height:.98;letter-spacing:-0.02em}
+  .neon{color:var(--pink);text-shadow:var(--glow-pink)}
 
-  .wrap{max-width:1200px;margin:0 auto;padding:0 clamp(18px,4vw,28px)}
-  .eyebrow{font-family:var(--display);letter-spacing:.34em;text-transform:uppercase;font-size:clamp(.62rem,1.4vw,.72rem);color:var(--gold);font-weight:600}
-  .gold-text{background:linear-gradient(115deg,var(--gold-deep),var(--gold-bright) 45%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .btn{font-family:var(--body);font-weight:600;border:none;cursor:pointer;border-radius:999px;padding:13px 26px;font-size:.94rem;
-    transition:transform .15s ease,box-shadow .2s ease,border-color .15s ease,color .15s ease,background-color .15s ease;text-decoration:none;display:inline-flex;align-items:center;gap:9px;position:relative;overflow:hidden}
-  .btn-gold{background:linear-gradient(115deg,var(--gold-deep),var(--gold) 52%,var(--gold-bright));color:#1a1405;box-shadow:0 6px 26px rgba(212,175,55,.3)}
-  .btn-gold::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg)}
-  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 12px 38px rgba(212,175,55,.46)}
-  .btn-gold:hover::after{animation:sheen .9s forwards}
-  @keyframes sheen{to{left:140%}}
-  .btn-ghost{background:rgba(255,255,255,.02);color:var(--ivory);border:1px solid var(--line)}
-  .btn-ghost:hover{border-color:var(--gold);color:var(--gold-bright);transform:translateY(-2px)}
+  .grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.05;mix-blend-mode:screen;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
-  /* nav */
-  .topnav{position:fixed;top:0;left:0;right:0;z-index:30;transition:background .3s,border-color .3s}
-  .topnav.solid{background:linear-gradient(180deg,rgba(7,7,9,.92),rgba(7,7,9,.66));backdrop-filter:blur(12px);border-bottom:1px solid var(--line-soft)}
-  .nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:16px clamp(18px,4vw,28px)}
-  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ivory);cursor:pointer}
-  .brand .crown{width:32px;height:25px;color:var(--gold);filter:drop-shadow(0 2px 10px rgba(212,175,55,.4));flex-shrink:0}
-  .brand .name{font-family:var(--display);font-weight:700;letter-spacing:.1em;font-size:clamp(.92rem,2.4vw,1.02rem);line-height:1}
-  .brand .name b{color:var(--gold)}
-  .brand small{display:block;font-weight:500;letter-spacing:.3em;font-size:.5rem;color:var(--muted);text-transform:uppercase;margin-top:3px}
-  .nav-links{display:flex;align-items:center;gap:clamp(16px,3vw,30px)}
-  .nav-links a{color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;transition:color .25s}
-  .nav-links a:hover{color:var(--ivory)}
-  @media(max-width:680px){.nav-links a:not(.btn){display:none}.brand small{display:none}.btn{padding:11px 18px;font-size:.88rem}}
+  .progress{position:fixed;top:0;left:0;height:2px;width:100%;z-index:80;transform:scaleX(0);transform-origin:left;
+    background:linear-gradient(90deg,var(--pink-deep),var(--pink-soft));box-shadow:0 0 8px rgba(255,45,149,.6)}
 
-  /* hero */
-  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(30px,5vw,50px);align-items:center;padding:clamp(120px,18vw,170px) 0 clamp(60px,9vw,90px)}
-  @media(max-width:980px){.hero{grid-template-columns:1fr;text-align:center}}
-  .hero h1{font-family:var(--display);font-weight:800;line-height:1.03;font-size:clamp(2.5rem,8vw,4.7rem);margin:20px 0 0;letter-spacing:-.01em;opacity:0;animation:rise .9s .16s forwards}
-  .hero .eyebrow{opacity:0;animation:rise .8s .05s forwards}
-  .hero p.sub{max-width:520px;margin:24px 0 0;color:var(--muted);font-size:clamp(1rem,2.5vw,1.1rem);opacity:0;animation:rise .9s .32s forwards}
-  @media(max-width:980px){.hero p.sub{margin-left:auto;margin-right:auto}}
-  .cta-row{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap;opacity:0;animation:rise .9s .48s forwards}
-  @media(max-width:980px){.cta-row{justify-content:center}}
-  .trust{margin-top:24px;color:var(--muted-2);font-size:.8rem;letter-spacing:.04em;opacity:0;animation:rise .9s .64s forwards;display:flex;gap:16px;flex-wrap:wrap}
-  @media(max-width:980px){.trust{justify-content:center}}
-  .trust span{display:inline-flex;align-items:center;gap:7px}.trust svg{color:var(--gold)}
-  @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  /* ---------- NAV ---------- */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;justify-content:space-between;
+    padding:1rem var(--pad);transition:background .35s ease,border-color .35s ease,backdrop-filter .35s ease;border-bottom:1px solid transparent}
+  .nav.scrolled{background:rgba(0,0,0,.72);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:.6rem}
+  .brand .wordmark{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:.02em;font-size:1.18rem;color:var(--white);text-shadow:var(--logo-glow)}
+  .nav-links{display:flex;gap:2.1rem}
+  .nav-links a{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);transition:color .25s,text-shadow .25s}
+  .nav-links a:hover{color:var(--pink);text-shadow:var(--glow-pink)}
+  .btn{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:500;
+    padding:.72rem 1.3rem;border-radius:8px;cursor:pointer;display:inline-block;transition:transform .2s ease,background .25s ease,box-shadow .25s ease,color .25s ease,border-color .25s ease;position:relative;overflow:hidden}
+  .btn.solid{background:var(--pink);color:#0A0008;border:1px solid var(--pink);box-shadow:var(--glow-pink)}
+  .btn.solid:hover{background:var(--pink-soft);box-shadow:0 0 12px rgba(255,45,149,.5),0 0 30px rgba(255,45,149,.28);transform:translateY(-2px)}
+  .btn.ghost{background:transparent;color:var(--bone);border:1px solid rgba(255,255,255,.22)}
+  .btn.ghost:hover{border-color:var(--pink);color:var(--pink);box-shadow:var(--glow-pink);text-shadow:var(--glow-pink);transform:translateY(-2px)}
+  .btn .sheen{position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg)}
+  .btn:hover .sheen{animation:sheen .7s ease}
+  @keyframes sheen{to{left:160%}}
 
-  .hero-visual{position:relative;opacity:0;animation:rise 1s .55s forwards;min-width:0}
-  .mock-ring{position:absolute;inset:-12% -8%;border-radius:30px;background:conic-gradient(from 0deg,rgba(212,175,55,0),rgba(212,175,55,.22),rgba(139,26,43,.18),rgba(212,175,55,0));filter:blur(38px);animation:spin 14s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .mock-frame{position:relative;background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 50px 120px -40px rgba(0,0,0,.95);transform:perspective(1400px) rotateY(-9deg) rotateX(3deg);transition:transform .6s}
-  .hero-visual:hover .mock-frame{transform:perspective(1400px) rotateY(-4deg) rotateX(1deg)}
-  @media(max-width:980px){.mock-frame{transform:none!important;max-width:520px;margin:0 auto}}
-  .mock-bar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,rgba(212,175,55,.05),transparent)}
-  .mock-bar i{width:9px;height:9px;border-radius:50%;background:var(--panel-3)}.mock-bar i:first-child{background:var(--garnet)}
-  .mock-bar .mt{margin-left:8px;font-family:var(--display);font-size:.72rem;letter-spacing:.1em;color:var(--muted)}
-  .mock-body{padding:18px;display:flex;flex-direction:column;gap:12px;min-height:280px}
-  .mb{padding:11px 14px;border-radius:13px;font-size:.85rem;max-width:82%;line-height:1.5}
-  .mb.bot{background:var(--panel-2);border:1px solid var(--line-soft);border-top-left-radius:4px;align-self:flex-start}
-  .mb.user{align-self:flex-end;border-top-right-radius:4px;color:#1a1405;background:linear-gradient(115deg,var(--gold),var(--gold-bright))}
-  .mock-input{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;color:var(--muted-2);font-size:.82rem;background:var(--obsidian)}
-  .mock-input .mi-send{margin-left:auto;width:30px;height:30px;border-radius:8px;background:linear-gradient(115deg,var(--gold-deep),var(--gold-bright));display:flex;align-items:center;justify-content:center;color:#1a1405;flex-shrink:0}
+  /* ---------- HERO ---------- */
+  .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;position:relative;padding:8rem 0 4rem;overflow:hidden}
+  .aura{position:absolute;border-radius:50%;filter:blur(64px);z-index:0;pointer-events:none}
+  .aura.a1{width:48vw;max-width:520px;height:48vw;max-height:520px;top:-12%;left:6%;
+    background:radial-gradient(circle,rgba(255,45,149,.14),transparent 66%);animation:pulse 8s ease-in-out infinite}
+  .aura.a2{width:62vw;max-width:700px;height:62vw;max-height:700px;bottom:-26%;right:-8%;
+    background:radial-gradient(circle,rgba(255,45,149,.10),transparent 66%);animation:drift 18s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:.95;transform:scale(1.06)}}
+  @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(-34px,-28px)}}
 
-  .stats{display:flex;justify-content:center;gap:clamp(28px,6vw,60px);flex-wrap:wrap;padding:30px 0 10px;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
-  .stat{text-align:center}
-  .stat b{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,4vw,1.9rem);display:block}
-  .stat span{color:var(--muted);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase}
+  /* trading-data backdrop */
+  .chart{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.7;
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 13%,#000 100%);mask-image:linear-gradient(to bottom,transparent 0,#000 13%,#000 100%)}
+  .chart svg{width:100%;height:100%;display:block}
+  .chart .grid-line{stroke:rgba(255,255,255,.05);stroke-width:1}
+  .chart .area{fill:url(#area)}
+  .chart .trend{fill:none;stroke:var(--pink);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;
+    filter:drop-shadow(0 0 6px rgba(255,45,149,.5));stroke-dasharray:2200;stroke-dashoffset:0;animation:draw 2.6s ease .3s 1}
+  @keyframes draw{from{stroke-dashoffset:2200}to{stroke-dashoffset:0}}
+  .chart .node{fill:var(--pink-soft);filter:drop-shadow(0 0 6px rgba(255,45,149,.9))}
+  .chart .ping{fill:none;stroke:var(--pink);stroke-width:2;opacity:0;transform-box:fill-box;transform-origin:center;animation:ping 2.6s ease-out infinite}
+  @keyframes ping{0%{transform:scale(.4);opacity:.8}100%{transform:scale(3.6);opacity:0}}
+  .chart .scan{fill:rgba(255,45,149,.16);animation:scan 7.5s linear infinite}
+  @keyframes scan{from{transform:translateX(-40px)}to{transform:translateX(1240px)}}
 
-  section h2{font-family:var(--display);font-weight:700;font-size:clamp(1.8rem,5vw,2.9rem);text-align:center;margin-top:14px;letter-spacing:-.01em}
-  .sec-head{text-align:center;margin-bottom:clamp(36px,6vw,54px)}
-  .sec-head p{color:var(--muted);max-width:580px;margin:14px auto 0;font-size:clamp(.95rem,2.4vw,1.05rem)}
+  .particles{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+  .particles .p{position:absolute;bottom:-12px;border-radius:50%;background:var(--pink-soft);box-shadow:0 0 6px rgba(255,111,182,.8);opacity:0;animation:rise linear infinite}
+  @keyframes rise{0%{transform:translateY(0);opacity:0}12%{opacity:.55}88%{opacity:.4}100%{transform:translateY(-92vh);opacity:0}}
+  .hud{position:absolute;top:6.5rem;right:var(--pad);z-index:2;font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:.5rem}
+  .hud .dot{width:7px;height:7px;border-radius:50%;background:var(--pink);box-shadow:var(--glow-pink);animation:beat 1.6s ease-in-out infinite}
+  @keyframes beat{0%,100%{opacity:1}50%{opacity:.25}}
+  .hero-inner{position:relative;z-index:2}
+  .hero .eyebrow{display:block;margin-bottom:1.8rem}
+  .hero h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(3rem,11vw,8rem);line-height:.92;letter-spacing:-0.03em;
+    color:var(--white);text-shadow:0 0 10px rgba(0,0,0,.5),var(--glow-white);margin-bottom:1.8rem}
+  .hero h1 .neon{color:var(--pink);text-shadow:0 0 9px rgba(255,45,149,.55),0 0 26px rgba(255,45,149,.3);display:inline-block}
+  .hero .lead{font-size:clamp(1.05rem,2vw,1.35rem);max-width:40ch;color:var(--bone);line-height:1.5;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+  .hero .cta-row{display:flex;gap:.9rem;margin-top:2.4rem;flex-wrap:wrap}
+  .scroll-cue{position:absolute;bottom:1.8rem;left:var(--pad);z-index:2;font-family:'JetBrains Mono',monospace;font-size:.66rem;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--mute);display:flex;align-items:center;gap:.6rem}
+  .scroll-cue .bar{width:40px;height:1px;background:var(--line);position:relative;overflow:hidden}
+  .scroll-cue .bar::after{content:"";position:absolute;inset:0;background:var(--pink);box-shadow:var(--glow-pink);transform:translateX(-100%);animation:slide 2.6s ease-in-out infinite}
+  @keyframes slide{0%{transform:translateX(-100%)}50%{transform:translateX(0)}100%{transform:translateX(100%)}}
 
-  /* WHY CROWN */
-  .why{padding:clamp(70px,11vw,110px) 0 clamp(40px,6vw,60px)}
-  .why-lead{max-width:760px;margin:0 auto clamp(40px,6vw,56px);text-align:center}
-  .why-lead .big{font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,4.5vw,2.4rem);line-height:1.2;margin-top:14px}
-  .why-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:1040px;margin:0 auto}
-  @media(max-width:760px){.why-grid{grid-template-columns:1fr}}
-  .why-card{position:relative;background:linear-gradient(165deg,var(--panel-2),var(--panel) 72%);border:1px solid var(--line-soft);border-radius:18px;padding:30px 30px 32px 34px;overflow:hidden;transition:transform .35s cubic-bezier(.2,.7,.2,1),border-color .35s,box-shadow .35s}
-  .why-card>*{position:relative;z-index:1}
-  .why-card::before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(180deg,var(--gold-bright),var(--gold) 42%,var(--garnet));opacity:.85;transition:opacity .35s,box-shadow .35s}
-  .why-card::after{content:"";position:absolute;inset:0;z-index:0;background:radial-gradient(115% 80% at 88% 0%,rgba(212,175,55,.12),transparent 58%);opacity:0;transition:opacity .35s}
-  .why-card:hover{transform:translateY(-6px);border-color:rgba(212,175,55,.32);box-shadow:0 22px 50px -26px rgba(0,0,0,.9),0 0 0 1px rgba(212,175,55,.1)}
-  .why-card:hover::before{opacity:1;box-shadow:0 0 16px -2px rgba(212,175,55,.55)}
-  .why-card:hover::after{opacity:1}
-  .why-card:hover .why-rn{opacity:.13;transform:translateY(0)}
-  .why-card:hover .why-ic{border-color:rgba(212,175,55,.55);box-shadow:inset 0 1px 0 rgba(245,224,163,.25),0 0 20px -6px rgba(212,175,55,.7)}
-  .why-rn{position:absolute;top:-8px;right:16px;font-family:var(--display);font-weight:700;font-size:6.6rem;line-height:1;color:var(--gold-bright);opacity:.06;letter-spacing:.02em;pointer-events:none;user-select:none;transform:translateY(5px);transition:opacity .35s,transform .35s}
-  .why-ic{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;color:var(--gold-bright);background:radial-gradient(125% 125% at 28% 18%,rgba(212,175,55,.2),rgba(33,33,43,.55));border:1px solid rgba(212,175,55,.3);box-shadow:inset 0 1px 0 rgba(245,224,163,.18);margin-bottom:18px;transition:border-color .35s,box-shadow .35s}
-  .why-card h3{font-family:var(--display);font-weight:600;font-size:1.3rem;color:var(--ivory);margin:0 0 10px;letter-spacing:.015em}
-  .why-card p{color:var(--muted);font-size:.95rem;line-height:1.72;margin:0;max-width:46ch}
+  /* ---------- TICKER ---------- */
+  .ticker{background:var(--ink-2);overflow:hidden;white-space:nowrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:.85rem 0;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+  .ticker-track{display:inline-block;animation:marq 34s linear infinite}
+  .ticker-track span{font-family:'JetBrains Mono',monospace;font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--bone)}
+  .ticker-track .star{color:var(--pink);text-shadow:var(--glow-pink);padding:0 1.5rem}
+  @keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
-  /* COMPARE: featured Crown column */
-  .compare{padding:clamp(50px,8vw,90px) 0}
-  .cmp{max-width:860px;margin:0 auto;display:grid;grid-template-columns:1.15fr 1fr 1fr;
-    border-radius:20px;overflow:hidden;border:1px solid var(--line-soft);
-    background:linear-gradient(180deg,var(--panel),var(--obsidian-2));
-    box-shadow:0 40px 100px -50px rgba(0,0,0,.9)}
-  .cmp .c{padding:clamp(13px,2.6vw,18px) clamp(11px,2.6vw,22px);display:flex;align-items:center;gap:9px;
-    font-size:clamp(.78rem,2vw,.93rem);line-height:1.35;border-top:1px solid var(--line-soft);min-width:0}
-  .cmp .c.r1{border-top:none}
-  .cmp .feat{color:var(--ivory);font-weight:600}
-  .cmp .them{color:var(--muted-2)}
-  .cmp .them .ic{color:var(--garnet-soft);opacity:.6;flex-shrink:0}
-  .cmp .us{background:linear-gradient(180deg,rgba(212,175,55,.10),rgba(212,175,55,.04));
-    color:var(--ivory);font-weight:600;border-left:1px solid var(--line)}
-  .cmp .us .ic{color:var(--gold);flex-shrink:0}
-  .cmp .h{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-  .cmp .h.feat{color:var(--muted-2);font-size:clamp(.6rem,1.6vw,.7rem)}
-  .cmp .h.them{color:var(--muted);font-size:clamp(.64rem,1.7vw,.76rem)}
-  .cmp .h.us{color:#1a1405;background:linear-gradient(115deg,var(--gold-deep),var(--gold) 55%,var(--gold-bright));
-    font-size:clamp(.66rem,1.8vw,.8rem);box-shadow:0 8px 30px -10px rgba(212,175,55,.6)}
-  .cmp .h.us .ic{color:#1a1405}
+  /* ---------- SECTION ---------- */
+  .sec{padding:clamp(5rem,12vw,8.5rem) 0;border-top:1px solid var(--line-soft);position:relative}
+  .sec-head{margin-bottom:3.4rem;max-width:780px}
+  .sec-head .eyebrow{display:block;margin-bottom:1rem}
+  .sec-head h2{font-size:clamp(2rem,5.5vw,3.6rem);color:var(--white);position:relative;display:inline-block;padding-bottom:14px}
+  .sec-head h2::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:72px;background:var(--pink);box-shadow:var(--glow-pink);
+    transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.2,.8,.2,1) .25s}
+  .sec-head.in h2::after{transform:scaleX(1)}
 
-  /* CTA BAND */
-  .cta-band{position:relative;text-align:center;padding:clamp(60px,10vw,100px) 0;border-top:1px solid var(--line-soft);overflow:hidden}
-  .cta-band::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 90% at 50% 100%,rgba(212,175,55,.1),transparent 70%);pointer-events:none}
-  .cta-band h2{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,3.4rem);letter-spacing:-.01em}
-  .cta-band p{color:var(--muted);max-width:480px;margin:14px auto 30px;font-size:clamp(1rem,2.5vw,1.1rem)}
+  /* ---------- MANIFESTO ---------- */
+  .manifesto{overflow:hidden}
+  .manifesto .ghost{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(540px,72vw);z-index:0;pointer-events:none;
+    filter:drop-shadow(0 0 7px rgba(255,45,149,.22));animation:crownfloat 9s ease-in-out infinite}
+  .manifesto .ghost .gb{stroke:var(--pink);stroke-width:.5;opacity:.12;fill:none;stroke-linejoin:round;stroke-linecap:round}
+  .manifesto .ghost .gt{stroke:var(--pink);stroke-width:.6;opacity:.85;fill:none;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:8 120;animation:crowntrace 5s linear infinite}
+  @keyframes crowntrace{from{stroke-dashoffset:128}to{stroke-dashoffset:0}}
+  @keyframes crownfloat{0%,100%{transform:translate(-50%,-50%)}50%{transform:translate(-50%,-54%)}}
+  .manifesto .wrap{position:relative;z-index:1}
+  .manifesto blockquote{font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:clamp(1.9rem,5vw,3.6rem);line-height:1.12;
+    letter-spacing:-0.02em;max-width:16ch;margin-bottom:2.2rem;color:var(--white)}
+  .manifesto .body{max-width:56ch;color:var(--mute);font-size:1.08rem}
 
-  /* features */
-  .features{padding:clamp(60px,9vw,90px) 0}
-  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-  @media(max-width:860px){.feat-grid{grid-template-columns:1fr 1fr}}
-  @media(max-width:560px){.feat-grid{grid-template-columns:1fr}}
-  .feat{background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);border-radius:var(--radius);padding:28px 24px;transition:border .3s,transform .3s,box-shadow .3s}
-  .feat:hover{border-color:var(--line);transform:translateY(-5px);box-shadow:0 30px 60px -40px rgba(212,175,55,.4)}
-  .feat .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,rgba(212,175,55,.16),rgba(139,26,43,.12));border:1px solid var(--line);color:var(--gold-bright);margin-bottom:18px}
-  .feat h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin-bottom:8px;letter-spacing:.02em}
-  .feat p{color:var(--muted);font-size:.92rem}
+  /* ---------- BRING GRID ---------- */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .cell{background:var(--ink-2);padding:2.6rem 2rem 3rem;transition:background .3s ease}
+  .cell:hover{background:var(--ink-3)}
+  .glyph{width:44px;height:34px;margin-bottom:1.5rem;filter:drop-shadow(0 0 5px rgba(255,45,149,.5))}
+  .glyph .bar{fill:var(--pink);transform-box:fill-box;transform-origin:bottom;animation:bars 1.5s ease-in-out infinite}
+  .glyph .bar:nth-child(2){animation-delay:.2s}
+  .glyph .bar:nth-child(3){animation-delay:.4s}
+  .glyph .bar:nth-child(4){animation-delay:.1s}
+  @keyframes bars{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+  .glyph .ring{fill:none;stroke:var(--pink);stroke-width:1.6;transform-box:fill-box;transform-origin:center;animation:sonar 2.4s ease-out infinite}
+  .glyph .ring.r2{animation-delay:1.2s}
+  .glyph .core{fill:var(--pink)}
+  @keyframes sonar{0%{transform:scale(.35);opacity:.9}100%{transform:scale(2.3);opacity:0}}
+  .glyph .net-path{stroke:var(--pink);stroke-width:1.6;fill:none;stroke-dasharray:6 10;animation:flow 1.6s linear infinite}
+  .glyph .node{fill:var(--pink)}
+  @keyframes flow{to{stroke-dashoffset:-16}}
+  .cell .tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);text-shadow:var(--glow-pink);margin-bottom:1rem;display:block}
+  .cell h3{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:1.55rem;line-height:1.1;margin-bottom:.8rem;color:var(--white)}
+  .cell p{color:var(--mute);font-size:1rem}
 
-  /* pricing */
-  .pricing{padding:clamp(50px,8vw,70px) 0 clamp(80px,12vw,120px)}
-  .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:900px;margin:0 auto}
-  @media(max-width:760px){.price-grid{grid-template-columns:1fr}}
-  .plan{background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);border-radius:20px;padding:clamp(28px,4vw,38px) clamp(24px,4vw,34px);position:relative;overflow:hidden}
-  .plan.pro{border-color:var(--line);box-shadow:0 40px 100px -50px rgba(212,175,55,.55)}
-  .plan.pro::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(212,175,55,.09),transparent 70%);pointer-events:none}
-  .badge{position:absolute;top:22px;right:-36px;transform:rotate(45deg);background:linear-gradient(120deg,var(--gold-deep),var(--gold-bright));color:#1a1405;font-size:.62rem;font-weight:800;letter-spacing:.18em;padding:6px 46px}
-  .plan .tier{font-family:var(--display);font-weight:700;font-size:1.3rem;letter-spacing:.06em}
-  .plan .desc{color:var(--muted);font-size:.9rem;margin-top:7px;min-height:42px}
-  .plan .amt{margin:20px 0 4px;font-family:var(--display)}.plan .amt b{font-size:clamp(2.6rem,7vw,3.1rem);font-weight:800}.plan .amt span{color:var(--muted);font-size:.95rem;font-family:var(--body)}
-  .plan ul{list-style:none;margin:22px 0 28px;display:flex;flex-direction:column;gap:13px}
-  .plan li{display:flex;gap:11px;align-items:flex-start;font-size:.92rem}.plan li svg{flex-shrink:0;margin-top:3px;color:var(--gold)}
-  .plan li.muted{color:var(--muted-2)}.plan li.muted svg{color:var(--muted-2)}
-  .plan .btn{width:100%;justify-content:center}
+  /* ---------- PRODUCTS ---------- */
+  .prod-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+  .prod-grid .reveal:nth-child(2){transition-delay:.12s}
+  .prod-grid .reveal:nth-child(3){transition-delay:.24s}
+  .card{position:relative;background:var(--ink-2);border:1px solid var(--line);border-radius:14px;padding:2.2rem 2rem 2rem;
+    display:flex;flex-direction:column;min-height:350px;transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease}
+  .card::before,.card::after{content:"";position:absolute;width:16px;height:16px;opacity:0;transition:opacity .3s ease,inset .3s ease}
+  .card::before{top:9px;left:9px;border-top:2px solid var(--pink);border-left:2px solid var(--pink)}
+  .card::after{bottom:9px;right:9px;border-bottom:2px solid var(--pink);border-right:2px solid var(--pink)}
+  .card:hover::before{opacity:.9;top:7px;left:7px}
+  .card:hover::after{opacity:.9;bottom:7px;right:7px}
+  .card:hover{transform:translateY(-6px);border-color:var(--pink);box-shadow:0 0 16px rgba(255,45,149,.24),0 14px 36px rgba(0,0,0,.6)}
+  .card .tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--pink);margin-bottom:1.7rem;display:flex;justify-content:space-between;align-items:center}
+  .card .tag .dot{width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:var(--glow-pink)}
+  .card h3{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.7rem;line-height:1.04;color:var(--white);margin-bottom:.9rem}
+  .card p{color:var(--mute);font-size:1rem;flex:1}
+  .card .link{font-family:'JetBrains Mono',monospace;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500;
+    margin-top:1.7rem;display:inline-flex;align-items:center;gap:.5rem;color:var(--bone);transition:color .25s,gap .25s,text-shadow .25s}
+  .card:hover .link{color:var(--pink);text-shadow:var(--glow-pink);gap:.85rem}
+  .card .link .arr{transition:transform .25s ease}
 
-  footer{border-top:1px solid var(--line-soft);padding:clamp(40px,6vw,56px) 0 40px}
-  .foot{display:flex;justify-content:space-between;align-items:flex-start;gap:30px;flex-wrap:wrap}
-  .foot .col h4{font-family:var(--display);letter-spacing:.1em;font-size:.74rem;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
-  .foot .col a{display:block;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:9px;transition:color .2s;cursor:pointer}
-  .foot .col a:hover{color:var(--ivory)}
-  .foot-note{margin-top:40px;padding-top:24px;border-top:1px solid var(--line-soft);color:var(--muted-2);font-size:.8rem;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  /* ---------- CONTACT ---------- */
+  .contact h2{font-size:clamp(2.6rem,8vw,6rem);color:var(--white);text-shadow:var(--glow-white)}
+  .contact .lines{display:flex;flex-direction:column;margin-top:2.4rem;border-top:1px solid var(--line-soft)}
+  .contact .lines a{display:flex;align-items:baseline;gap:1.4rem;padding:1.4rem 0;border-bottom:1px solid var(--line-soft);
+    font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:clamp(1.3rem,4vw,2.4rem);color:var(--bone);
+    transition:color .25s,padding-left .25s,text-shadow .25s}
+  .contact .lines a:hover{color:var(--pink);text-shadow:var(--glow-pink);padding-left:1rem}
+  .contact .lines .k{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);align-self:center;flex:none;width:5rem}
+  .contact .note{color:var(--mute);max-width:48ch;margin-top:2.4rem;font-size:1.02rem}
+
+  /* ---------- FOOTER ---------- */
+  footer{border-top:1px solid var(--line);padding:4rem 0 2.5rem;background:var(--ink-2)}
+  .foot-grid{display:flex;justify-content:space-between;gap:3rem;flex-wrap:wrap;margin-bottom:3.5rem}
+  .foot-brand .wordmark{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.35rem;color:var(--white);text-shadow:var(--logo-glow);display:flex;align-items:center;gap:.6rem}
+  .foot-brand p{color:var(--mute);font-size:.95rem;margin-top:.9rem;max-width:30ch}
+  .foot-col h4{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--pink);text-shadow:var(--glow-pink);margin-bottom:1.2rem}
+  .foot-col a{display:block;color:var(--mute);font-size:.95rem;margin-bottom:.6rem;transition:color .25s}
+  .foot-col a:hover{color:var(--pink)}
+  .foot-bottom{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding-top:2rem;border-top:1px solid var(--line-soft);
+    font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+
+  /* ---------- REVEAL ---------- */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  .hero-inner>*{opacity:0;transform:translateY(20px)}
+  .hero.loaded .eyebrow{opacity:1;transform:none;transition:all .6s ease .05s}
+  .hero.loaded h1{opacity:1;transform:none;transition:all .8s cubic-bezier(.2,.8,.2,1) .15s}
+  .hero.loaded h1 .neon{animation:neon 2.6s ease 1s 1}
+  @keyframes neon{0%,18%,22%,40%,100%{text-shadow:0 0 9px rgba(255,45,149,.55),0 0 26px rgba(255,45,149,.3);opacity:1}20%,30%{text-shadow:none;opacity:.55}}
+  .hero.loaded .lead{opacity:1;transform:none;transition:all .7s ease .4s}
+  .hero.loaded .cta-row{opacity:1;transform:none;transition:all .7s ease .55s}
+
+  @media(max-width:880px){.grid3,.prod-grid{grid-template-columns:1fr}.nav-links{display:none}.hud{display:none}}
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    html{scroll-behavior:auto}
+    .reveal,.hero-inner>*{opacity:1;transform:none}
+    .particles,.chart .scan,.chart .ping{display:none}
+  }
 </style>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 56'%3E%3Cpath d='M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z' fill='%23d4af37'/%3E%3Crect x='4' y='44' width='56' height='8' fill='%23d4af37'/%3E%3C/svg%3E">
 </head>
 <body>
-<script>/*urlclean*/try{var _p=location.pathname;if(/\.html$/.test(_p))history.replaceState(null,"",_p.replace(/index\.html$/,"").replace(/\.html$/,"")+location.search+location.hash);var _q=location.pathname.replace(/\/+$/,"");if(_q==="/login"){location.replace("/chat#login");}else if(_q==="/signup"){location.replace("/chat#signup");}}catch(e){}</script>
-<div class="bg-glow"></div><div class="grain"></div><div class="embers" id="embers"></div>
-<svg class="crown-wm" viewBox="0 0 64 50" fill="currentColor" aria-hidden="true"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/></svg>
 
-<div class="topnav" id="topnav"><div class="nav-inner">
-  <a class="brand" href="/">
-    <svg class="crown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/><circle cx="10" cy="12" r="3.2"/><circle cx="32" cy="4" r="3.2"/><circle cx="54" cy="12" r="3.2"/></svg>
-    <span class="name">BLACK<b>CROWN</b> VxJ<small>LLC · Artificial Intelligence</small></span>
+<div class="grain"></div>
+<div class="progress" id="progress"></div>
+
+<nav class="nav" id="nav">
+  <a class="brand" href="#top" aria-label="BlackCrown home">
+    <svg width="28" height="23" viewBox="0 0 36 30" fill="none" stroke="#FF2D95" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 0 6px rgba(255,45,149,.7))" aria-hidden="true">
+      <path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/>
+      <line x1="7" y1="28" x2="29" y2="28"/>
+    </svg>
+    <span class="wordmark">BlackCrown</span>
   </a>
   <div class="nav-links">
-    <a href="#why">Why Crown</a><a href="#features">Features</a><a href="#pricing">Pricing</a>
-    <a href="/chat#login">Log in</a>
-    <a class="btn btn-gold" href="/chat">Start Chat Now →</a>
+    <a href="#ethos">Mission</a>
+    <a href="#products">Products</a>
+    <a href="#contact">Contact</a>
   </div>
-</div></div>
+  <a href="#contact" class="btn solid">Get in touch<span class="sheen"></span></a>
+</nav>
 
-<main>
-  <header class="hero wrap">
-    <div class="hero-copy">
-      <div class="eyebrow">Your Private AI Workspace</div>
-      <h1>Intelligence,<span class="gold-text"> Crowned.</span></h1>
-      <p class="sub">Every AI chatbot is a blank box you talk into and forget. Crown is a private workspace where your data stays yours, your work stays organized, and Pro is flat-out unlimited. Start free in seconds.</p>
-      <div class="cta-row">
-        <a class="btn btn-gold" href="/chat">Start Chat Now →</a>
-        <a class="btn btn-ghost" href="#pricing">View the Tiers</a>
-      </div>
-      <div class="trust">
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> No card to begin</span>
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Private by design</span>
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Hosted on AWS</span>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="mock-ring"></div>
-      <div class="mock-frame">
-        <div class="mock-bar"><i></i><i></i><i></i><span class="mt">CROWN CONSOLE</span></div>
-        <div class="mock-body">
-          <div class="mb user">Turn these messy meeting notes into clear action items.</div>
-          <div class="mb bot">Done. 6 action items, each with an owner and a due date. Want them grouped by priority?</div>
-          <div class="mb user">Yes. And keep this in my Q3 Planning project.</div>
-          <div class="mb bot">Saved to Q3 Planning. ✦ Your notes stay yours, never sold, never used to train a model.</div>
-          <div class="mock-input">Speak, and the Crown shall answer…<span class="mi-send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span></div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <div class="wrap"><div class="stats">
-    <div class="stat"><b class="gold-text">∞</b><span>Pro Tokens</span></div>
-    <div class="stat"><b class="gold-text">Private</b><span>Never Trained On</span></div>
-    <div class="stat"><b class="gold-text">Projects</b><span>Organized Work</span></div>
-    <div class="stat"><b class="gold-text">AWS</b><span>Global Edge</span></div>
-  </div></div>
-
-  <!-- WHY CROWN -->
-  <section class="why wrap" id="why">
-    <div class="why-lead">
-      <div class="eyebrow">Why Crown</div>
-      <div class="big">Most AI tools are a blank box you talk into.<br><span class="gold-text">Crown is built for real work.</span></div>
-    </div>
-    <div class="why-grid">
-      <article class="why-card"><span class="why-rn">I</span><div class="why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9.4 12l1.9 1.9 3.5-3.7"/></svg></div><h3>A Private Court</h3><p>Your conversations are yours. We don't sell your data, and your work is never used to train models. What happens in Crown stays in Crown.</p></article>
-      <article class="why-card"><span class="why-rn">II</span><div class="why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l1.9 5.6 5.6 1.9-5.6 1.9L12 18.2l-1.9-5.6L4.5 10.7l5.6-1.9z"/><path d="M18.8 14.6l.55 1.65 1.65.55-1.65.55-.55 1.65-.55-1.65-1.65-.55 1.65-.55z"/></svg></div><h3>Refined, Not Generic</h3><p>One executive-grade assistant tuned for polished, decision-ready output. No clutter, no endless model menus, just answers with taste.</p></article>
-      <article class="why-card"><span class="why-rn">III</span><div class="why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h5l2 3h11v8a2 2 0 0 1-2 2H3z"/><path d="M3 7V5a2 2 0 0 1 2-2h4l2 3"/></svg></div><h3>Built for Real Work</h3><p>Organize everything into Projects. Group your threads, keep context together, and move between work streams without losing your place.</p></article>
-      <article class="why-card"><span class="why-rn">IV</span><div class="why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172-2.828a10 10 0 0 1 2.172-2.828a4 4 0 1 1 0 5.656a10 10 0 0 1-2.172-2.828a10 10 0 0 0-2.172-2.828"/></svg></div><h3>Flat &amp; Unlimited</h3><p>Pro is one simple price with unlimited usage. No token anxiety, no metered surprises, just open the console and work.</p></article>
-    </div>
-  </section>
-
-  <!-- COMPARE -->
-  <section class="compare wrap">
-    <div class="sec-head"><div class="eyebrow">Crown vs. Ordinary AI</div><h2>The same models. A better way to use them.</h2><p>Everyone rents the same frontier intelligence. The difference is what's built around it.</p></div>
-    <div class="cmp">
-      <div class="c h feat r1">&nbsp;</div>
-      <div class="c h them r1">Ordinary AI</div>
-      <div class="c h us r1"><svg class="ic" width="14" height="11" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg> Crown</div>
-
-      <div class="c feat">Your data</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> May train the model</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Never trained on</div>
-
-      <div class="c feat">Your history</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Endless scroll</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Organized into Projects</div>
-
-      <div class="c feat">Pricing</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Credits &amp; caps</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Flat &amp; unlimited (Pro)</div>
-
-      <div class="c feat">Experience</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Generic &amp; cluttered</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Refined &amp; focused</div>
-
-      <div class="c feat">Getting started</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Sign up first</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Start instantly</div>
-    </div>
-  </section>
-
-  <!-- FEATURES -->
-  <section class="features wrap" id="features">
-    <div class="sec-head"><div class="eyebrow">The Regalia</div><h2>Everything in your court</h2><p>A complete toolkit beneath one crown, and far more reserved for Pro.</p></div>
-    <div class="feat-grid" id="featGrid"></div>
-  </section>
-
-  <!-- PRICING -->
-  <section class="pricing wrap" id="pricing">
-    <div class="sec-head"><div class="eyebrow">Choose your standing</div><h2>Free to enter. Unlimited to reign.</h2><p>Start with a generous monthly allotment. Ascend the moment you need more.</p></div>
-    <div class="price-grid">
-      <div class="plan">
-        <div class="tier">Free</div><div class="desc">For the curious. Taste the Crown, no card required.</div>
-        <div class="amt"><b>$0</b><span> / forever</span></div>
-        <ul>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> 10,000 tokens / month</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Full Crown intelligence</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Streaming, formatted replies</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Saved conversation history</li>
-          <li class="muted"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Projects &amp; organization</li>
-          <li class="muted"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Web access, images &amp; files</li>
-        </ul>
-        <a class="btn btn-ghost" href="/chat">Start Free</a>
-      </div>
-      <div class="plan pro">
-        <div class="badge">CROWNED</div>
-        <div class="tier gold-text">Pro</div><div class="desc">Everything in Free, plus the full court: unlimited and unlocked.</div>
-        <div class="amt"><b class="gold-text">$19.99</b><span> / month</span></div>
-        <ul>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Unlimited tokens</b> (fair-use)</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Live web access</b> with cited sources</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>AI image generation</b></li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>File uploads</b> for images, PDFs &amp; documents</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Projects</b> to organize chats your way</li>
-        </ul>
-        <a class="btn btn-gold" href="/chat#upgrade">Ascend to Pro →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- CLOSING CTA -->
-  <section class="cta-band">
-    <div class="wrap">
-      <div class="eyebrow">Begin your reign</div>
-      <h2>Claim your <span class="gold-text">crown.</span></h2>
-      <p>Private, organized, unlimited. Start free in seconds. No card, no signup to try.</p>
-      <a class="btn btn-gold" href="/chat" style="font-size:1rem;padding:15px 32px">Start Chat Now →</a>
-    </div>
-  </section>
-</main>
-
-<footer><div class="wrap">
-  <div class="foot">
-    <div class="col" style="max-width:280px">
-      <a class="brand" href="/" style="margin-bottom:14px"><svg class="crown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/></svg><span class="name">BLACK<b>CROWN</b> VxJ</span></a>
-      <p style="color:var(--muted);font-size:.88rem">Your private AI workspace. Refined, organized, and yours. Hosted on AWS.</p>
-    </div>
-    <div class="col"><h4>Product</h4><a href="/chat">Console</a><a href="#why">Why Crown</a><a href="#features">Features</a><a href="#pricing">Pricing</a></div>
-    <div class="col"><h4>Company</h4><a href="/about">About</a><a href="/contact">Contact</a><a href="/careers">Careers</a></div>
-    <div class="col"><h4>Legal</h4><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/acceptable-use">Acceptable Use</a></div>
+<header class="hero" id="top">
+  <div class="aura a1"></div>
+  <div class="aura a2"></div>
+  <div class="chart" aria-hidden="true">
+    <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FF2D95" stop-opacity="0.30"/>
+          <stop offset="1" stop-color="#FF2D95" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line class="grid-line" x1="0" y1="160" x2="1200" y2="160"/>
+      <line class="grid-line" x1="0" y1="280" x2="1200" y2="280"/>
+      <line class="grid-line" x1="0" y1="400" x2="1200" y2="400"/>
+      <line class="grid-line" x1="0" y1="520" x2="1200" y2="520"/>
+      <g id="candles"></g>
+      <path class="area" d="M0 505 L80 478 L165 508 L250 442 L335 472 L420 398 L505 432 L590 355 L675 388 L760 300 L845 335 L930 250 L1015 285 L1100 200 L1140 190 L1200 180 L1200 700 L0 700 Z"/>
+      <path class="trend" d="M0 505 L80 478 L165 508 L250 442 L335 472 L420 398 L505 432 L590 355 L675 388 L760 300 L845 335 L930 250 L1015 285 L1100 200 L1140 190 L1200 180"/>
+      <rect class="scan" x="0" y="0" width="2" height="700"/>
+      <circle class="ping" cx="1140" cy="190" r="7"/>
+      <circle class="node" cx="1140" cy="190" r="5"/>
+    </svg>
   </div>
-  <div class="foot-note"><span>© <span id="yr"></span> BlackCrown VxJ, LLC. All rights reserved.</span><span>Built on AWS · Powered by frontier AI</span></div>
-</div></footer>
+  <div class="particles" id="particles"></div>
+  <div class="hud"><span class="dot"></span><span id="clock">SYS // ONLINE</span></div>
+  <div class="wrap hero-inner">
+    <span class="eyebrow">BlackCrownVxJ LLC · Trading · AI · Commerce</span>
+    <h1>Claim your <span class="neon">crown</span>.</h1>
+    <p class="lead">BlackCrown builds the market intelligence, the personal AI, and the private network that independent operators rely on to move first.</p>
+    <div class="cta-row">
+      <a href="#products" class="btn solid">Explore the products<span class="sheen"></span></a>
+      <a href="#ethos" class="btn ghost">What we stand for<span class="sheen"></span></a>
+    </div>
+  </div>
+  <div class="scroll-cue"><span class="bar"></span>Scroll</div>
+</header>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>Korvus Industries · Real-time market intelligence for traders</span><span class="star">✦</span>
+    <span>BlackCrown Intelligence · A personal AI tuned to you</span><span class="star">✦</span>
+    <span>The Collective · A private network for builders</span><span class="star">✦</span>
+    <span>Korvus Industries · Real-time market intelligence for traders</span><span class="star">✦</span>
+    <span>BlackCrown Intelligence · A personal AI tuned to you</span><span class="star">✦</span>
+    <span>The Collective · A private network for builders</span><span class="star">✦</span>
+  </div>
+</div>
+
+<section class="sec manifesto" id="ethos">
+  <svg class="ghost" viewBox="0 0 36 30" fill="none" aria-hidden="true">
+    <path class="gb" d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/>
+    <line class="gb" x1="7" y1="28" x2="29" y2="28"/>
+    <path class="gt" d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/>
+  </svg>
+  <div class="wrap">
+    <span class="eyebrow reveal">What we stand for</span>
+    <blockquote class="reveal" style="margin-top:1rem">A crown isn't handed down. It's <span class="neon">built</span>.</blockquote>
+    <p class="body reveal">BlackCrown builds for the independent operator: the trader watching the open, the founder shipping after hours, the person who would rather own the outcome than wait on it. Everything we ship has one purpose, and that's to give them a sharper, faster edge.</p>
+  </div>
+</section>
+
+<section class="sec" id="bring">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">What we bring</span>
+      <h2 class="display">Three advantages, by design.</h2>
+    </div>
+    <div class="grid3 reveal">
+      <div class="cell">
+        <svg class="glyph" viewBox="0 0 40 32" aria-hidden="true">
+          <rect class="bar" x="3" y="20" width="5" height="9"/>
+          <rect class="bar" x="12" y="14" width="5" height="15"/>
+          <rect class="bar" x="21" y="7" width="5" height="22"/>
+          <rect class="bar" x="30" y="16" width="5" height="13"/>
+        </svg>
+        <span class="tag">Information</span>
+        <h3>A genuine information edge</h3>
+        <p>Catch the catalyst, the filing, the headline while it still matters, early enough to act on it instead of just reacting to it.</p>
+      </div>
+      <div class="cell">
+        <svg class="glyph" viewBox="0 0 40 32" aria-hidden="true">
+          <circle class="core" cx="20" cy="16" r="3"/>
+          <circle class="ring r1" cx="20" cy="16" r="6"/>
+          <circle class="ring r2" cx="20" cy="16" r="6"/>
+        </svg>
+        <span class="tag">Intelligence</span>
+        <h3>A thinking partner on call</h3>
+        <p>A personal AI that holds your context and history, so every decision starts informed instead of from scratch.</p>
+      </div>
+      <div class="cell">
+        <svg class="glyph" viewBox="0 0 40 32" aria-hidden="true">
+          <path class="net-path" d="M6 25 L20 8 L34 25"/>
+          <circle class="node" cx="6" cy="25" r="3"/>
+          <circle class="node" cx="20" cy="8" r="3"/>
+          <circle class="node" cx="34" cy="25" r="3"/>
+        </svg>
+        <span class="tag">Network</span>
+        <h3>A network of serious builders</h3>
+        <p>Direct access to other operators building across trading, AI, and commerce, who share what actually works.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="products">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow">What we build</span>
+      <h2 class="display">Three products, one edge.</h2>
+    </div>
+    <div class="prod-grid">
+      <a class="card reveal" href="https://korvus.industries" target="_blank" rel="noopener">
+        <div class="tag"><span>Korvus Industries</span><span class="dot"></span></div>
+        <h3>A news terminal for traders.</h3>
+        <p>A real-time news and market terminal that filters noise into signal, so you read the move before the crowd does.</p>
+        <span class="link">Visit Korvus <span class="arr">→</span></span>
+      </a>
+      <a class="card reveal" href="https://blackcrown-intelligence.com" target="_blank" rel="noopener">
+        <div class="tag"><span>BlackCrown Intelligence</span><span class="dot"></span></div>
+        <h3>A personal AI that knows you.</h3>
+        <p>A personal AI tuned to how you work and what you're after. Context-aware, always available, and built to think alongside you.</p>
+        <span class="link">Open the chat <span class="arr">→</span></span>
+      </a>
+      <a class="card reveal" href="https://discord.gg/xmuSA5mMTN" target="_blank" rel="noopener">
+        <div class="tag"><span>The Collective</span><span class="dot"></span></div>
+        <h3>A private room for builders.</h3>
+        <p>A members-only space where people building in ecommerce, trading, and AI trade ideas, share what's working, and make the connections that move things forward.</p>
+        <span class="link">Request access <span class="arr">→</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="sec contact" id="contact">
+  <div class="wrap">
+    <span class="eyebrow reveal" style="display:block;margin-bottom:1rem">Get in touch</span>
+    <h2 class="display reveal">Let's build.</h2>
+    <div class="lines reveal">
+      <a href="mailto:BlackCrownVxJ.LLC@outlook.com"><span class="k">Email</span>BlackCrownVxJ.LLC@outlook.com</a>
+      <a href="tel:+17032989426"><span class="k">Call</span>(703) 298-9426</a>
+    </div>
+    <p class="note reveal">For partnerships, press, or early access to the Collective, send us a note. We read every message and we'll get back to you.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <span class="wordmark">
+          <svg width="24" height="20" viewBox="0 0 36 30" fill="none" stroke="#FF2D95" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 0 5px rgba(255,45,149,.7))" aria-hidden="true">
+            <path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/>
+            <line x1="7" y1="28" x2="29" y2="28"/>
+          </svg>
+          BlackCrown
+        </span>
+        <p>Market intelligence, AI, and a private network for independent operators.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Products</h4>
+        <a href="https://korvus.industries" target="_blank" rel="noopener">Korvus Industries</a>
+        <a href="https://blackcrown-intelligence.com" target="_blank" rel="noopener">BlackCrown Intelligence</a>
+        <a href="https://discord.gg/xmuSA5mMTN" target="_blank" rel="noopener">The Collective</a>
+      </div>
+      <div class="foot-col">
+        <h4>Contact</h4>
+        <a href="mailto:BlackCrownVxJ.LLC@outlook.com">Email us</a>
+        <a href="tel:+17032989426">(703) 298-9426</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 BlackCrownVxJ LLC</span>
+    </div>
+  </div>
+</footer>
 
 <script>
-  (function(){const e=document.getElementById("embers");let h="";for(let i=0;i<14;i++){const l=Math.random()*100,d=8+Math.random()*10,delay=Math.random()*12,s=2+Math.random()*2.5;h+=`<span class="ember" style="left:${l}%;width:${s}px;height:${s}px;animation-duration:${d}s;animation-delay:${delay}s"></span>`;}e.innerHTML=h;})();
-  document.getElementById("yr").textContent=new Date().getFullYear();
-  addEventListener("scroll",()=>document.getElementById("topnav").classList.toggle("solid",scrollY>30));
-  const FEATURES=[
-    ["Crown Chat","M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z","Fluid, fast conversation that streams in as it's written, refined and tuned to your voice."],
-    ["Live Web Access","M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18 M3 12h18 M12 3c2.6 2.7 2.6 15.3 0 18 M12 3c-2.6 2.7-2.6 15.3 0 18","Crown searches the live web and answers with current information, every claim backed by cited sources. (Pro)"],
-    ["AI Image Generation","M4 5h16v14H4z M4 16l4-4 4 4 4-5 4 5 M9 9h.01","Turn a prompt into striking, high-resolution images, right inside Crown. (Pro)"],
-    ["File Uploads","M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48","Share images, PDFs and documents. Crown reads them and reasons over what's inside. (Pro)"],
-    ["Projects","M3 7h5l2 3h11v8a2 2 0 0 1-2 2H3z M3 7V5a2 2 0 0 1 2-2h4l2 3","Group threads into Projects so your work stays organized and in context. (Pro)"],
-    ["Private by Design","M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z","Your conversations stay yours, never sold, never used to train models."],
-    ["Unlimited Pro","M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z","Pro removes the ceiling: unlimited, fair-use usage at one flat price."],
-    ["Hosted on AWS","M4 17h16M4 7h16M7 12h10","Fast, reliable delivery on a scalable AWS backend you control."]
-  ];
-  document.getElementById("featGrid").innerHTML=FEATURES.map(([t,d,p])=>`<div class="feat"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg></div><h3>${t}</h3><p>${p}</p></div>`).join("");
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const nav = document.getElementById('nav');
+  const progress = document.getElementById('progress');
+  const onScroll = () => {
+    nav.classList.toggle('scrolled', window.scrollY > 24);
+    const h = document.documentElement;
+    progress.style.transform = 'scaleX(' + (h.scrollTop / (h.scrollHeight - h.clientHeight || 1)) + ')';
+  };
+  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+
+  const clockEl = document.getElementById('clock');
+  const tick = () => { clockEl.textContent = 'SYS // ONLINE · ' + new Date().toISOString().substr(11,8) + ' UTC'; };
+  tick(); setInterval(tick, 1000);
+
+  (function(){
+    const g = document.getElementById('candles');
+    if(!g) return;
+    const NS='http://www.w3.org/2000/svg', n=20;
+    for(let i=0;i<n;i++){
+      const x = 30 + i*(1150/(n-1));
+      const mid = 615 - Math.sin(i*0.55)*26 - i*3;
+      const bodyH = 14 + ((i*53)%4)*9;
+      const wickH = bodyH + 14 + ((i*31)%3)*9;
+      const up = (i*7)%2===0;
+      const wick=document.createElementNS(NS,'line');
+      wick.setAttribute('x1',x); wick.setAttribute('x2',x);
+      wick.setAttribute('y1',mid-wickH/2); wick.setAttribute('y2',mid+wickH/2);
+      wick.setAttribute('stroke','#FF2D95'); wick.setAttribute('stroke-width','1.2'); wick.setAttribute('opacity','0.28');
+      g.appendChild(wick);
+      const body=document.createElementNS(NS,'rect');
+      body.setAttribute('x',x-5); body.setAttribute('width',10);
+      body.setAttribute('y',mid-bodyH/2); body.setAttribute('height',bodyH);
+      if(up){ body.setAttribute('fill','#FF2D95'); body.setAttribute('opacity','0.30'); }
+      else { body.setAttribute('fill','none'); body.setAttribute('stroke','#FF2D95'); body.setAttribute('stroke-width','1.2'); body.setAttribute('opacity','0.40'); }
+      g.appendChild(body);
+    }
+  })();
+
+  if(!reduce){
+    const box = document.getElementById('particles');
+    for(let i=0;i<12;i++){
+      const p=document.createElement('span'); p.className='p';
+      p.style.left=Math.random()*100+'%';
+      p.style.animationDuration=(8+Math.random()*9)+'s';
+      p.style.animationDelay=(-Math.random()*12)+'s';
+      const s=2+Math.random()*2; p.style.width=p.style.height=s+'px';
+      box.appendChild(p);
+    }
+  }
+
+  const CH='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*<>/';
+  function scramble(el){
+    const final = el.dataset.txt || el.textContent; el.dataset.txt = final;
+    if(reduce){ el.textContent=final; return; }
+    let it=0; const len=final.length;
+    const id=setInterval(()=>{
+      el.textContent = final.split('').map((c,i)=>{
+        if(!/[A-Za-z0-9]/.test(c)) return c;
+        return i<it ? final[i] : CH[Math.floor(Math.random()*CH.length)];
+      }).join('');
+      it += 1; if(it>len){clearInterval(id); el.textContent=final;}
+    },30);
+  }
+
+  const io = new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} }),{threshold:0.15});
+  document.querySelectorAll('.reveal,.sec-head').forEach(el=>io.observe(el));
+  const sio = new IntersectionObserver((es)=>es.forEach(e=>{ if(e.isIntersecting){ scramble(e.target); sio.unobserve(e.target);} }),{threshold:0.6});
+  document.querySelectorAll('.eyebrow').forEach(el=>sio.observe(el));
+
+  window.addEventListener('load', ()=> requestAnimationFrame(()=> document.getElementById('top').classList.add('loaded')));
+
+  /* ---------- Clean URLs: scroll to sections without leaving a #hash in the bar ---------- */
+  function bcScrollTo(id){
+    const t = document.getElementById(id);
+    if(!t) return false;
+    if(id==='top'){ window.scrollTo({top:0,behavior:'smooth'}); return true; }
+    const off = (nav ? nav.offsetHeight : 64) + 6;
+    const y = t.getBoundingClientRect().top + window.pageYOffset - off;
+    window.scrollTo({top:y,behavior:'smooth'});
+    return true;
+  }
+  function bcCleanUrl(){ history.replaceState(null,'',location.pathname+location.search); }
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const id = a.getAttribute('href').slice(1);
+      if(!id) return;
+      if(bcScrollTo(id)){ e.preventDefault(); bcCleanUrl(); }
+    });
+  });
+  window.addEventListener('load',()=>{
+    if(location.hash){
+      const id = location.hash.slice(1);
+      setTimeout(()=>{ bcScrollTo(id); bcCleanUrl(); }, 60);
+    }
+  });
 </script>
 </body>
 </html>
