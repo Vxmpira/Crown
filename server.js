@@ -50,7 +50,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // Admin portal: a logged-in user whose email is in ADMIN_EMAILS (comma-separated) gets admin access.
 const ADMIN_EMAILS  = String(process.env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-const PRO_PRICE_USD = parseFloat(process.env.PRO_PRICE_USD || "29");
+const PRO_PRICE_USD = parseFloat(process.env.PRO_PRICE_USD || "19.99");
 const isAdmin = u => !!u && ADMIN_EMAILS.includes(String(u.email).toLowerCase());
 
 // Email (AWS SES via SMTP). Dormant until SMTP_* are set in crown.env — powers password reset.
