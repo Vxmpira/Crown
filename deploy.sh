@@ -50,6 +50,7 @@ sudo systemctl restart crown
 echo "==> Publishing static files"
 sudo mkdir -p /var/www/crown
 sudo cp *.html /var/www/crown/
+sudo cp og-image.png sitemap.xml robots.txt /var/www/crown/ 2>/dev/null || true
 
 # 5. nginx: serve the site + proxy /api to the backend
 echo "==> Configuring nginx"

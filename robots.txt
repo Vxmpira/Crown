@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /reset
+Disallow: /login
+Disallow: /signup
+
+Sitemap: https://blackcrown-intelligence.com/sitemap.xml

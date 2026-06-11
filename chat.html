@@ -129,6 +129,19 @@
   .cbtn.gold{background:linear-gradient(115deg,var(--gold-deep),var(--gold) 55%,var(--gold-bright));color:#1a1405;border:none}
   .bubble-img img{display:block;width:100%;border-radius:11px;background:var(--obsidian)}
   .img-cap{font-size:.74rem;color:var(--muted-2);padding:8px 4px 2px;line-height:1.45}
+  .bubble.md p{margin:0 0 9px}
+  .bubble.md p:last-child{margin-bottom:0}
+  .bubble.md h3,.bubble.md h4,.bubble.md h5,.bubble.md h6{font-family:var(--display);font-weight:700;color:var(--gold-bright);margin:4px 0 8px;font-size:1.02em;line-height:1.3}
+  .bubble.md ul,.bubble.md ol{margin:6px 0 10px;padding-left:20px}
+  .bubble.md ul:last-child,.bubble.md ol:last-child{margin-bottom:0}
+  .bubble.md li{margin:3px 0;line-height:1.55}
+  .bubble.md strong{color:#fff;font-weight:700}
+  .bubble.md em{font-style:italic}
+  .bubble.md a{color:var(--gold-bright);text-decoration:underline;text-underline-offset:2px}
+  .bubble.md code{background:var(--obsidian);border:1px solid var(--line-soft);border-radius:5px;padding:1px 6px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em}
+  .bubble.md pre{background:var(--obsidian);border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px;overflow-x:auto;margin:9px 0}
+  .bubble.md pre:last-child{margin-bottom:0}
+  .bubble.md pre code{background:none;border:none;padding:0;font-size:.86em;line-height:1.55;display:block;white-space:pre}
   .typing i{width:7px;height:7px;border-radius:50%;background:var(--gold);display:inline-block;animation:blink 1.2s infinite}
   .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
   @keyframes blink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
@@ -615,7 +628,7 @@ function renderChat(){
       bubble = `<div class="bubble bubble-img"><img src="${m.image}" alt="${esc(m.alt||'Generated image')}" loading="lazy">${m.alt?`<div class="img-cap">${esc(m.alt)}</div>`:""}</div>`;
       actions = `<div class="mactions"><a class="copy" href="${m.image}" download="crown-image.png"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Save</a></div>`;
     } else {
-      bubble = `<div class="bubble">${esc(m.content)}</div>`;
+      bubble = u ? `<div class="bubble">${esc(m.content)}</div>` : `<div class="bubble md">${mdToHtml(m.content)}</div>`;
       if(!u) actions = `<div class="mactions"><button class="copy" onclick="copyMsg(this,${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>`;
     }
     return `<div class="msg ${u?'user':'bot'}"><div class="av">${av}</div><div class="mcol"><div class="mname">${esc(nm)}</div>${bubble}${actions}</div></div>`;
@@ -875,6 +888,36 @@ function chooseText(i){
   modelReply(c, prompt);
 }
 function esc(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+function mdToHtml(src){
+  const escH = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline = s => s
+    .replace(/`([^`]+)`/g,(m,c)=>'<code>'+c+'</code>')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/__([^_]+)__/g,'<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<em>$2</em>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  const out=[]; let inCode=false, code=[], list=null, items=[], para=[];
+  const flushPara=()=>{ if(para.length){ out.push('<p>'+para.map(l=>inline(escH(l))).join('<br>')+'</p>'); para=[]; } };
+  const flushList=()=>{ if(list){ out.push('<'+list+'>'+items.join('')+'</'+list+'>'); list=null; items=[]; } };
+  const flushAll=()=>{ flushPara(); flushList(); };
+  String(src||"").replace(/\r\n/g,'\n').split('\n').forEach(ln=>{
+    if(/^```/.test(ln)){
+      if(inCode){ out.push('<pre><code>'+escH(code.join('\n'))+'</code></pre>'); code=[]; inCode=false; }
+      else { flushAll(); inCode=true; }
+      return;
+    }
+    if(inCode){ code.push(ln); return; }
+    let m;
+    if(m=ln.match(/^(#{1,3})\s+(.*)$/)){ flushAll(); out.push('<h'+Math.min(6,m[1].length+2)+'>'+inline(escH(m[2]))+'</h'+Math.min(6,m[1].length+2)+'>'); return; }
+    if(m=ln.match(/^\s*[-*+]\s+(.*)$/)){ flushPara(); if(list!=='ul'){ flushList(); list='ul'; } items.push('<li>'+inline(escH(m[1]))+'</li>'); return; }
+    if(m=ln.match(/^\s*\d+\.\s+(.*)$/)){ flushPara(); if(list!=='ol'){ flushList(); list='ol'; } items.push('<li>'+inline(escH(m[1]))+'</li>'); return; }
+    if(ln.trim()===''){ flushAll(); return; }
+    flushList(); para.push(ln);
+  });
+  if(inCode){ out.push('<pre><code>'+escH(code.join('\n'))+'</code></pre>'); }
+  flushAll();
+  return out.join('');
+}
 
 $("send").onclick=send;
 $("input").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); }});
