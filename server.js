@@ -358,10 +358,15 @@ app.post("/api/chat", async (req, res) => {
     const messages = sanitizeMessages(req.body.messages);
     if (!messages.length) return res.status(400).json({ error:"empty", message:"Nothing to send." });
 
+    // Web access: only for Pro (search costs ~$10/1k on top of tokens) and only when the user toggles it on.
+    const useWeb = req.body.web === true && tier === "pro";
+    const payload = { model:MODEL, max_tokens:2048, system:SYSTEM, messages, stream:true };
+    if (useWeb) payload.tools = [{ type:"web_search_20250305", name:"web_search", max_uses:5 }];
+
     const upstream = await fetch("https://api.anthropic.com/v1/messages", {
       method:"POST",
       headers:{ "content-type":"application/json", "x-api-key":KEY, "anthropic-version":"2023-06-01" },
-      body: JSON.stringify({ model:MODEL, max_tokens:2048, system:SYSTEM, messages, stream:true })
+      body: JSON.stringify(payload)
     });
 
     if (!upstream.ok) {
@@ -378,7 +383,8 @@ app.post("/api/chat", async (req, res) => {
     const send = obj => { try { res.write("data: " + JSON.stringify(obj) + "\n\n"); } catch {} };
 
     const dec = new TextDecoder();
-    let buf = "", inTok = 0, outTok = 0;
+    let buf = "", inTok = 0, outTok = 0, searched = false;
+    const results = [], cites = [];
     try {
       const reader = upstream.body.getReader();
       while (true) {
@@ -390,11 +396,22 @@ app.post("/api/chat", async (req, res) => {
           const raw = buf.slice(0, nl); buf = buf.slice(nl + 2);
           const line = raw.split("\n").find(l => l.startsWith("data:"));
           if (!line) continue;
-          const payload = line.slice(5).trim();
-          if (!payload || payload === "[DONE]") continue;
-          let ev; try { ev = JSON.parse(payload); } catch { continue; }
+          const payload2 = line.slice(5).trim();
+          if (!payload2 || payload2 === "[DONE]") continue;
+          let ev; try { ev = JSON.parse(payload2); } catch { continue; }
           if (ev.type === "message_start") { inTok = ev.message?.usage?.input_tokens || 0; }
-          else if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") { send({ t: ev.delta.text }); }
+          else if (ev.type === "content_block_start") {
+            const cb = ev.content_block || {};
+            if (cb.type === "server_tool_use" && cb.name === "web_search") { if (!searched) { searched = true; send({ status:"searching" }); } }
+            else if (cb.type === "web_search_tool_result") {
+              if (!searched) { searched = true; send({ status:"searching" }); }
+              if (Array.isArray(cb.content)) for (const r of cb.content) if (r && r.type === "web_search_result" && r.url) results.push({ title: r.title || r.url, url: r.url });
+            }
+          }
+          else if (ev.type === "content_block_delta") {
+            if (ev.delta?.type === "text_delta") send({ t: ev.delta.text });
+            else if (ev.delta?.type === "citations_delta" && ev.delta.citation?.url) cites.push({ title: ev.delta.citation.title || ev.delta.citation.url, url: ev.delta.citation.url });
+          }
           else if (ev.type === "message_delta" && ev.usage?.output_tokens != null) { outTok = ev.usage.output_tokens; }
           else if (ev.type === "error") { send({ error:"model_error", message: ev.error?.message || "stream error" }); }
         }
@@ -403,10 +420,13 @@ app.post("/api/chat", async (req, res) => {
       send({ error:"stream_error", message: streamErr.message });
     }
 
+    const dedup = arr => { const seen = new Set(), out = []; for (const s of arr) { if (s.url && !seen.has(s.url)) { seen.add(s.url); out.push(s); } } return out; };
+    const sources = dedup(cites.length ? cites : results).slice(0, 6);
+
     const spent = inTok + outTok;
     apply(spent);
     const nowUsed = used + spent;
-    send({ done:true, usage:{ tier, used:nowUsed, limit, remaining:Math.max(0, limit - nowUsed) } });
+    send({ done:true, usage:{ tier, used:nowUsed, limit, remaining:Math.max(0, limit - nowUsed) }, sources });
     res.end();
   } catch (e) {
     if (res.headersSent) { try { res.write("data: " + JSON.stringify({ error:"server_error", message:e.message }) + "\n\n"); } catch {} res.end(); }
