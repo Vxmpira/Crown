@@ -106,6 +106,9 @@ CREATE TABLE IF NOT EXISTS password_resets (
 );
 `);
 
+// migration: profile photo column (added after the initial schema; safe to re-run on every boot)
+try { db.exec("ALTER TABLE users ADD COLUMN avatar TEXT"); } catch (e) { /* column already exists */ }
+
 const q = {
   userByEmail:    db.prepare("SELECT * FROM users WHERE email = ?"),
   userById:       db.prepare("SELECT * FROM users WHERE id = ?"),
@@ -128,6 +131,8 @@ const q = {
   countPro:       db.prepare("SELECT COUNT(*) AS c FROM users WHERE tier='pro'"),
   countSince:     db.prepare("SELECT COUNT(*) AS c FROM users WHERE created_at >= ?"),
   setPassword:    db.prepare("UPDATE users SET password_hash = ? WHERE id = ?"),
+  setUsername:    db.prepare("UPDATE users SET username = ? WHERE id = ?"),
+  setAvatar:      db.prepare("UPDATE users SET avatar = ? WHERE id = ?"),
   delUserSessions:db.prepare("DELETE FROM sessions WHERE user_id = ?"),
   insertReset:    db.prepare("INSERT INTO password_resets (token_hash,user_id,expires_at,used) VALUES (?,?,?,0)"),
   getReset:       db.prepare("SELECT * FROM password_resets WHERE token_hash = ?"),
@@ -161,7 +166,7 @@ function setSessionCookie(res, token){
 }
 const effectiveTier = u => (isAdmin(u) ? "pro" : u.tier);   // owner/admins get full Pro access
 const userLimit = u => (effectiveTier(u) === "pro" ? PRO_FAIR_USE : FREE_LIMIT);
-const publicUser = u => ({ username:u.username, email:u.email, tier:effectiveTier(u), tokensUsed:u.tokens_used, limit:userLimit(u) });
+const publicUser = u => ({ username:u.username, email:u.email, tier:effectiveTier(u), tokensUsed:u.tokens_used, limit:userLimit(u), avatar:u.avatar||null });
 
 // in-memory rate limiter (per key)
 const rl = new Map();
@@ -241,6 +246,47 @@ app.post("/api/logout", (req, res) => {
 app.get("/api/me", (req, res) => {
   const u = getSessionUser(req);
   res.json({ user: u ? publicUser(u) : null });
+});
+
+// ---- profile: update display name ----
+app.post("/api/account/username", (req, res) => {
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
+  const username = String(req.body.username || "").trim();
+  if (username.length < 3 || username.length > 40)
+    return res.status(400).json({ error:"bad_username", message:"Name must be 3 to 40 characters." });
+  q.setUsername.run(username, u.id);
+  res.json({ user: publicUser(q.userById.get(u.id)) });
+});
+
+// ---- profile: change password (current password required) ----
+app.post("/api/account/password", (req, res) => {
+  if (rateLimited("pw:"+clientIp(req), 8, 60000)) return res.status(429).json({ error:"rate", message:"Too many attempts. Try again shortly." });
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
+  const current  = String(req.body.current || "");
+  const password = String(req.body.password || "");
+  if (!bcrypt.compareSync(current, u.password_hash))
+    return res.status(403).json({ error:"bad_current", message:"Your current password is incorrect." });
+  if (password.length < 8)
+    return res.status(400).json({ error:"bad_password", message:"New password must be at least 8 characters." });
+  q.setPassword.run(bcrypt.hashSync(password, 10), u.id);
+  res.json({ ok:true });
+});
+
+// ---- profile: set or remove avatar (small base64 image, stored in the DB) ----
+app.post("/api/account/avatar", (req, res) => {
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
+  let avatar = req.body.avatar;
+  if (avatar === null || avatar === "") { q.setAvatar.run(null, u.id); return res.json({ user: publicUser(q.userById.get(u.id)) }); }
+  avatar = String(avatar || "");
+  if (!/^data:image\/(png|jpe?g|webp);base64,/.test(avatar))
+    return res.status(400).json({ error:"bad_image", message:"Unsupported image format." });
+  if (avatar.length > 700000)
+    return res.status(413).json({ error:"too_large", message:"That image is too large. Please choose a smaller one." });
+  q.setAvatar.run(avatar, u.id);
+  res.json({ user: publicUser(q.userById.get(u.id)) });
 });
 
 // ---- password reset ----
@@ -372,7 +418,7 @@ app.post("/api/chat", async (req, res) => {
     let upstream = await callModel(payload);
 
     // If the web_search tool is the problem (e.g. not enabled for the org), don't take the whole
-    // chat down — drop the tool and retry once so the user still gets an answer.
+    // chat down. Drop the tool and retry once so the user still gets an answer.
     if (!upstream.ok && payload.tools) {
       const errText = await upstream.text().catch(() => "");
       console.error("[chat] web_search rejected (" + upstream.status + "), retrying without it: " + errText.slice(0, 300));
