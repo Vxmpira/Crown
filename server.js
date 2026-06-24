@@ -20,7 +20,7 @@ const Database = require("better-sqlite3");
 const nodemailer = require("nodemailer");
 
 const KEY    = process.env.ANTHROPIC_API_KEY;
-const MODEL  = process.env.MODEL || "claude-sonnet-4-20250514";
+const MODEL  = process.env.MODEL || "claude-sonnet-4-6";
 const PORT   = process.env.PORT || 3000;
 const SYSTEM = "You are Crown, the assistant for BlackCrown VxJ. Confident, refined, concise. Help with writing, code, strategy and ideas.";
 
@@ -363,15 +363,28 @@ app.post("/api/chat", async (req, res) => {
     const payload = { model:MODEL, max_tokens:2048, system:SYSTEM, messages, stream:true };
     if (useWeb) payload.tools = [{ type:"web_search_20250305", name:"web_search", max_uses:5 }];
 
-    const upstream = await fetch("https://api.anthropic.com/v1/messages", {
+    const callModel = body => fetch("https://api.anthropic.com/v1/messages", {
       method:"POST",
       headers:{ "content-type":"application/json", "x-api-key":KEY, "anthropic-version":"2023-06-01" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(body)
     });
 
+    let upstream = await callModel(payload);
+
+    // If the web_search tool is the problem (e.g. not enabled for the org), don't take the whole
+    // chat down — drop the tool and retry once so the user still gets an answer.
+    if (!upstream.ok && payload.tools) {
+      const errText = await upstream.text().catch(() => "");
+      console.error("[chat] web_search rejected (" + upstream.status + "), retrying without it: " + errText.slice(0, 300));
+      delete payload.tools;
+      upstream = await callModel(payload);
+    }
+
     if (!upstream.ok) {
-      let detail; try { detail = await upstream.json(); } catch { detail = await upstream.text().catch(()=> ""); }
-      return res.status(502).json({ error:"model_error", detail });
+      let detail; try { detail = await upstream.json(); } catch { detail = await upstream.text().catch(() => ""); }
+      const msg = detail && detail.error && detail.error.message ? detail.error.message : ("Model request failed (" + upstream.status + ")");
+      console.error("[chat] Anthropic error " + upstream.status + ": " + msg);
+      return res.status(502).json({ error:"model_error", message: msg, detail });
     }
 
     // ---- Server-Sent Events stream back to the browser ----
