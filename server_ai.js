@@ -28,9 +28,10 @@ const KEY           = process.env.ANTHROPIC_API_KEY;
 const MODEL         = process.env.SERVERAI_MODEL || process.env.MODEL || "claude-sonnet-4-6";
 const CHANNEL_ID    = process.env.SERVERAI_CHANNEL_ID || "1519381180175220766";
 const WEEKLY_LIMIT  = parseInt(process.env.SERVERAI_WEEKLY_LIMIT || "10", 10);
-const MAX_TOKENS    = parseInt(process.env.SERVERAI_MAX_TOKENS || "700", 10);
+const MAX_TOKENS    = parseInt(process.env.SERVERAI_MAX_TOKENS || "1500", 10);
 const CONTEXT_DEPTH = parseInt(process.env.SERVERAI_CONTEXT_DEPTH || "10", 10);
-const REPLY_CAP     = 1800;   // hard character ceiling before the footer, Discord caps content at 2000
+const CHUNK_LIMIT   = 1900;   // per-message ceiling, Discord hard-caps content at 2000
+const MAX_CHUNKS    = 5;      // safety ceiling so one answer can never flood the channel
 const WEB_ENABLED   = (process.env.SERVERAI_WEB || "on").toLowerCase() !== "off";
 const WEB_MAX_USES  = parseInt(process.env.SERVERAI_WEB_MAX_USES || "3", 10);
 
@@ -116,6 +117,23 @@ async function buildThread(message, botId) {
   return merged.length ? merged : [{ role: "user", content: String(message.content || "").trim() }];
 }
 
+// ---- split a long answer into Discord-sized pieces on clean boundaries ----
+function splitMessage(text, limit) {
+  const out = [];
+  let rest = text.trim();
+  while (rest.length > limit) {
+    let cut = rest.lastIndexOf("\n\n", limit);
+    if (cut < limit * 0.5) cut = rest.lastIndexOf("\n", limit);
+    if (cut < limit * 0.5) cut = rest.lastIndexOf(" ", limit);
+    if (cut < limit * 0.5) cut = limit;
+    out.push(rest.slice(0, cut).trimEnd());
+    rest = rest.slice(cut).trimStart();
+    if (out.length >= MAX_CHUNKS - 1) break;
+  }
+  if (rest) out.push(rest);
+  return out;
+}
+
 // ---- the model call, same shape as the Crown backend uses ----
 async function askModel(messages) {
   const payload = { model: MODEL, max_tokens: MAX_TOKENS, system: systemNow(), messages };
@@ -178,14 +196,19 @@ client.on("messageCreate", async (message) => {
     }
     clearInterval(typing);
     if (!answer) answer = "I came back empty on that one. Try rewording the question.";
-    if (answer.length > REPLY_CAP) answer = answer.slice(0, REPLY_CAP - 1).trimEnd() + "\u2026";
 
     const remaining = left - 1;
-    await message.reply({
-      content: answer + "\n-# Calls left this week: " + remaining + "/" + WEEKLY_LIMIT,
-      allowedMentions: { repliedUser: true }
-    });
-    q.upsert.run(String(message.author.id), wk, calls + 1);   // charge only after a successful send
+    const footer = "\n-# Calls left this week: " + remaining + "/" + WEEKLY_LIMIT;
+    const chunks = splitMessage(answer, CHUNK_LIMIT);
+    if (chunks.length) chunks[chunks.length - 1] += footer;   // counter rides the final chunk only
+
+    // first piece replies to the member; the rest chain off the previous piece so a
+    // later reply to any of them still walks the whole thread back for context
+    let anchor = message;
+    for (const piece of chunks) {
+      anchor = await anchor.reply({ content: piece, allowedMentions: { repliedUser: anchor.id === message.id } });
+    }
+    q.upsert.run(String(message.author.id), wk, calls + 1);   // charge once, after the full answer sends
   } catch (err) {
     console.error("[serverai] handler error: " + (err && err.message ? err.message : err));
   }
