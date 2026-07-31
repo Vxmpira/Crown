@@ -31,6 +31,8 @@ const WEEKLY_LIMIT  = parseInt(process.env.SERVERAI_WEEKLY_LIMIT || "10", 10);
 const MAX_TOKENS    = parseInt(process.env.SERVERAI_MAX_TOKENS || "700", 10);
 const CONTEXT_DEPTH = parseInt(process.env.SERVERAI_CONTEXT_DEPTH || "10", 10);
 const REPLY_CAP     = 1800;   // hard character ceiling before the footer, Discord caps content at 2000
+const WEB_ENABLED   = (process.env.SERVERAI_WEB || "on").toLowerCase() !== "off";
+const WEB_MAX_USES  = parseInt(process.env.SERVERAI_WEB_MAX_USES || "3", 10);
 
 const SYSTEM = "You are Server AI, the member assistant inside the Eclipse-X Discord server, " +
   "built and run by BlackCrown Intelligence, the AI division of BlackCrownVxJ LLC. " +
@@ -41,6 +43,13 @@ const SYSTEM = "You are Server AI, the member assistant inside the Eclipse-X Dis
   "short paragraphs, no markdown headers, no bullet walls, under 1500 characters. " +
   "You give information and education, never financial advice; when markets come up, the decision " +
   "always belongs to the trader. Never use em dashes.";
+
+// built per call so the assistant always knows today's date, plus web guidance when enabled
+function systemNow() {
+  const today = new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "long", year: "numeric", month: "long", day: "numeric" }).format(new Date());
+  const web = WEB_ENABLED ? " You can search the web when a question needs current or outside information; ground those answers in what you find and mention the source briefly." : "";
+  return SYSTEM + web + " Today's date is " + today + ", New York time.";
+}
 
 if (!DISCORD_TOKEN) { console.error("[serverai] SERVERAI_DISCORD_TOKEN is not set in /etc/crown/crown.env"); process.exit(1); }
 if (!KEY)           { console.error("[serverai] ANTHROPIC_API_KEY is not set in /etc/crown/crown.env");      process.exit(1); }
@@ -109,11 +118,21 @@ async function buildThread(message, botId) {
 
 // ---- the model call, same shape as the Crown backend uses ----
 async function askModel(messages) {
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
+  const payload = { model: MODEL, max_tokens: MAX_TOKENS, system: systemNow(), messages };
+  if (WEB_ENABLED) payload.tools = [{ type: "web_search_20250305", name: "web_search", max_uses: WEB_MAX_USES }];
+  const call = body => fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "content-type": "application/json", "x-api-key": KEY, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({ model: MODEL, max_tokens: MAX_TOKENS, system: SYSTEM, messages })
+    body: JSON.stringify(body)
   });
+  let r = await call(payload);
+  // if web search itself is the problem, drop it and retry once so the member still gets an answer
+  if (!r.ok && payload.tools) {
+    const errText = await r.text().catch(() => "");
+    console.error("[serverai] web_search rejected (" + r.status + "), retrying without it: " + errText.slice(0, 200));
+    delete payload.tools;
+    r = await call(payload);
+  }
   if (!r.ok) {
     const detail = await r.text().catch(() => "");
     throw new Error("Anthropic " + r.status + ": " + detail.slice(0, 300));
@@ -146,15 +165,18 @@ client.on("messageCreate", async (message) => {
 
     await message.channel.sendTyping();
     const thread = await buildThread(message, client.user.id);
+    const typing = setInterval(() => message.channel.sendTyping().catch(() => {}), 8000);
 
     let answer;
     try {
       answer = await askModel(thread);
     } catch (err) {
+      clearInterval(typing);
       console.error("[serverai] model error: " + err.message);
       await message.reply("The engine hit a snag. Give it a minute and try again.");
       return;   // failed calls are free
     }
+    clearInterval(typing);
     if (!answer) answer = "I came back empty on that one. Try rewording the question.";
     if (answer.length > REPLY_CAP) answer = answer.slice(0, REPLY_CAP - 1).trimEnd() + "\u2026";
 
