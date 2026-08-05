@@ -30,6 +30,8 @@ const CHANNEL_ID    = process.env.SERVERAI_CHANNEL_ID || "1519381180175220766";
 const WEEKLY_LIMIT  = parseInt(process.env.SERVERAI_WEEKLY_LIMIT || "10", 10);
 const MAX_TOKENS    = parseInt(process.env.SERVERAI_MAX_TOKENS || "1500", 10);
 const CONTEXT_DEPTH = parseInt(process.env.SERVERAI_CONTEXT_DEPTH || "10", 10);
+const UNLIMITED_ROLES = (process.env.SERVERAI_UNLIMITED_ROLES || "1493199724084461710,1493199789670535218")
+  .split(",").map(s => s.trim()).filter(Boolean);   // Owner, Co-Owner
 const CHUNK_LIMIT   = 1900;   // per-message ceiling, Discord hard-caps content at 2000
 const MAX_CHUNKS    = 5;      // safety ceiling so one answer can never flood the channel
 const WEB_ENABLED   = (process.env.SERVERAI_WEB || "on").toLowerCase() !== "off";
@@ -175,10 +177,16 @@ client.on("messageCreate", async (message) => {
       return;   // no quota charge
     }
 
-    const { wk, calls, left } = usageFor(message.author.id);
-    if (left <= 0) {
-      await message.reply("You are out of Server AI calls for this week. Your " + WEEKLY_LIMIT + " reset Monday.");
-      return;   // no quota charge
+    const roleCache = message.member ? message.member.roles.cache : null;
+    const unlimited = roleCache ? UNLIMITED_ROLES.some(id => roleCache.has(id)) : false;
+
+    let wk = null, calls = 0, left = WEEKLY_LIMIT;
+    if (!unlimited) {
+      ({ wk, calls, left } = usageFor(message.author.id));
+      if (left <= 0) {
+        await message.reply("You are out of Server AI calls for this week. Your " + WEEKLY_LIMIT + " reset Monday.");
+        return;   // no quota charge
+      }
     }
 
     await message.channel.sendTyping();
@@ -197,8 +205,9 @@ client.on("messageCreate", async (message) => {
     clearInterval(typing);
     if (!answer) answer = "I came back empty on that one. Try rewording the question.";
 
-    const remaining = left - 1;
-    const footer = "\n-# Calls left this week: " + remaining + "/" + WEEKLY_LIMIT;
+    const footer = unlimited
+      ? "\n-# Unlimited access"
+      : "\n-# Calls left this week: " + (left - 1) + "/" + WEEKLY_LIMIT;
     const chunks = splitMessage(answer, CHUNK_LIMIT);
     if (chunks.length) chunks[chunks.length - 1] += footer;   // counter rides the final chunk only
 
@@ -208,7 +217,7 @@ client.on("messageCreate", async (message) => {
     for (const piece of chunks) {
       anchor = await anchor.reply({ content: piece, allowedMentions: { repliedUser: anchor.id === message.id } });
     }
-    q.upsert.run(String(message.author.id), wk, calls + 1);   // charge once, after the full answer sends
+    if (!unlimited) q.upsert.run(String(message.author.id), wk, calls + 1);   // charge once, non-unlimited only
   } catch (err) {
     console.error("[serverai] handler error: " + (err && err.message ? err.message : err));
   }
