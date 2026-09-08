@@ -1,0 +1,27 @@
+# Crown Room Engine (AnythingLLM server)
+# ---------------------------------------
+# Runs AnythingLLM as an INTERNAL service on the EC2 box.
+# Bound to 127.0.0.1 only. It is never exposed to the internet.
+# The Crown backend (server.js on :3000) is the only thing that talks to it.
+# Admin UI access is via SSH tunnel only (see DEPLOY.md).
+
+services:
+  anythingllm:
+    image: mintplexlabs/anythingllm:latest
+    container_name: crown-rooms
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3001"      # localhost only. Do NOT change to 0.0.0.0
+    cap_add:
+      - SYS_ADMIN
+    env_file:
+      - .env
+    environment:
+      - STORAGE_DIR=/app/server/storage
+    volumes:
+      - ./storage:/app/server/storage
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:3001/api/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
