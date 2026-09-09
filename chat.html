@@ -329,6 +329,21 @@
   .ctx button .lk{margin-left:auto;font-size:.62rem;color:var(--champagne);letter-spacing:.1em}
   .ctx .sep{height:1px;background:var(--line-cool);margin:5px 0}
 
+  /* ---------- Four Rooms selector ---------- */
+  .model-pill{cursor:pointer;user-select:none;transition:border-color .18s,background .18s}
+  .model-pill:hover{border-color:var(--line);background:rgba(212,175,55,.06)}
+  .model-pill .mp-chev{opacity:.55;flex:none}
+  .model-pill.roomed{color:var(--gold-bright);border-color:var(--line)}
+  #modelName{white-space:nowrap}
+  @media(max-width:560px){.model-pill{display:flex;padding:6px 10px}#modelName{max-width:96px;overflow:hidden;text-overflow:ellipsis}}
+  .rooms-eyebrow{font-family:var(--display);letter-spacing:.34em;text-transform:uppercase;font-size:.6rem;color:var(--muted);margin-top:30px;text-indent:.34em}
+  .rooms-row{display:flex;gap:9px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+  .room-mini{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:var(--r-pill);border:1px solid var(--line-cool);background:var(--glass);backdrop-filter:var(--blur);color:var(--platinum);font-size:.8rem;cursor:pointer;transition:border-color .18s,background .18s,transform .18s}
+  .room-mini:hover{border-color:var(--line);background:var(--glass-2);transform:translateY(-1px)}
+  .room-mini.on{border-color:var(--gold);color:var(--gold-bright);box-shadow:0 0 18px rgba(212,175,55,.15)}
+  .room-mini .rn{font-family:var(--display);font-size:.62rem;letter-spacing:.18em;color:var(--gold)}
+  .room-mini .lk2{font-size:.58rem;letter-spacing:.14em;color:var(--champagne);border:1px solid var(--line-warm);border-radius:999px;padding:2px 7px}
+
   /* ---------- toast ---------- */
   .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);z-index:80;background:var(--panel-2);border:1px solid var(--line);
     border-radius:12px;padding:12px 19px;color:var(--ivory);font-size:.88rem;box-shadow:0 20px 50px rgba(0,0,0,.6);opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;display:flex;align-items:center;gap:9px;backdrop-filter:var(--blur)}
@@ -380,7 +395,7 @@
         <span class="mh-title" id="headTitle">New chat</span>
       </div>
       <div class="mh-right">
-        <span class="model-pill"><span class="dot"></span> <span id="modelName">Crown · Standard</span></span>
+        <span class="model-pill" id="modelPill" onclick="openRoomMenu(event)" title="Choose your room"><span class="dot"></span> <span id="modelName">Crown · Standard</span><svg class="mp-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
         <span class="pill" id="tierPill">FREE</span>
         <div class="avatar" id="avatar" onclick="openAccount()" title="Account"><svg width="17" height="14" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg></div>
       </div>
@@ -485,6 +500,7 @@
 
 <input id="photoInput" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="onPhoto(this.files)">
 <div class="ctx" id="ctxMenu"></div>
+<div class="ctx" id="roomMenu"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -509,6 +525,16 @@ const HERO_CARDS = [
   { q:"Write a clean Python script that automates a routine task.", title:"Write code", sub:"A script or component", icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>' },
   { q:"Brainstorm creative brand name ideas for a new company.", title:"Brainstorm ideas", sub:"Names, angles, directions", icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>' }
 ];
+/* ===== The Four Rooms (Crowned) ===== */
+const ROOMS = {
+  "unfiltered":      { num:"01", name:"Unfiltered",      label:"Room 01 \u00b7 Unfiltered",      tease:"Direct answers. No hedging.",     previewSys:"You are Room 01 Unfiltered of the BlackCrown Four Rooms: direct, candid, zero corporate hedging. Preview mode, answer in character." },
+  "deep-logic":      { num:"02", name:"Deep-Logic",      label:"Room 02 \u00b7 Deep-Logic",      tease:"Step-by-step reasoning.",         previewSys:"You are Room 02 Deep-Logic of the BlackCrown Four Rooms: rigorous step-by-step reasoning, show your logic cleanly. Preview mode, answer in character." },
+  "visual-analysis": { num:"03", name:"Visual Analysis", label:"Room 03 \u00b7 Visual Analysis", tease:"Charts, screens, documents.",     previewSys:"You are Room 03 Visual Analysis of the BlackCrown Four Rooms: focused on interpreting charts, screenshots and documents. Preview mode, answer in character." },
+  "creativity":      { num:"04", name:"Creativity",      label:"Room 04 \u00b7 Creativity",      tease:"Ideas without limits.",           previewSys:"You are Room 04 Creativity of the BlackCrown Four Rooms: vivid, imaginative, bold ideas. Preview mode, answer in character." }
+};
+S.room = "crown";
+try{ const _rr = localStorage.getItem("crown_room"); if(_rr && (_rr === "crown" || ROOMS[_rr])) S.room = _rr; }catch(e){}
+
 (function seedEmbers(){
   try{
     var box=document.getElementById("embers"); if(!box) return;
@@ -698,7 +724,9 @@ function renderHead(){
   $("headTitle").textContent = c ? c.title : "New chat";
   $("tierPill").textContent = S.tier==="pro"?"PRO":"FREE";
   $("tierPill").classList.toggle("pro", S.tier==="pro");
-  $("modelName").textContent = S.tier==="pro" ? "Crown · Pro" : "Crown · Standard";
+  const rm = S.room && S.room!=="crown" ? ROOMS[S.room] : null;
+  $("modelName").textContent = rm ? rm.label : (S.tier==="pro" ? "Crown · Pro" : "Crown · Standard");
+  $("modelPill").classList.toggle("roomed", !!rm);
   $("avatar").innerHTML = avInner('<svg width="17" height="14" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg>');
   const out = S.tier==="free" && S.tokensUsed>=S.freeLimit;
   $("lockedBar").classList.toggle("show", out);
@@ -712,12 +740,14 @@ function renderChat(){
       <div class="eyebrow2">Intelligence, Crowned</div>
       <h2>How may the Crown<br>serve you today?</h2>
       <p>Crown searches the live web, reads your files, and generates images. Begin your reign below.</p>
-      <div class="chips">${HERO_CARDS.map(card=>`<button class="chip" data-q="${esc(card.q)}" onclick="useChip(this)"><span class="medallion">${card.icon}</span><span class="ct"><span class="ck">${esc(card.title)}</span><span class="cs">${esc(card.sub)}</span></span><svg class="ca" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`).join("")}</div></div>`;
+      <div class="chips">${HERO_CARDS.map(card=>`<button class="chip" data-q="${esc(card.q)}" onclick="useChip(this)"><span class="medallion">${card.icon}</span><span class="ct"><span class="ck">${esc(card.title)}</span><span class="cs">${esc(card.sub)}</span></span><svg class="ca" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`).join("")}</div>
+      <div class="rooms-eyebrow">The Four Rooms</div>
+      <div class="rooms-row">${Object.keys(ROOMS).map(sl=>{const r=ROOMS[sl];return `<button class="room-mini${S.room===sl?' on':''}" onclick="setRoom('${sl}')" title="${esc(r.tease)}"><span class="rn">${r.num}</span>${esc(r.name)}${S.tier==="pro"?"":'<span class="lk2">PRO</span>'}</button>`;}).join("")}</div></div>`;
     return;
   }
   chat.innerHTML = c.messages.map((m,i)=>{
     const u = m.role==='user';
-    const nm = u ? (S.account?.username || "You") : "Crown";
+    const nm = u ? (S.account?.username || "You") : (m.room && ROOMS[m.room] ? ROOMS[m.room].label : "Crown");
     const av = u ? avInner("You") : CROWN_AV;
     let bubble, actions="";
     if(m.choice){
@@ -767,6 +797,40 @@ function openCtx(e, chatId){
 }
 function closeCtx(){ $("ctxMenu").classList.remove("show"); }
 addEventListener("click", e=>{ if(!e.target.closest(".ctx") && !e.target.closest(".dots") && !e.target.closest(".pdots")) closeCtx(); });
+
+/* ===== Four Rooms selector ===== */
+function roomMenuHtml(){
+  const cur = S.room || "crown", pro = S.tier==="pro";
+  let h = `<div class="ctx-label">Crown</div>`;
+  h += `<button onclick="setRoom('crown')">${cur==="crown"?"\ud83d\udc51 ":""}Crown \u00b7 ${pro?"Pro":"Standard"}</button>`;
+  h += `<div class="sep"></div><div class="ctx-label">The Four Rooms${pro?"":" \u00b7 Crowned"}</div>`;
+  for(const slug of Object.keys(ROOMS)){
+    const r = ROOMS[slug];
+    h += `<button onclick="setRoom('${slug}')" title="${esc(r.tease)}">${cur===slug?"\ud83d\udc51 ":""}<span style="font-family:var(--display);font-size:.62rem;letter-spacing:.18em;color:var(--gold)">${r.num}</span> ${esc(r.name)}${pro?"":' <span class="lk">PRO</span>'}</button>`;
+  }
+  return h;
+}
+function openRoomMenu(e){
+  e.stopPropagation();
+  const m = $("roomMenu");
+  if(m.classList.contains("show")){ m.classList.remove("show"); return; }
+  m.innerHTML = roomMenuHtml();
+  m.classList.add("show");
+  const r = $("modelPill").getBoundingClientRect(), w = 236;
+  m.style.left = Math.max(8, Math.min(r.right - w, innerWidth - w - 8)) + "px";
+  m.style.top  = (r.bottom + 8) + "px";
+}
+function closeRoomMenu(){ $("roomMenu").classList.remove("show"); }
+addEventListener("click", e=>{ if(!e.target.closest("#roomMenu") && !e.target.closest("#modelPill")) closeRoomMenu(); });
+function setRoom(slug){
+  closeRoomMenu();
+  if(slug!=="crown" && S.tier!=="pro"){ proGate(ROOMS[slug].name + " (Room " + ROOMS[slug].num + ")"); return; }
+  S.room = slug;
+  try{ localStorage.setItem("crown_room", slug); }catch(e){}
+  renderHead(); renderChat();
+  if(slug!=="crown") toast("\ud83d\udc51 " + ROOMS[slug].label);
+  const inp = $("input"); if(inp) inp.focus();
+}
 
 /* ===== account / profile ===== */
 function openAccount(){ renderAccount(); $("accountModal").classList.add("show"); }
@@ -1149,6 +1213,7 @@ const est = s => Math.max(1, Math.ceil((s||"").length/4));
 async function send(){
   const text=$("input").value.trim();
   if((!text && !pendingAtts.length) || busy) return;
+  if(S.room && S.room!=="crown" && pendingAtts.length){ toast("Attachments run in Crown chat for now. Switch to Crown or remove the files."); return; }
   if(S.tier!=="pro" && S.tokensUsed>=S.freeLimit){ renderHead(); openUpgrade(); return; }
   let c=activeChat(); if(!c){ newChat(); c=activeChat(); }
   const atts = pendingAtts; pendingAtts=[]; renderAtts();
@@ -1158,6 +1223,13 @@ async function send(){
   c.messages.push(msg);
   if(c.title==="New chat"){ const base = text || atts[0]?.name || "Shared a file"; c.title = base.length>34 ? base.slice(0,34)+"…" : base; }
   $("input").value=""; $("input").style.height="28px";
+  // Room sends skip the image interception; rooms answer in text.
+  if(S.room && S.room!=="crown"){
+    if(S.tier!=="pro"){ render(); openUpgrade(); return; }
+    render();
+    await roomReply(c, text);
+    return;
+  }
   // If it reads like an image request (and nothing is attached), offer to generate instead.
   const wantsImage = !atts.length && /\b(create|generate|make|draw|design|render|paint)\b[^.?!\n]{0,40}\b(image|picture|photo|logo|artwork|drawing|illustration|wallpaper|poster|icon)\b/i.test(text);
   if(wantsImage){ c.messages.push({role:"assistant", choice:{prompt:text}}); render(); return; }
@@ -1202,6 +1274,52 @@ async function modelReply(c, lastText){
     if(err.code==="limit"){ c.messages.push({role:"assistant",content:"👑 "+err.message}); render(); if(S.tier!=="pro") openUpgrade(); }
     else if(err.code==="rate"){ c.messages.push({role:"assistant",content:err.message}); render(); }
     else{ c.messages.push({role:"assistant",content:"⚠️ Couldn't reach the model backend.\n\nOn your live site this calls /api/chat. If you see this there, check: sudo systemctl status crown, and that your API key is set in /etc/crown/crown.env.\n\n("+err.message+")"}); render(); }
+  }finally{ busy=false; $("send").disabled=false; renderHead(); $("input").focus(); }
+}
+/* ===== Four Rooms reply (Crowned): non-streaming POST to /api/room-chat, typewriter reveal ===== */
+async function roomReply(c, lastText){
+  busy=true; $("send").disabled=true;
+  const slug = S.room, R = ROOMS[slug] || { name:"Room", label:"Room" };
+  const idx = c.messages.push({ role:"assistant", content:"", streaming:true, room:slug }) - 1;
+  render();
+  const chat=$("chat");
+  const node = chat.querySelector(".msg:last-child");
+  const bubble = node ? node.querySelector(".bubble") : null;
+  if(bubble){ bubble.classList.remove("md"); bubble.innerHTML='<span class="searching"><span class="tdots"><i></i><i></i><i></i></span> '+(slug==="deep-logic" ? "Deep-Logic is reasoning\u2026" : esc(R.name)+" is composing\u2026")+'</span>'; if(nearBottom(chat)) chat.scrollTop=chat.scrollHeight; }
+  try{
+    let reply, usage=null;
+    if(IS_PREVIEW){
+      reply = await previewFull([{ role:"user", content:(R.previewSys ? R.previewSys+"\n\n" : "")+lastText }]);
+    } else {
+      const res = await fetch("/api/room-chat", { method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({ room:slug, message:lastText }) });
+      const d = await res.json().catch(()=>({}));
+      if(res.status===402){ const e=new Error(d.message||"Limit reached"); e.code="limit"; throw e; }
+      if(res.status===403){ const e=new Error(d.message||"The Rooms are a Crowned feature."); e.code="crowned"; throw e; }
+      if(res.status===429){ const e=new Error(d.message||"You're going a bit fast. Give it a moment."); e.code="rate"; throw e; }
+      if(!res.ok) throw new Error(d.message || ("The room did not answer ("+res.status+")"));
+      reply = d.text || "\u2026"; usage = d.usage || null;
+    }
+    c.messages[idx].content = "";
+    if(bubble){ bubble.classList.add("md"); bubble.innerHTML=""; }
+    const words = String(reply).split(/(\s+)/);
+    for(let i=0;i<words.length;i+=4){
+      c.messages[idx].content += words.slice(i,i+4).join("");
+      if(bubble){ bubble.innerHTML = mdToHtml(c.messages[idx].content) + '<span class="stream-caret"></span>'; if(nearBottom(chat)) chat.scrollTop=chat.scrollHeight; }
+      await sleep(12);
+    }
+    c.messages[idx].content = String(reply); delete c.messages[idx].streaming;
+    if(usage){
+      if(typeof usage.used==="number") S.tokensUsed=usage.used;
+      if(typeof usage.limit==="number") S.freeLimit=usage.limit;
+      if(usage.tier) S.tier=usage.tier;
+    }
+    render();
+  }catch(err){
+    c.messages.splice(idx,1);
+    if(err.code==="limit"){ c.messages.push({role:"assistant",content:"\ud83d\udc51 "+err.message}); render(); }
+    else if(err.code==="crowned"){ c.messages.push({role:"assistant",content:"\ud83d\udc51 "+err.message}); render(); openUpgrade(); }
+    else if(err.code==="rate"){ c.messages.push({role:"assistant",content:err.message}); render(); }
+    else { c.messages.push({role:"assistant",content:"\u26a0\ufe0f "+(err.message||"The room engine is not responding.")}); render(); }
   }finally{ busy=false; $("send").disabled=false; renderHead(); $("input").focus(); }
 }
 /* user picked an option on the "looks like an image?" prompt */

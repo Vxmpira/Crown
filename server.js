@@ -48,6 +48,16 @@ const OPENAI_IMG_URL = process.env.IMAGE_API_URL || "https://api.openai.com/v1/i
 const PICSART_T2I    = "https://genai-api.picsart.io/v1/text2image";
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+// Four Rooms engine (AnythingLLM, internal only). Dormant until ROOMS_API_KEY is set in crown.env.
+// server.js is the ONLY public door; the engine listens on 127.0.0.1:3001 inside Docker and is never exposed.
+const ROOMS_BASE = (process.env.ROOMS_BASE_URL || "http://127.0.0.1:3001/api/v1").replace(/\/+$/, "");
+const ROOMS_KEY  = process.env.ROOMS_API_KEY;
+// room slug -> credit multiplier. Reasoning-heavy rooms burn far more real tokens per answer, so they bill heavier.
+// Override from crown.env with ROOM_MULTIPLIERS='{"deep-logic":4}' style JSON if pricing needs tuning later.
+let ROOM_MULT = { "unfiltered": 1, "deep-logic": 3, "visual-analysis": 2, "creativity": 1 };
+try { if (process.env.ROOM_MULTIPLIERS) ROOM_MULT = Object.assign(ROOM_MULT, JSON.parse(process.env.ROOM_MULTIPLIERS)); } catch (_) { console.error("ROOM_MULTIPLIERS is not valid JSON; using defaults"); }
+const ROOM_SLUGS = Object.keys(ROOM_MULT);
+
 // Admin portal: a logged-in user whose email is in ADMIN_EMAILS (comma-separated) gets admin access.
 const ADMIN_EMAILS  = String(process.env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
 const PRO_PRICE_USD = parseFloat(process.env.PRO_PRICE_USD || "19.99");
@@ -208,7 +218,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req,
 app.use(express.json({ limit: "14mb" }));   // headroom for image/PDF attachments (base64) on /api/chat
 
 app.get("/api/health", (_req, res) =>
-  res.json({ ok:true, model:MODEL, keyLoaded:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, db:true, accounts:true, images:!!IMAGE_KEY, email:!!mailer }));
+  res.json({ ok:true, model:MODEL, keyLoaded:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, db:true, accounts:true, images:!!IMAGE_KEY, email:!!mailer, rooms:!!ROOMS_KEY }));
 
 // ---- auth ----
 app.post("/api/register", (req, res) => {
@@ -490,6 +500,60 @@ app.post("/api/chat", async (req, res) => {
   } catch (e) {
     if (res.headersSent) { try { res.write("data: " + JSON.stringify({ error:"server_error", message:e.message }) + "\n\n"); } catch {} res.end(); }
     else res.status(500).json({ error:"server_error", message:e.message });
+  }
+});
+
+// ---- Four Rooms (Crowned tier): proxied to the internal room engine ----
+// The frontend sends { room, message }. History threading is per user per room via sessionId,
+// so each room remembers its own conversation with that user and rooms never bleed into each other.
+app.post("/api/room-chat", async (req, res) => {
+  if (rateLimited("room:"+clientIp(req), 20, 60000)) return res.status(429).json({ error:"rate", message:"You're going a bit fast. Give it a moment." });
+  if (!ROOMS_KEY) return res.status(503).json({ error:"rooms_unconfigured", message:"The Rooms are not open yet." });
+
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
+  if (effectiveTier(u) !== "pro") return res.status(403).json({ error:"crowned_only", message:"The Rooms are a Crowned feature. Upgrade to enter." });
+
+  const room = String(req.body.room || "").trim().toLowerCase();
+  if (!ROOM_SLUGS.includes(room)) return res.status(400).json({ error:"bad_room", message:"Unknown room." });
+  const message = String(req.body.message || "").trim();
+  if (!message) return res.status(400).json({ error:"empty", message:"Nothing to send." });
+  if (message.length > 32000) return res.status(413).json({ error:"too_long", message:"That message is too long." });
+
+  const limit = userLimit(u);
+  if (u.tokens_used >= limit)
+    return res.status(402).json({ error:"limit", tier:"pro", used:u.tokens_used, limit,
+      message:"You've reached the fair-use ceiling for this period. Please contact support." });
+
+  try {
+    const upstream = await fetch(`${ROOMS_BASE}/workspace/${room}/chat`, {
+      method: "POST",
+      headers: { "content-type":"application/json", "authorization":"Bearer " + ROOMS_KEY },
+      body: JSON.stringify({ message, mode:"chat", sessionId: `u${u.id}-${room}` })
+    });
+    const data = await upstream.json().catch(() => null);
+    if (!upstream.ok || !data || data.error) {
+      const msg = (data && (data.error || data.message)) || ("Room request failed (" + upstream.status + ")");
+      console.error("[room-chat] " + room + ": " + (typeof msg === "string" ? msg : JSON.stringify(msg)));
+      return res.status(502).json({ error:"room_error", message: typeof msg === "string" ? msg : "The room did not answer." });
+    }
+
+    // Deep-Logic thinks out loud in <think> blocks. Users get the answer, not the monologue.
+    let text = String(data.textResponse || "");
+    text = text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+    if (!text) return res.status(502).json({ error:"room_empty", message:"The room returned an empty answer. Try again." });
+
+    // Meter real usage through the existing token system. If the engine reports token metrics use them,
+    // otherwise estimate at ~4 chars per token. Multiplier makes heavy rooms drain the pool faster.
+    const rawTokens = (data.metrics && data.metrics.total_tokens) ? data.metrics.total_tokens : Math.ceil((message.length + text.length) / 4);
+    const spent = Math.ceil(rawTokens * (ROOM_MULT[room] || 1));
+    q.addTokens.run(spent, u.id);
+    const nowUsed = u.tokens_used + spent;
+
+    res.json({ room, text, usage:{ tier:"pro", used:nowUsed, limit, remaining:Math.max(0, limit - nowUsed), multiplier: ROOM_MULT[room] || 1 } });
+  } catch (e) {
+    console.error("[room-chat] " + room + ": " + e.message);
+    res.status(502).json({ error:"room_unreachable", message:"The room engine is not responding." });
   }
 });
 
