@@ -3,383 +3,499 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Crown: Your Private AI Workspace | BlackCrown VxJ</title>
-<meta name="description" content="Crown isn't another chatbot. It's your private AI workspace. Refined, organized, and yours. Free to start, unlimited with Pro." />
-<link rel="canonical" href="https://blackcrown-intelligence.com/" />
-<meta name="theme-color" content="#070709" />
+<title>BlackCrown Intelligence | A private AI with Four Rooms, by BlackCrownVxJ</title>
+<meta name="description" content="BlackCrown Intelligence is the AI division of the BlackCrown house: a private workspace built around Four Rooms, each tuned for a different kind of thinking. Free to start. Crowned for $49.99/mo." />
+<meta name="theme-color" content="#06070a" />
+<meta property="og:title" content="BlackCrown Intelligence | Intelligence, Crowned" />
+<meta property="og:description" content="A private AI with Four Rooms: Unfiltered, Deep-Logic, Visual Analysis, Creativity. Your data is never sold or trained on. Free to start." />
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="Crown | BlackCrown VxJ" />
-<meta property="og:title" content="Crown: Your Private AI Workspace" />
-<meta property="og:description" content="A private AI workspace where your data stays yours, your work stays organized, and Pro is flat-out unlimited." />
 <meta property="og:url" content="https://blackcrown-intelligence.com/" />
-<meta property="og:image" content="https://blackcrown-intelligence.com/og-image.png" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Crown: Your Private AI Workspace" />
-<meta name="twitter:description" content="A private AI workspace where your data stays yours, your work stays organized, and Pro is flat-out unlimited." />
-<meta name="twitter:image" content="https://blackcrown-intelligence.com/og-image.png" />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --obsidian:#070709;--obsidian-2:#0c0c11;--panel:#13131a;--panel-2:#1a1a23;--panel-3:#21212b;
-    --gold:#d4af37;--gold-bright:#f5e0a3;--gold-deep:#9c7c1f;--garnet:#8b1a2b;--garnet-soft:#b3243a;
-    --ivory:#ece7dd;--muted:#8c867a;--muted-2:#5f5b52;
-    --line:rgba(212,175,55,.16);--line-soft:rgba(236,231,221,.08);
-    --display:'Cinzel',serif;--body:'Hanken Grotesk',system-ui,sans-serif;--radius:16px;
+    --void:#06070a; --obsidian:#0a0b10; --panel:#12151c; --panel-2:#191d26; --panel-3:#222733;
+    --gold:#d4af37; --gold-bright:#f4e4b0; --gold-deep:#9c7c1f; --garnet:#7c1626; --garnet-soft:#b3243a;
+    --ivory:#e9ebf0; --platinum:#cdd6e2; --muted:#828c9b; --muted-2:#535b69;
+    --line:rgba(212,175,55,.16); --line-soft:rgba(205,214,226,.09); --line-warm:rgba(212,175,55,.1);
+    --glass:rgba(20,24,32,.6); --glass-2:rgba(26,31,41,.72);
+    --display:'Cinzel',Georgia,serif; --body:'Hanken Grotesk',system-ui,-apple-system,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --blur:saturate(150%) blur(20px); --r:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-  body{background:var(--obsidian);color:var(--ivory);font-family:var(--body);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+  html{scroll-behavior:smooth}
+  body{background:var(--void);color:var(--ivory);font-family:var(--body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
   ::selection{background:rgba(212,175,55,.3);color:#fff}
-  img,svg{max-width:100%}
+  a{color:inherit;text-decoration:none}
+  button{font-family:var(--body);color:inherit;cursor:pointer}
+  img,svg{display:block}
 
-  .bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:radial-gradient(55% 45% at 50% -5%,rgba(212,175,55,.13),transparent 70%),
-      radial-gradient(40% 38% at 88% 8%,rgba(139,26,43,.16),transparent 70%),
-      radial-gradient(45% 45% at 8% 75%,rgba(212,175,55,.06),transparent 70%),
-      linear-gradient(180deg,var(--obsidian),var(--obsidian-2))}
-  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-  .embers{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
-  .ember{position:absolute;bottom:-10px;border-radius:50%;background:var(--gold);opacity:0;filter:blur(.4px);animation:float linear infinite}
-  @keyframes float{0%{transform:translateY(0) scale(1);opacity:0}12%{opacity:.7}88%{opacity:.5}100%{transform:translateY(-104vh) scale(.4);opacity:0}}
-  .crown-wm{position:fixed;z-index:0;top:42%;left:50%;transform:translate(-50%,-50%);width:min(120vw,1000px);opacity:.022;pointer-events:none;color:var(--gold)}
-  main,nav,footer{position:relative;z-index:2}
+  /* ---------- ambient ---------- */
+  .bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(56% 46% at 62% 6%,rgba(212,175,55,.18),rgba(212,175,55,.05) 36%,transparent 62%),
+      radial-gradient(42% 48% at 6% 108%,rgba(58,86,150,.16),transparent 62%),
+      radial-gradient(70% 60% at 60% 42%,rgba(13,16,22,0),rgba(0,0,0,.6) 94%)}
+  .bg .rays{position:absolute;left:50%;top:-14%;width:1200px;height:800px;transform:translateX(-46%);opacity:.45;
+    background:conic-gradient(from 200deg at 50% 0%,transparent 0deg,rgba(212,175,55,.09) 18deg,transparent 36deg,transparent 60deg,rgba(212,175,55,.06) 80deg,transparent 104deg,transparent 150deg,rgba(244,231,180,.07) 172deg,transparent 196deg);
+    -webkit-mask:radial-gradient(60% 80% at 50% 0%,#000,transparent 72%);mask:radial-gradient(60% 80% at 50% 0%,#000,transparent 72%);animation:sway 20s ease-in-out infinite alternate}
+  @keyframes sway{from{transform:translateX(-46%) rotate(-3deg)}to{transform:translateX(-46%) rotate(3deg)}}
+  .bg .grid{position:absolute;inset:0;background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);background-size:52px 52px;opacity:.35;-webkit-mask:radial-gradient(120% 90% at 60% 22%,#000,transparent 74%);mask:radial-gradient(120% 90% at 60% 22%,#000,transparent 74%)}
+  .topedge{position:fixed;top:0;left:0;right:0;height:1px;z-index:60;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(205,214,226,.22) 18%,rgba(246,231,180,.75) 50%,rgba(205,214,226,.22) 82%,transparent)}
 
-  .wrap{max-width:1200px;margin:0 auto;padding:0 clamp(18px,4vw,28px)}
-  .eyebrow{font-family:var(--display);letter-spacing:.34em;text-transform:uppercase;font-size:clamp(.62rem,1.4vw,.72rem);color:var(--gold);font-weight:600}
-  .gold-text{background:linear-gradient(115deg,var(--gold-deep),var(--gold-bright) 45%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .btn{font-family:var(--body);font-weight:600;border:none;cursor:pointer;border-radius:999px;padding:13px 26px;font-size:.94rem;
-    transition:transform .15s ease,box-shadow .2s ease,border-color .15s ease,color .15s ease,background-color .15s ease;text-decoration:none;display:inline-flex;align-items:center;gap:9px;position:relative;overflow:hidden}
-  .btn-gold{background:linear-gradient(115deg,var(--gold-deep),var(--gold) 52%,var(--gold-bright));color:#1a1405;box-shadow:0 6px 26px rgba(212,175,55,.3)}
-  .btn-gold::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg)}
-  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 12px 38px rgba(212,175,55,.46)}
-  .btn-gold:hover::after{animation:sheen .9s forwards}
-  @keyframes sheen{to{left:140%}}
-  .btn-ghost{background:rgba(255,255,255,.02);color:var(--ivory);border:1px solid var(--line)}
-  .btn-ghost:hover{border-color:var(--gold);color:var(--gold-bright);transform:translateY(-2px)}
+  .wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 26px}
 
-  /* nav */
-  .topnav{position:fixed;top:0;left:0;right:0;z-index:30;transition:background .3s,border-color .3s}
-  .topnav.solid{background:linear-gradient(180deg,rgba(7,7,9,.92),rgba(7,7,9,.66));backdrop-filter:blur(12px);border-bottom:1px solid var(--line-soft)}
-  .nav-inner{display:flex;align-items:center;justify-content:space-between;max-width:1200px;margin:0 auto;padding:16px clamp(18px,4vw,28px)}
-  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ivory);cursor:pointer}
-  .brand .crown{width:32px;height:25px;color:var(--gold);filter:drop-shadow(0 2px 10px rgba(212,175,55,.4));flex-shrink:0}
-  .brand .name{font-family:var(--display);font-weight:700;letter-spacing:.1em;font-size:clamp(.92rem,2.4vw,1.02rem);line-height:1}
-  .brand .name b{color:var(--gold)}
-  .brand small{display:block;font-weight:500;letter-spacing:.3em;font-size:.5rem;color:var(--muted);text-transform:uppercase;margin-top:3px}
-  .nav-links{display:flex;align-items:center;gap:clamp(16px,3vw,30px)}
-  .nav-links a{color:var(--muted);text-decoration:none;font-size:.92rem;font-weight:500;transition:color .25s}
-  .nav-links a:hover{color:var(--ivory)}
-  @media(max-width:680px){.nav-links a:not(.btn){display:none}.brand small{display:none}.btn{padding:11px 18px;font-size:.88rem}}
+  /* ---------- shared chrome ---------- */
+  .eyebrow{font-family:var(--mono);font-size:.66rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+  .eyebrow .sys{color:var(--muted-2)}
+  h2.sec{font-family:var(--display);font-weight:700;font-size:clamp(1.7rem,3.6vw,2.5rem);line-height:1.15;letter-spacing:.01em;margin-bottom:14px}
+  .lede{color:var(--muted);font-size:1.03rem;line-height:1.65;max-width:640px}
+  .num{font-family:var(--mono);font-size:.7rem;letter-spacing:.24em;color:var(--gold)}
+  .chip{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:var(--platinum);border:1px solid var(--line-soft);background:var(--glass);backdrop-filter:var(--blur);border-radius:999px;padding:7px 14px}
+  .chip .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px rgba(212,175,55,.9);animation:pulse 2.2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .btn{display:inline-flex;align-items:center;gap:10px;border-radius:12px;padding:14px 26px;font-weight:600;font-size:.95rem;border:1px solid transparent;transition:transform .18s,box-shadow .18s,border-color .18s,background .18s}
+  .btn-gold{background:linear-gradient(135deg,var(--gold-bright),var(--gold) 55%,var(--gold-deep));color:#1a1405;box-shadow:0 10px 34px rgba(212,175,55,.25)}
+  .btn-gold:hover{transform:translateY(-2px);box-shadow:0 16px 44px rgba(212,175,55,.35)}
+  .btn-ghost{border-color:var(--line-soft);background:var(--glass);backdrop-filter:var(--blur);color:var(--platinum)}
+  .btn-ghost:hover{border-color:var(--line);color:var(--gold-bright)}
 
-  /* hero */
-  .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(30px,5vw,50px);align-items:center;padding:clamp(120px,18vw,170px) 0 clamp(60px,9vw,90px)}
-  @media(max-width:980px){.hero{grid-template-columns:1fr;text-align:center}}
-  .hero h1{font-family:var(--display);font-weight:800;line-height:1.03;font-size:clamp(2.5rem,8vw,4.7rem);margin:20px 0 0;letter-spacing:-.01em;opacity:0;animation:rise .9s .16s forwards}
-  .hero .eyebrow{opacity:0;animation:rise .8s .05s forwards}
-  .hero p.sub{max-width:520px;margin:24px 0 0;color:var(--muted);font-size:clamp(1rem,2.5vw,1.1rem);opacity:0;animation:rise .9s .32s forwards}
-  @media(max-width:980px){.hero p.sub{margin-left:auto;margin-right:auto}}
-  .cta-row{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap;opacity:0;animation:rise .9s .48s forwards}
-  @media(max-width:980px){.cta-row{justify-content:center}}
-  .trust{margin-top:24px;color:var(--muted-2);font-size:.8rem;letter-spacing:.04em;opacity:0;animation:rise .9s .64s forwards;display:flex;gap:16px;flex-wrap:wrap}
-  @media(max-width:980px){.trust{justify-content:center}}
-  .trust span{display:inline-flex;align-items:center;gap:7px}.trust svg{color:var(--gold)}
-  @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  /* ---------- nav ---------- */
+  nav{position:sticky;top:0;z-index:50;background:rgba(6,7,10,.72);backdrop-filter:var(--blur);border-bottom:1px solid var(--line-soft)}
+  .nav-in{max-width:1180px;margin:0 auto;padding:0 26px;height:72px;display:flex;align-items:center;gap:26px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .mark{filter:drop-shadow(0 2px 10px rgba(212,175,55,.35))}
+  .brand .bt{font-family:var(--display);font-weight:700;font-size:1.02rem;letter-spacing:.14em}
+  .brand .bt b{color:var(--gold)}
+  .brand .bt small{display:block;font-family:var(--mono);font-weight:500;font-size:.5rem;letter-spacing:.42em;color:var(--muted);margin-top:2px}
+  .nav-links{display:flex;gap:24px;margin-left:auto;align-items:center}
+  .nav-links a{font-size:.88rem;color:var(--muted);transition:color .15s}
+  .nav-links a:hover{color:var(--gold-bright)}
+  .nav-cta{margin-left:6px}
+  .house-link{font-family:var(--mono);font-size:.6rem;letter-spacing:.2em;color:var(--muted-2);border:1px solid var(--line-soft);border-radius:999px;padding:6px 12px}
+  .house-link:hover{color:var(--gold);border-color:var(--line)}
+  @media(max-width:860px){.nav-links a.hideable{display:none}.house-link{display:none}}
 
-  .hero-visual{position:relative;opacity:0;animation:rise 1s .55s forwards;min-width:0}
-  .mock-ring{position:absolute;inset:-12% -8%;border-radius:30px;background:conic-gradient(from 0deg,rgba(212,175,55,0),rgba(212,175,55,.22),rgba(139,26,43,.18),rgba(212,175,55,0));filter:blur(38px);animation:spin 14s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .mock-frame{position:relative;background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 50px 120px -40px rgba(0,0,0,.95);transform:perspective(1400px) rotateY(-9deg) rotateX(3deg);transition:transform .6s}
-  .hero-visual:hover .mock-frame{transform:perspective(1400px) rotateY(-4deg) rotateX(1deg)}
-  @media(max-width:980px){.mock-frame{transform:none!important;max-width:520px;margin:0 auto}}
-  .mock-bar{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,rgba(212,175,55,.05),transparent)}
-  .mock-bar i{width:9px;height:9px;border-radius:50%;background:var(--panel-3)}.mock-bar i:first-child{background:var(--garnet)}
-  .mock-bar .mt{margin-left:8px;font-family:var(--display);font-size:.72rem;letter-spacing:.1em;color:var(--muted)}
-  .mock-body{padding:18px;display:flex;flex-direction:column;gap:12px;min-height:280px}
-  .mb{padding:11px 14px;border-radius:13px;font-size:.85rem;max-width:82%;line-height:1.5}
-  .mb.bot{background:var(--panel-2);border:1px solid var(--line-soft);border-top-left-radius:4px;align-self:flex-start}
-  .mb.user{align-self:flex-end;border-top-right-radius:4px;color:#1a1405;background:linear-gradient(115deg,var(--gold),var(--gold-bright))}
-  .mock-input{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;color:var(--muted-2);font-size:.82rem;background:var(--obsidian)}
-  .mock-input .mi-send{margin-left:auto;width:30px;height:30px;border-radius:8px;background:linear-gradient(115deg,var(--gold-deep),var(--gold-bright));display:flex;align-items:center;justify-content:center;color:#1a1405;flex-shrink:0}
+  /* ---------- hero ---------- */
+  .hero{padding:110px 0 30px;text-align:center;position:relative}
+  .hero .chips-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:34px}
+  .hero h1{font-family:var(--display);font-weight:700;font-size:clamp(2.6rem,6.6vw,4.4rem);line-height:1.08;letter-spacing:.01em;
+    background:linear-gradient(180deg,#fff 6%,var(--gold-bright) 46%,var(--gold) 82%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 6px 40px rgba(212,175,55,.18));margin-bottom:20px}
+  .hero .lede{margin:0 auto 38px}
+  .hero .cta-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+  .hero .fine{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;color:var(--muted-2);margin-top:18px;text-transform:uppercase}
+  .crown-hero{width:96px;height:78px;margin:0 auto 30px;filter:drop-shadow(0 10px 40px rgba(212,175,55,.4));animation:float 6s ease-in-out infinite}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
-  .stats{display:flex;justify-content:center;gap:clamp(28px,6vw,60px);flex-wrap:wrap;padding:30px 0 10px;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
-  .stat{text-align:center}
-  .stat b{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,4vw,1.9rem);display:block}
-  .stat span{color:var(--muted);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase}
+  /* ---------- marquee ---------- */
+  .marq{border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);margin:64px 0 0;overflow:hidden;background:rgba(255,255,255,.015)}
+  .marq-track{display:flex;gap:0;white-space:nowrap;animation:marq 36s linear infinite;width:max-content;padding:13px 0}
+  .marq span{font-family:var(--mono);font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);padding:0 28px}
+  .marq b{color:var(--gold);font-weight:500}
+  @keyframes marq{to{transform:translateX(-50%)}}
 
-  section h2{font-family:var(--display);font-weight:700;font-size:clamp(1.8rem,5vw,2.9rem);text-align:center;margin-top:14px;letter-spacing:-.01em}
-  .sec-head{text-align:center;margin-bottom:clamp(36px,6vw,54px)}
-  .sec-head p{color:var(--muted);max-width:580px;margin:14px auto 0;font-size:clamp(.95rem,2.4vw,1.05rem)}
+  section{padding:96px 0}
+  .sec-head{margin-bottom:46px}
 
-  /* WHY CROWN */
-  .why{padding:clamp(70px,11vw,110px) 0 clamp(40px,6vw,60px)}
-  .why-lead{max-width:760px;margin:0 auto clamp(40px,6vw,56px);text-align:center}
-  .why-lead .big{font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,4.5vw,2.4rem);line-height:1.2;margin-top:14px}
-  .why-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:1040px;margin:0 auto}
-  @media(max-width:760px){.why-grid{grid-template-columns:1fr}}
-  .why-card{position:relative;background:linear-gradient(165deg,var(--panel-2),var(--panel) 72%);border:1px solid var(--line-soft);border-radius:18px;padding:30px 30px 32px 34px;overflow:hidden;transition:transform .35s cubic-bezier(.2,.7,.2,1),border-color .35s,box-shadow .35s}
-  .why-card>*{position:relative;z-index:1}
-  .why-card::before{content:"";position:absolute;left:0;top:16px;bottom:16px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(180deg,var(--gold-bright),var(--gold) 42%,var(--garnet));opacity:.85;transition:opacity .35s,box-shadow .35s}
-  .why-card::after{content:"";position:absolute;inset:0;z-index:0;background:radial-gradient(115% 80% at 88% 0%,rgba(212,175,55,.12),transparent 58%);opacity:0;transition:opacity .35s}
-  .why-card:hover{transform:translateY(-6px);border-color:rgba(212,175,55,.32);box-shadow:0 22px 50px -26px rgba(0,0,0,.9),0 0 0 1px rgba(212,175,55,.1)}
-  .why-card:hover::before{opacity:1;box-shadow:0 0 16px -2px rgba(212,175,55,.55)}
-  .why-card:hover::after{opacity:1}
-  .why-card:hover .why-rn{opacity:.13;transform:translateY(0)}
-  .why-card:hover .why-ic{border-color:rgba(212,175,55,.55);box-shadow:inset 0 1px 0 rgba(245,224,163,.25),0 0 20px -6px rgba(212,175,55,.7)}
-  .why-rn{position:absolute;top:-8px;right:16px;font-family:var(--display);font-weight:700;font-size:6.6rem;line-height:1;color:var(--gold-bright);opacity:.06;letter-spacing:.02em;pointer-events:none;user-select:none;transform:translateY(5px);transition:opacity .35s,transform .35s}
-  .why-ic{width:48px;height:48px;border-radius:13px;display:grid;place-items:center;color:var(--gold-bright);background:radial-gradient(125% 125% at 28% 18%,rgba(212,175,55,.2),rgba(33,33,43,.55));border:1px solid rgba(212,175,55,.3);box-shadow:inset 0 1px 0 rgba(245,224,163,.18);margin-bottom:18px;transition:border-color .35s,box-shadow .35s}
-  .why-card h3{font-family:var(--display);font-weight:600;font-size:1.3rem;color:var(--ivory);margin:0 0 10px;letter-spacing:.015em}
-  .why-card p{color:var(--muted);font-size:.95rem;line-height:1.72;margin:0;max-width:46ch}
+  /* ---------- rooms ---------- */
+  .rooms-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  @media(max-width:860px){.rooms-grid{grid-template-columns:1fr}}
+  .room{position:relative;border:1px solid var(--line-soft);border-radius:var(--r);background:var(--glass);backdrop-filter:var(--blur);padding:30px 28px;transition:border-color .2s,transform .2s,box-shadow .2s;overflow:hidden}
+  .room::before{content:"";position:absolute;inset:0;background:radial-gradient(70% 60% at 20% 0%,rgba(212,175,55,.08),transparent 60%);opacity:0;transition:opacity .25s}
+  .room:hover{border-color:var(--line);transform:translateY(-3px);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+  .room:hover::before{opacity:1}
+  .room .rhead{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+  .room h3{font-family:var(--display);font-weight:700;font-size:1.28rem;letter-spacing:.02em}
+  .room p{color:var(--muted);font-size:.95rem;line-height:1.65}
+  .room .fit{margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft);font-size:.86rem;color:var(--platinum)}
+  .room .fit b{color:var(--gold)}
+  .room .rtag{margin-left:auto;font-family:var(--mono);font-size:.58rem;letter-spacing:.18em;color:var(--muted-2);border:1px solid var(--line-soft);border-radius:999px;padding:4px 10px}
+  .room.soon{border-style:dashed}
+  .room.soon .rtag{color:var(--gold);border-color:var(--line-warm)}
+  .room.wide{grid-column:1 / -1}
+  @media(max-width:860px){.room.wide{grid-column:auto}}
 
-  /* COMPARE: featured Crown column */
-  .compare{padding:clamp(50px,8vw,90px) 0}
-  .cmp{max-width:860px;margin:0 auto;display:grid;grid-template-columns:1.15fr 1fr 1fr;
-    border-radius:20px;overflow:hidden;border:1px solid var(--line-soft);
-    background:linear-gradient(180deg,var(--panel),var(--obsidian-2));
-    box-shadow:0 40px 100px -50px rgba(0,0,0,.9)}
-  .cmp .c{padding:clamp(13px,2.6vw,18px) clamp(11px,2.6vw,22px);display:flex;align-items:center;gap:9px;
-    font-size:clamp(.78rem,2vw,.93rem);line-height:1.35;border-top:1px solid var(--line-soft);min-width:0}
-  .cmp .c.r1{border-top:none}
-  .cmp .feat{color:var(--ivory);font-weight:600}
-  .cmp .them{color:var(--muted-2)}
-  .cmp .them .ic{color:var(--garnet-soft);opacity:.6;flex-shrink:0}
-  .cmp .us{background:linear-gradient(180deg,rgba(212,175,55,.10),rgba(212,175,55,.04));
-    color:var(--ivory);font-weight:600;border-left:1px solid var(--line)}
-  .cmp .us .ic{color:var(--gold);flex-shrink:0}
-  .cmp .h{font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-  .cmp .h.feat{color:var(--muted-2);font-size:clamp(.6rem,1.6vw,.7rem)}
-  .cmp .h.them{color:var(--muted);font-size:clamp(.64rem,1.7vw,.76rem)}
-  .cmp .h.us{color:#1a1405;background:linear-gradient(115deg,var(--gold-deep),var(--gold) 55%,var(--gold-bright));
-    font-size:clamp(.66rem,1.8vw,.8rem);box-shadow:0 8px 30px -10px rgba(212,175,55,.6)}
-  .cmp .h.us .ic{color:#1a1405}
+  /* ---------- loop ---------- */
+  .loop{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:step}
+  @media(max-width:960px){.loop{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.loop{grid-template-columns:1fr}}
+  .step{border:1px solid var(--line-soft);border-radius:var(--r);background:rgba(255,255,255,.02);padding:26px 22px}
+  .step h4{font-family:var(--display);font-size:1.02rem;font-weight:700;margin:10px 0 8px}
+  .step p{color:var(--muted);font-size:.88rem;line-height:1.6}
 
-  /* CTA BAND */
-  .cta-band{position:relative;text-align:center;padding:clamp(60px,10vw,100px) 0;border-top:1px solid var(--line-soft);overflow:hidden}
-  .cta-band::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 90% at 50% 100%,rgba(212,175,55,.1),transparent 70%);pointer-events:none}
-  .cta-band h2{font-family:var(--display);font-weight:800;font-size:clamp(2rem,6vw,3.4rem);letter-spacing:-.01em}
-  .cta-band p{color:var(--muted);max-width:480px;margin:14px auto 30px;font-size:clamp(1rem,2.5vw,1.1rem)}
+  /* ---------- privacy ---------- */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:860px){.pillars{grid-template-columns:1fr}}
+  .pillar{border:1px solid var(--line-soft);border-left:2px solid var(--gold);border-radius:12px;background:rgba(255,255,255,.02);padding:24px 22px}
+  .pillar h4{font-family:var(--display);font-size:1rem;font-weight:700;margin-bottom:8px}
+  .pillar p{color:var(--muted);font-size:.9rem;line-height:1.62}
 
-  /* features */
-  .features{padding:clamp(60px,9vw,90px) 0}
-  .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-  @media(max-width:860px){.feat-grid{grid-template-columns:1fr 1fr}}
-  @media(max-width:560px){.feat-grid{grid-template-columns:1fr}}
-  .feat{background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);border-radius:var(--radius);padding:28px 24px;transition:border .3s,transform .3s,box-shadow .3s}
-  .feat:hover{border-color:var(--line);transform:translateY(-5px);box-shadow:0 30px 60px -40px rgba(212,175,55,.4)}
-  .feat .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,rgba(212,175,55,.16),rgba(139,26,43,.12));border:1px solid var(--line);color:var(--gold-bright);margin-bottom:18px}
-  .feat h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin-bottom:8px;letter-spacing:.02em}
-  .feat p{color:var(--muted);font-size:.92rem}
+  /* ---------- pricing ---------- */
+  .plans{display:grid;grid-template-columns:1fr 1.15fr;gap:20px;align-items:stretch;max-width:920px}
+  @media(max-width:860px){.plans{grid-template-columns:1fr}}
+  .plan{border:1px solid var(--line-soft);border-radius:var(--r);background:var(--glass);backdrop-filter:var(--blur);padding:34px 30px;display:flex;flex-direction:column}
+  .plan.crowned{border-color:var(--line);background:linear-gradient(180deg,rgba(212,175,55,.07),rgba(20,24,32,.6) 40%);box-shadow:0 30px 80px rgba(0,0,0,.5),inset 0 1px 0 rgba(244,228,176,.14);position:relative}
+  .plan .ptag{font-family:var(--mono);font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--muted)}
+  .plan.crowned .ptag{color:var(--gold)}
+  .plan h3{font-family:var(--display);font-weight:700;font-size:1.5rem;margin:10px 0 4px}
+  .price{display:flex;align-items:baseline;gap:8px;margin:8px 0 4px}
+  .price b{font-family:var(--display);font-size:2.5rem;font-weight:700;color:var(--gold-bright)}
+  .price span{color:var(--muted);font-size:.9rem}
+  .plan .sub{font-family:var(--mono);font-size:.6rem;letter-spacing:.16em;color:var(--muted-2);text-transform:uppercase;margin-bottom:20px}
+  .plan ul{list-style:none;margin:0 0 26px;display:grid;gap:11px}
+  .plan li{display:flex;gap:11px;font-size:.92rem;color:var(--platinum);line-height:1.5}
+  .plan li.na{color:var(--muted-2)}
+  .plan li .tick{color:var(--gold);font-weight:700;flex:none}
+  .plan li.na .tick{color:var(--muted-2)}
+  .plan .btn{margin-top:auto;justify-content:center}
+  .ribbon{position:absolute;top:-13px;right:22px;background:linear-gradient(135deg,var(--gold-bright),var(--gold));color:#1a1405;font-family:var(--mono);font-size:.58rem;letter-spacing:.2em;font-weight:600;padding:6px 14px;border-radius:999px;text-transform:uppercase}
+  .topup-note{max-width:920px;margin-top:16px;border:1px dashed var(--line-warm);border-radius:12px;padding:16px 20px;display:flex;gap:14px;align-items:center;color:var(--muted);font-size:.9rem}
+  .topup-note b{color:var(--gold-bright)}
+  .stripe-line{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;color:var(--muted-2);margin-top:18px;text-transform:uppercase}
 
-  /* pricing */
-  .pricing{padding:clamp(50px,8vw,70px) 0 clamp(80px,12vw,120px)}
-  .price-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;max-width:900px;margin:0 auto}
-  @media(max-width:760px){.price-grid{grid-template-columns:1fr}}
-  .plan{background:linear-gradient(180deg,var(--panel),var(--obsidian-2));border:1px solid var(--line-soft);border-radius:20px;padding:clamp(28px,4vw,38px) clamp(24px,4vw,34px);position:relative;overflow:hidden}
-  .plan.pro{border-color:var(--line);box-shadow:0 40px 100px -50px rgba(212,175,55,.55)}
-  .plan.pro::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at 50% 0%,rgba(212,175,55,.09),transparent 70%);pointer-events:none}
-  .badge{position:absolute;top:22px;right:-36px;transform:rotate(45deg);background:linear-gradient(120deg,var(--gold-deep),var(--gold-bright));color:#1a1405;font-size:.62rem;font-weight:800;letter-spacing:.18em;padding:6px 46px}
-  .plan .tier{font-family:var(--display);font-weight:700;font-size:1.3rem;letter-spacing:.06em}
-  .plan .desc{color:var(--muted);font-size:.9rem;margin-top:7px;min-height:42px}
-  .plan .amt{margin:20px 0 4px;font-family:var(--display)}.plan .amt b{font-size:clamp(2.6rem,7vw,3.1rem);font-weight:800}.plan .amt span{color:var(--muted);font-size:.95rem;font-family:var(--body)}
-  .plan ul{list-style:none;margin:22px 0 28px;display:flex;flex-direction:column;gap:13px}
-  .plan li{display:flex;gap:11px;align-items:flex-start;font-size:.92rem}.plan li svg{flex-shrink:0;margin-top:3px;color:var(--gold)}
-  .plan li.muted{color:var(--muted-2)}.plan li.muted svg{color:var(--muted-2)}
-  .plan .btn{width:100%;justify-content:center}
+  /* ---------- honesty ---------- */
+  .honest{display:grid;grid-template-columns:1.2fr 1fr;gap:20px}
+  @media(max-width:860px){.honest{grid-template-columns:1fr}}
+  .hcard{border:1px solid var(--line-soft);border-radius:var(--r);background:rgba(255,255,255,.02);padding:30px 28px}
+  .hcard h3{font-family:var(--display);font-size:1.2rem;font-weight:700;margin-bottom:12px}
+  .hcard p,.hcard li{color:var(--muted);font-size:.93rem;line-height:1.68}
+  .hcard ul{list-style:none;display:grid;gap:10px}
+  .hcard li b{color:var(--platinum)}
+  .hcard li::before{content:"✦";color:var(--gold);margin-right:10px;font-size:.7rem}
 
-  footer{border-top:1px solid var(--line-soft);padding:clamp(40px,6vw,56px) 0 40px}
-  .foot{display:flex;justify-content:space-between;align-items:flex-start;gap:30px;flex-wrap:wrap}
-  .foot .col h4{font-family:var(--display);letter-spacing:.1em;font-size:.74rem;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
-  .foot .col a{display:block;color:var(--muted);text-decoration:none;font-size:.9rem;margin-bottom:9px;transition:color .2s;cursor:pointer}
-  .foot .col a:hover{color:var(--ivory)}
-  .foot-note{margin-top:40px;padding-top:24px;border-top:1px solid var(--line-soft);color:var(--muted-2);font-size:.8rem;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  /* ---------- faq ---------- */
+  .faq{max-width:820px}
+  details{border-bottom:1px solid var(--line-soft);padding:20px 4px}
+  summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:1rem;color:var(--ivory)}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";font-family:var(--mono);color:var(--gold);font-size:1rem;transition:transform .2s}
+  details[open] summary::after{transform:rotate(45deg)}
+  details p{color:var(--muted);font-size:.93rem;line-height:1.68;margin-top:12px;max-width:700px}
+  details a{color:var(--gold-bright)}
+
+  /* ---------- final cta ---------- */
+  .final{text-align:center;padding:110px 0 120px}
+  .final h2{font-family:var(--display);font-weight:700;font-size:clamp(2rem,5vw,3.2rem);margin-bottom:16px;
+    background:linear-gradient(180deg,#fff 8%,var(--gold-bright) 52%,var(--gold) 86%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .final .lede{margin:0 auto 34px}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--line-soft);background:rgba(6,7,10,.7);padding:56px 0 30px;position:relative;z-index:2}
+  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:30px;margin-bottom:36px}
+  @media(max-width:860px){.foot-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.foot-grid{grid-template-columns:1fr}}
+  footer h5{font-family:var(--mono);font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--muted-2);margin-bottom:14px}
+  footer .fcol a{display:block;color:var(--muted);font-size:.88rem;margin-bottom:9px}
+  footer .fcol a:hover{color:var(--gold-bright)}
+  footer .fabout{color:var(--muted);font-size:.88rem;line-height:1.6;max-width:280px;margin-top:12px}
+  .legal{border-top:1px solid var(--line-soft);padding-top:22px;color:var(--muted-2);font-size:.76rem;line-height:1.65}
+  .legal .row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:14px}
+  .legal .row a{color:var(--muted);margin-left:14px}
+
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .rise{animation:rise .9s cubic-bezier(.2,.7,.2,1) both}
 </style>
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/site.webmanifest">
 </head>
 <body>
-<script>/*urlclean*/try{var _p=location.pathname;if(/\.html$/.test(_p))history.replaceState(null,"",_p.replace(/index\.html$/,"").replace(/\.html$/,"")+location.search+location.hash);var _q=location.pathname.replace(/\/+$/,"");if(_q==="/login"){location.replace("/chat#login");}else if(_q==="/signup"){location.replace("/chat#signup");}}catch(e){}</script>
-<div class="bg-glow"></div><div class="grain"></div><div class="embers" id="embers"></div>
-<svg class="crown-wm" viewBox="0 0 64 50" fill="currentColor" aria-hidden="true"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/></svg>
+<div class="topedge"></div>
+<div class="bg"><div class="rays"></div><div class="grid"></div></div>
 
-<div class="topnav" id="topnav"><div class="nav-inner">
-  <a class="brand" href="/">
-    <svg class="crown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/><circle cx="10" cy="12" r="3.2"/><circle cx="32" cy="4" r="3.2"/><circle cx="54" cy="12" r="3.2"/></svg>
-    <span class="name">BLACK<b>CROWN</b> VxJ<small>LLC · Artificial Intelligence</small></span>
-  </a>
-  <div class="nav-links">
-    <a href="#why">Why Crown</a><a href="#features">Features</a><a href="#pricing">Pricing</a>
-    <a href="/chat#login">Log in</a>
-    <a class="btn btn-gold" href="/chat">Start Chat Now →</a>
+<!-- ======================= NAV ======================= -->
+<nav>
+  <div class="nav-in">
+    <a class="brand" href="/">
+      <svg class="mark" width="34" height="28" viewBox="0 0 64 52" fill="none" aria-hidden="true">
+        <defs><linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e7b4"/><stop offset=".55" stop-color="#d4af37"/><stop offset="1" stop-color="#9c7c1f"/></linearGradient></defs>
+        <path d="M6 40 L13 13 L32 30 L51 13 L58 40 Z" fill="url(#mg)" stroke="#f6e7b4" stroke-width="1.2" stroke-linejoin="round"/>
+        <path d="M32 4 L36 12 L32 30 L28 12 Z" fill="url(#mg)" stroke="#f6e7b4" stroke-width="1" stroke-linejoin="round"/>
+        <rect x="6" y="41" width="52" height="6" rx="2" fill="#9c7c1f"/>
+        <circle cx="13" cy="11" r="2.6" fill="#fff"/><circle cx="32" cy="3.4" r="3" fill="#fff"/><circle cx="51" cy="11" r="2.6" fill="#fff"/>
+      </svg>
+      <span class="bt">BLACK<b>CROWN</b><small>INTELLIGENCE</small></span>
+    </a>
+    <div class="nav-links">
+      <a class="hideable" href="#rooms">The Rooms</a>
+      <a class="hideable" href="#privacy">Privacy</a>
+      <a class="hideable" href="#pricing">Pricing</a>
+      <a class="hideable" href="#faq">Questions</a>
+      <a class="house-link" href="https://blackcrownvxj.com" target="_blank" rel="noopener">THE HOUSE ↗</a>
+      <a class="btn btn-gold nav-cta" style="padding:11px 20px;font-size:.88rem" href="/chat">Enter the Console</a>
+    </div>
   </div>
-</div></div>
+</nav>
 
-<main>
-  <header class="hero wrap">
-    <div class="hero-copy">
-      <div class="eyebrow">Your Private AI Workspace</div>
-      <h1>Intelligence,<span class="gold-text"> Crowned.</span></h1>
-      <p class="sub">Every AI chatbot is a blank box you talk into and forget. Crown is a private workspace where your data stays yours, your work stays organized, and Pro is flat-out unlimited. Start free in seconds.</p>
-      <div class="cta-row">
-        <a class="btn btn-gold" href="/chat">Start Chat Now →</a>
-        <a class="btn btn-ghost" href="#pricing">View the Tiers</a>
-      </div>
-      <div class="trust">
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> No card to begin</span>
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Private by design</span>
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Hosted on AWS</span>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="mock-ring"></div>
-      <div class="mock-frame">
-        <div class="mock-bar"><i></i><i></i><i></i><span class="mt">CROWN CONSOLE</span></div>
-        <div class="mock-body">
-          <div class="mb user">Turn these messy meeting notes into clear action items.</div>
-          <div class="mb bot">Done. 6 action items, each with an owner and a due date. Want them grouped by priority?</div>
-          <div class="mb user">Yes. And keep this in my Q3 Planning project.</div>
-          <div class="mb bot">Saved to Q3 Planning. ✦ Your notes stay yours, never sold, never used to train a model.</div>
-          <div class="mock-input">Speak, and the Crown shall answer…<span class="mi-send"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span></div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <div class="wrap"><div class="stats">
-    <div class="stat"><b class="gold-text">∞</b><span>Pro Tokens</span></div>
-    <div class="stat"><b class="gold-text">Private</b><span>Never Trained On</span></div>
-    <div class="stat"><b class="gold-text">Projects</b><span>Organized Work</span></div>
-    <div class="stat"><b class="gold-text">AWS</b><span>Global Edge</span></div>
-  </div></div>
-
-  <!-- WHY CROWN -->
-  <section class="why wrap" id="why">
-    <div class="why-lead">
-      <div class="eyebrow">Why Crown</div>
-      <div class="big">Most AI tools are a blank box you talk into.<br><span class="gold-text">Crown is built for real work.</span></div>
-    </div>
-    <div class="why-grid">
-      <article class="why-card"><span class="why-rn">I</span><div class="why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9.4 12l1.9 1.9 3.5-3.7"/></svg></div><h3>A Private Court</h3><p>Your conversations are yours. We don't sell your data, and your work is never used to train models. What happens in Crown stays in Crown.</p></article>
-      <article class="why-card"><span class="why-rn">II</span><div class="why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2l1.9 5.6 5.6 1.9-5.6 1.9L12 18.2l-1.9-5.6L4.5 10.7l5.6-1.9z"/><path d="M18.8 14.6l.55 1.65 1.65.55-1.65.55-.55 1.65-.55-1.65-1.65-.55 1.65-.55z"/></svg></div><h3>Refined, Not Generic</h3><p>One executive-grade assistant tuned for polished, decision-ready output. No clutter, no endless model menus, just answers with taste.</p></article>
-      <article class="why-card"><span class="why-rn">III</span><div class="why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h5l2 3h11v8a2 2 0 0 1-2 2H3z"/><path d="M3 7V5a2 2 0 0 1 2-2h4l2 3"/></svg></div><h3>Built for Real Work</h3><p>Organize everything into Projects. Group your threads, keep context together, and move between work streams without losing your place.</p></article>
-      <article class="why-card"><span class="why-rn">IV</span><div class="why-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172-2.828a10 10 0 0 1 2.172-2.828a4 4 0 1 1 0 5.656a10 10 0 0 1-2.172-2.828a10 10 0 0 0-2.172-2.828"/></svg></div><h3>Flat &amp; Unlimited</h3><p>Pro is one simple price with unlimited usage. No token anxiety, no metered surprises, just open the console and work.</p></article>
-    </div>
-  </section>
-
-  <!-- COMPARE -->
-  <section class="compare wrap">
-    <div class="sec-head"><div class="eyebrow">Crown vs. Ordinary AI</div><h2>The same models. A better way to use them.</h2><p>Everyone rents the same frontier intelligence. The difference is what's built around it.</p></div>
-    <div class="cmp">
-      <div class="c h feat r1">&nbsp;</div>
-      <div class="c h them r1">Ordinary AI</div>
-      <div class="c h us r1"><svg class="ic" width="14" height="11" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/></svg> Crown</div>
-
-      <div class="c feat">Your data</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> May train the model</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Never trained on</div>
-
-      <div class="c feat">Your history</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Endless scroll</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Organized into Projects</div>
-
-      <div class="c feat">Pricing</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Credits &amp; caps</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Flat &amp; unlimited (Pro)</div>
-
-      <div class="c feat">Experience</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Generic &amp; cluttered</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Refined &amp; focused</div>
-
-      <div class="c feat">Getting started</div>
-      <div class="c them"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Sign up first</div>
-      <div class="c us"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Start instantly</div>
-    </div>
-  </section>
-
-  <!-- FEATURES -->
-  <section class="features wrap" id="features">
-    <div class="sec-head"><div class="eyebrow">The Regalia</div><h2>Everything in your court</h2><p>A complete toolkit beneath one crown, and far more reserved for Pro.</p></div>
-    <div class="feat-grid" id="featGrid"></div>
-  </section>
-
-  <!-- PRICING -->
-  <section class="pricing wrap" id="pricing">
-    <div class="sec-head"><div class="eyebrow">Choose your standing</div><h2>Free to enter. Unlimited to reign.</h2><p>Start with a generous monthly allotment. Ascend the moment you need more.</p></div>
-    <div class="price-grid">
-      <div class="plan">
-        <div class="tier">Free</div><div class="desc">For the curious. Taste the Crown, no card required.</div>
-        <div class="amt"><b>$0</b><span> / forever</span></div>
-        <ul>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> 10,000 tokens / month</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Full Crown intelligence</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Streaming, formatted replies</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Saved conversation history</li>
-          <li class="muted"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Projects &amp; organization</li>
-          <li class="muted"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Web access, images &amp; files</li>
-        </ul>
-        <a class="btn btn-ghost" href="/chat">Start Free</a>
-      </div>
-      <div class="plan pro">
-        <div class="badge">CROWNED</div>
-        <div class="tier gold-text">Pro</div><div class="desc">Everything in Free, plus the full court: unlimited and unlocked.</div>
-        <div class="amt"><b class="gold-text">$19.99</b><span> / month</span></div>
-        <ul>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Unlimited tokens</b> (fair-use)</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Live web access</b> with cited sources</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>AI image generation</b></li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>File uploads</b> for images, PDFs &amp; documents</li>
-          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> <b>Projects</b> to organize chats your way</li>
-        </ul>
-        <a class="btn btn-gold" href="/chat#upgrade">Ascend to Pro →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- CLOSING CTA -->
-  <section class="cta-band">
-    <div class="wrap">
-      <div class="eyebrow">Begin your reign</div>
-      <h2>Claim your <span class="gold-text">crown.</span></h2>
-      <p>Private, organized, unlimited. Start free in seconds. No card, no signup to try.</p>
-      <a class="btn btn-gold" href="/chat" style="font-size:1rem;padding:15px 32px">Start Chat Now →</a>
-    </div>
-  </section>
-</main>
-
-<footer><div class="wrap">
-  <div class="foot">
-    <div class="col" style="max-width:280px">
-      <a class="brand" href="/" style="margin-bottom:14px"><svg class="crown" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="1.5"/></svg><span class="name">BLACK<b>CROWN</b> VxJ</span></a>
-      <p style="color:var(--muted);font-size:.88rem">Your private AI workspace. Refined, organized, and yours. Hosted on AWS.</p>
-    </div>
-    <div class="col"><h4>Product</h4><a href="/chat">Console</a><a href="#why">Why Crown</a><a href="#features">Features</a><a href="#pricing">Pricing</a></div>
-    <div class="col"><h4>Company</h4><a href="/about">About</a><a href="/contact">Contact</a><a href="/careers">Careers</a></div>
-    <div class="col"><h4>Legal</h4><a href="/terms">Terms</a><a href="/privacy">Privacy</a><a href="/acceptable-use">Acceptable Use</a></div>
+<!-- ======================= HERO ======================= -->
+<header class="hero wrap rise">
+  <div class="chips-row">
+    <span class="chip"><span class="dot"></span> SYS // ONLINE</span>
+    <span class="chip">FOUR ROOMS LIVE</span>
+    <span class="chip">A BLACKCROWNVXJ HOUSE PRODUCT</span>
   </div>
-  <div class="foot-note"><span>© <span id="yr"></span> BlackCrown VxJ, LLC. All rights reserved.</span><span>Built on AWS · Powered by frontier AI</span></div>
-</div></footer>
+  <svg class="crown-hero" viewBox="0 0 64 52" fill="none" aria-hidden="true">
+    <defs><linearGradient id="hg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e7b4"/><stop offset=".55" stop-color="#d4af37"/><stop offset="1" stop-color="#9c7c1f"/></linearGradient></defs>
+    <path d="M6 40 L13 13 L32 30 L51 13 L58 40 Z" fill="url(#hg)" stroke="#f6e7b4" stroke-width="1.2" stroke-linejoin="round"/>
+    <path d="M32 4 L36 12 L32 30 L28 12 Z" fill="url(#hg)" stroke="#f6e7b4" stroke-width="1" stroke-linejoin="round"/>
+    <rect x="6" y="41" width="52" height="6" rx="2" fill="#9c7c1f"/>
+    <circle cx="13" cy="11" r="2.6" fill="#fff"/><circle cx="32" cy="3.4" r="3" fill="#fff"/><circle cx="51" cy="11" r="2.6" fill="#fff"/>
+  </svg>
+  <h1>Intelligence, Crowned.</h1>
+  <p class="lede">BlackCrown Intelligence is the AI division of the house: a private workspace built around Four Rooms, each tuned for a different kind of thinking. Your words are never sold, never used for training, and never anyone's business but yours.</p>
+  <div class="cta-row">
+    <a class="btn btn-gold" href="/chat">Begin free, no card</a>
+    <a class="btn btn-ghost" href="#rooms">See the Four Rooms</a>
+  </div>
+  <div class="fine">Free tier included · Crowned $49.99/mo · Cancel anytime</div>
+</header>
 
-<script>
-  (function(){const e=document.getElementById("embers");let h="";for(let i=0;i<14;i++){const l=Math.random()*100,d=8+Math.random()*10,delay=Math.random()*12,s=2+Math.random()*2.5;h+=`<span class="ember" style="left:${l}%;width:${s}px;height:${s}px;animation-duration:${d}s;animation-delay:${delay}s"></span>`;}e.innerHTML=h;})();
-  document.getElementById("yr").textContent=new Date().getFullYear();
-  addEventListener("scroll",()=>document.getElementById("topnav").classList.toggle("solid",scrollY>30));
-  const FEATURES=[
-    ["Crown Chat","M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z","Fluid, fast conversation that streams in as it's written, refined and tuned to your voice."],
-    ["Live Web Access","M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18 M3 12h18 M12 3c2.6 2.7 2.6 15.3 0 18 M12 3c-2.6 2.7-2.6 15.3 0 18","Crown searches the live web and answers with current information, every claim backed by cited sources. (Pro)"],
-    ["AI Image Generation","M4 5h16v14H4z M4 16l4-4 4 4 4-5 4 5 M9 9h.01","Turn a prompt into striking, high-resolution images, right inside Crown. (Pro)"],
-    ["File Uploads","M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48","Share images, PDFs and documents. Crown reads them and reasons over what's inside. (Pro)"],
-    ["Projects","M3 7h5l2 3h11v8a2 2 0 0 1-2 2H3z M3 7V5a2 2 0 0 1 2-2h4l2 3","Group threads into Projects so your work stays organized and in context. (Pro)"],
-    ["Private by Design","M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z","Your conversations stay yours, never sold, never used to train models."],
-    ["Unlimited Pro","M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z","Pro removes the ceiling: unlimited, fair-use usage at one flat price."],
-    ["Hosted on AWS","M4 17h16M4 7h16M7 12h10","Fast, reliable delivery on a scalable AWS backend you control."]
-  ];
-  document.getElementById("featGrid").innerHTML=FEATURES.map(([t,d,p])=>`<div class="feat"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg></div><h3>${t}</h3><p>${p}</p></div>`).join("");
-</script>
+<div class="marq" aria-hidden="true">
+  <div class="marq-track">
+    <span><b>Room 01</b> Unfiltered · direct answers, no hedging ✦</span>
+    <span><b>Room 02</b> Deep-Logic · step-by-step reasoning ✦</span>
+    <span><b>Room 03</b> Visual Analysis · charts, screens, documents ✦</span>
+    <span><b>Room 04</b> Creativity · ideas without limits ✦</span>
+    <span><b>Privacy</b> never sold, never trained on ✦</span>
+    <span><b>Room 01</b> Unfiltered · direct answers, no hedging ✦</span>
+    <span><b>Room 02</b> Deep-Logic · step-by-step reasoning ✦</span>
+    <span><b>Room 03</b> Visual Analysis · charts, screens, documents ✦</span>
+    <span><b>Room 04</b> Creativity · ideas without limits ✦</span>
+    <span><b>Privacy</b> never sold, never trained on ✦</span>
+  </div>
+</div>
+
+<!-- ======================= ROOMS ======================= -->
+<section id="rooms" class="wrap">
+  <div class="sec-head">
+    <div class="eyebrow"><span class="sys">THE PRODUCT //</span> FOUR ROOMS, ONE CROWN</div>
+    <h2 class="sec">Choose the room. Do the work.</h2>
+    <p class="lede">One assistant that does everything usually does nothing well. Crown is built as separate rooms, each running its own engine, its own temperament, and its own memory of you. Walk into the one that fits the job.</p>
+  </div>
+  <div class="rooms-grid">
+    <article class="room">
+      <div class="rhead"><span class="num">ROOM 01</span><h3>Unfiltered</h3><span class="rtag">CROWNED</span></div>
+      <p>Direct answers with the corporate hedging stripped out. Ask the question you actually have and get the answer straight, with judgement left to you.</p>
+      <div class="fit"><b>For you if</b> every other AI lectures you before it helps you.</div>
+    </article>
+    <article class="room">
+      <div class="rhead"><span class="num">ROOM 02</span><h3>Deep-Logic</h3><span class="rtag">CROWNED</span></div>
+      <p>A reasoning engine that thinks before it speaks. Hard problems, math, strategy, and code walked through step by step until the answer holds up.</p>
+      <div class="fit"><b>For you if</b> you need work you can check, not just an answer that sounds right.</div>
+    </article>
+    <article class="room">
+      <div class="rhead"><span class="num">ROOM 03</span><h3>Visual Analysis</h3><span class="rtag">CROWNED</span></div>
+      <p>Built to read what you see: charts, screenshots, documents, and data described in plain language, interpreted instead of just captioned.</p>
+      <div class="fit"><b>For you if</b> half your questions start with a picture of something.</div>
+    </article>
+    <article class="room">
+      <div class="rhead"><span class="num">ROOM 04</span><h3>Creativity</h3><span class="rtag">CROWNED</span></div>
+      <p>Names, angles, drafts, and directions with the temperature turned up. Volume and range first, so you can pick the one worth polishing.</p>
+      <div class="fit"><b>For you if</b> the blank page is the slowest part of your process.</div>
+    </article>
+    <article class="room soon wide">
+      <div class="rhead"><span class="num">ROOM 05</span><h3>The Floor</h3><span class="rtag">IN DEVELOPMENT</span></div>
+      <p>The trading room, fed by the house itself: Korvus scored news and LodeStone chart context wired in as live knowledge, so the room answers about the session you are actually in. Built with <a href="https://korvus.industries" style="color:var(--gold-bright)">Korvus Industries</a>, the market intelligence arm of BlackCrown.</p>
+      <div class="fit"><b>For you if</b> you already trade with Korvus and want to interrogate the data instead of just reading it.</div>
+    </article>
+  </div>
+</section>
+
+<!-- ======================= LOOP ======================= -->
+<section class="wrap">
+  <div class="sec-head">
+    <div class="eyebrow"><span class="sys">HOW IT FITS //</span> ONE SYSTEM</div>
+    <h2 class="sec">The loop your thinking lives in.</h2>
+  </div>
+  <div class="loop">
+    <div class="step"><span class="num">01 · ENTER</span><h4>Pick your room</h4><p>Choose the chamber that fits the job from the console. Your selection is remembered.</p></div>
+    <div class="step"><span class="num">02 · WORK</span><h4>The room answers</h4><p>Each room runs its own engine and temperament, and signs its own replies.</p></div>
+    <div class="step"><span class="num">03 · KEEP</span><h4>Projects hold context</h4><p>Chats and projects persist to your account, so the thinking compounds instead of evaporating.</p></div>
+    <div class="step"><span class="num">04 · CROWN</span><h4>Crowned unlocks all</h4><p>One membership opens every room, with usage that resets monthly and top-ups when you run hot.</p></div>
+  </div>
+</section>
+
+<!-- ======================= PRIVACY ======================= -->
+<section id="privacy" class="wrap">
+  <div class="sec-head">
+    <div class="eyebrow"><span class="sys">THE STANDARD //</span> PRIVACY IS THE DEFAULT</div>
+    <h2 class="sec">Your data stays yours.</h2>
+    <p class="lede">The house rule applies here the same as it does across every BlackCrown product. It is not a setting you go hunting for.</p>
+  </div>
+  <div class="pillars">
+    <div class="pillar"><h4>Never sold</h4><p>Nothing you write, upload, or ask is sold to anyone, for any reason, at any price.</p></div>
+    <div class="pillar"><h4>Never trained on</h4><p>Your conversations are not used to train models. Your work stays your work.</p></div>
+    <div class="pillar"><h4>Yours to remove</h4><p>Your chats belong to your account. Delete them, or the account itself, at any time.</p></div>
+  </div>
+</section>
+
+<!-- ======================= PRICING ======================= -->
+<section id="pricing" class="wrap">
+  <div class="sec-head">
+    <div class="eyebrow"><span class="sys">PRICING //</span> START FREE, CLAIM THE CROWN</div>
+    <h2 class="sec">Two tiers. Straight terms.</h2>
+  </div>
+  <div class="plans">
+    <div class="plan">
+      <span class="ptag">FREE</span>
+      <h3>Standard</h3>
+      <div class="price"><b>$0</b><span>/mo</span></div>
+      <div class="sub">No card required</div>
+      <ul>
+        <li><span class="tick">✓</span> Crown standard chat</li>
+        <li><span class="tick">✓</span> Monthly usage allowance</li>
+        <li><span class="tick">✓</span> Account, history, and projects view</li>
+        <li class="na"><span class="tick">✕</span> The Four Rooms</li>
+        <li class="na"><span class="tick">✕</span> Web access and image generation</li>
+        <li class="na"><span class="tick">✕</span> File uploads and Projects</li>
+      </ul>
+      <a class="btn btn-ghost" href="/chat">Start free</a>
+    </div>
+    <div class="plan crowned">
+      <span class="ribbon">The full crown</span>
+      <span class="ptag">CROWNED</span>
+      <h3>Crowned</h3>
+      <div class="price"><b>$49.99</b><span>/mo</span></div>
+      <div class="sub">Auto-renews monthly · cancel anytime</div>
+      <ul>
+        <li><span class="tick">✓</span> <b>All Four Rooms:</b>&nbsp;Unfiltered, Deep-Logic, Visual Analysis, Creativity</li>
+        <li><span class="tick">✓</span> Generous monthly usage pool across every room</li>
+        <li><span class="tick">✓</span> Live web access and image generation</li>
+        <li><span class="tick">✓</span> File uploads and unlimited Projects</li>
+        <li><span class="tick">✓</span> Priority access to Room 05, The Floor, at release</li>
+        <li><span class="tick">✓</span> Eclipse-X community access</li>
+      </ul>
+      <a class="btn btn-gold" href="/chat#upgrade">Claim the Crown</a>
+    </div>
+  </div>
+  <div class="topup-note">
+    <span class="num">SOON</span>
+    <span><b>Token top-ups.</b> Running hot before the monthly reset? Add tokens to your account in a couple of clicks, straight through Stripe. Heavy rooms, heavy months, handled.</span>
+  </div>
+  <p class="stripe-line">Secure checkout by Stripe · Subscription renews monthly until cancelled · Cancel anytime from your account</p>
+</section>
+
+<!-- ======================= HONESTY ======================= -->
+<section class="wrap">
+  <div class="sec-head">
+    <div class="eyebrow"><span class="sys">BEFORE YOU DECIDE //</span> PLAIN TERMS</div>
+    <h2 class="sec">What Crown is, and what it is not.</h2>
+  </div>
+  <div class="honest">
+    <div class="hcard">
+      <h3>Described plainly</h3>
+      <p>Crown is a private AI workspace. It answers questions, reasons through problems, reads what you show it, and drafts what you ask for, inside rooms tuned for each of those jobs. It will sometimes be wrong, the way every AI is sometimes wrong, and important answers deserve your verification. It does not pretend otherwise, and neither do we.</p>
+      <p style="margin-top:12px">We built it this way on purpose. A tool that is honest about its limits is a tool you can actually rely on.</p>
+    </div>
+    <div class="hcard">
+      <h3>What you are signing up for</h3>
+      <ul>
+        <li><b>A free account, no card.</b> Setup takes about a minute.</li>
+        <li><b>Straight billing.</b> $49.99/mo on Crowned, cancel anytime, no lock-in.</li>
+        <li><b>Privacy as the default.</b> Never sold, never trained on.</li>
+        <li><b>Email only when it matters.</b> No marketing blasts.</li>
+        <li><b>Leave whenever.</b> Your account and data are yours to delete.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= FAQ ======================= -->
+<section id="faq" class="wrap">
+  <div class="sec-head">
+    <div class="eyebrow"><span class="sys">QUESTIONS //</span> STRAIGHT ANSWERS</div>
+    <h2 class="sec">Asked and answered.</h2>
+  </div>
+  <div class="faq">
+    <details>
+      <summary>What are the Four Rooms, really?</summary>
+      <p>Four separately tuned AI environments inside one console. Each room runs its own engine and its own temperament: Unfiltered for directness, Deep-Logic for step-by-step reasoning, Visual Analysis for charts and screenshots, Creativity for volume and range. You pick the room, the room signs its replies, and each room keeps its own thread with you.</p>
+    </details>
+    <details>
+      <summary>Is the free tier actually useful?</summary>
+      <p>Yes. Standard gives you Crown's base chat with a monthly allowance, no card required. The Four Rooms, web access, image generation, uploads, and Projects are Crowned features.</p>
+    </details>
+    <details>
+      <summary>What happens to my data?</summary>
+      <p>Nothing you write or upload is sold or used to train a model. That is the standard across the whole BlackCrown house, not a toggle. Your chats live on your account and you can delete them, or the account, whenever you choose.</p>
+    </details>
+    <details>
+      <summary>What is Room 05, The Floor?</summary>
+      <p>The trading room, currently in development. It wires the house's own market intelligence into a room: scored news from <a href="https://korvus.industries" target="_blank" rel="noopener">Korvus</a> and chart context from LodeStone, so the room can answer about the session you are actually trading. Crowned members get priority access at release.</p>
+    </details>
+    <details>
+      <summary>How does billing work?</summary>
+      <p>Checkout and subscriptions run on Stripe. Crowned is $49.99 a month, renews monthly, and cancels anytime from your account portal in two clicks. Token top-ups for heavy months are on the way.</p>
+    </details>
+    <details>
+      <summary>Where does Crown sit in the BlackCrown house?</summary>
+      <p>BlackCrown is one house with several edges: <a href="https://korvus.industries" target="_blank" rel="noopener">Korvus</a> for market intelligence, LodeStone on the chart, Eclipse-X for the community, and Crown as the AI division. Each stands alone; together they compound. The house itself lives at <a href="https://blackcrownvxj.com" target="_blank" rel="noopener">blackcrownvxj.com</a>.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ======================= FINAL CTA ======================= -->
+<section class="final wrap">
+  <div class="eyebrow" style="text-align:center"><span class="sys">SYS //</span> THE CONSOLE IS OPEN</div>
+  <h2>Claim your crown.</h2>
+  <p class="lede">Begin free in about a minute. No card, no lock-in, and nothing you write is ever anyone else's.</p>
+  <div class="cta-row" style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap">
+    <a class="btn btn-gold" href="/chat">Enter the Console</a>
+    <a class="btn btn-ghost" href="https://blackcrownvxj.com" target="_blank" rel="noopener">Meet the house</a>
+  </div>
+</section>
+
+<!-- ======================= FOOTER ======================= -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="fcol">
+        <a class="brand" href="/">
+          <svg class="mark" width="30" height="25" viewBox="0 0 64 52" fill="none" aria-hidden="true">
+            <defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e7b4"/><stop offset=".55" stop-color="#d4af37"/><stop offset="1" stop-color="#9c7c1f"/></linearGradient></defs>
+            <path d="M6 40 L13 13 L32 30 L51 13 L58 40 Z" fill="url(#fg)" stroke="#f6e7b4" stroke-width="1.2" stroke-linejoin="round"/>
+            <path d="M32 4 L36 12 L32 30 L28 12 Z" fill="url(#fg)" stroke="#f6e7b4" stroke-width="1" stroke-linejoin="round"/>
+            <rect x="6" y="41" width="52" height="6" rx="2" fill="#9c7c1f"/>
+            <circle cx="13" cy="11" r="2.6" fill="#fff"/><circle cx="32" cy="3.4" r="3" fill="#fff"/><circle cx="51" cy="11" r="2.6" fill="#fff"/>
+          </svg>
+          <span class="bt">BLACK<b>CROWN</b><small>INTELLIGENCE</small></span>
+        </a>
+        <p class="fabout">The AI division of the BlackCrown house. A private workspace with Four Rooms, for people who build their own edge.</p>
+      </div>
+      <div class="fcol">
+        <h5>Product</h5>
+        <a href="/chat">Enter the Console</a>
+        <a href="#rooms">The Four Rooms</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#privacy">Privacy standard</a>
+      </div>
+      <div class="fcol">
+        <h5>The House</h5>
+        <a href="https://blackcrownvxj.com" target="_blank" rel="noopener">BlackCrownVxJ</a>
+        <a href="https://korvus.industries" target="_blank" rel="noopener">Korvus Industries</a>
+        <a href="https://blackcrownvxj.com/lodestone.html" target="_blank" rel="noopener">LodeStone Indicator</a>
+        <a href="https://blackcrownvxj.com/eclipse-x.html" target="_blank" rel="noopener">Eclipse-X Community</a>
+      </div>
+      <div class="fcol">
+        <h5>Company</h5>
+        <a href="/about">About</a>
+        <a href="/terms">Terms of Service</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+    <div class="legal">
+      <p>BlackCrown Intelligence provides AI-generated content for informational and productivity purposes. AI output can be inaccurate; verify important information independently. Nothing on this site or in the product is financial, investment, legal, or tax advice.</p>
+      <div class="row">
+        <span>© 2026 BlackCrownVxJ LLC. All rights reserved.</span>
+        <span>
+          <a href="/terms">Terms</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/acceptable-use">Acceptable Use</a>
+        </span>
+      </div>
+    </div>
+  </div>
+</footer>
 </body>
 </html>
