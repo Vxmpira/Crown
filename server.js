@@ -36,6 +36,16 @@ const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
 const STRIPE_PRICE  = process.env.STRIPE_PRICE_ID;
 const STRIPE_WHSEC  = process.env.STRIPE_WEBHOOK_SECRET;
 const PUBLIC_URL    = process.env.PUBLIC_URL || "https://blackcrown-intelligence.com";
+// Session cookie scope. Without a domain the cookie is host-only, so logging in on
+// www.blackcrown-intelligence.com leaves the apex domain cookieless (and vice versa),
+// which looked like "Stripe logged me out". Set COOKIE_DOMAIN=.blackcrown-intelligence.com
+// in crown.env so one login covers both hosts.
+const COOKIE_DOMAIN = (process.env.COOKIE_DOMAIN || "").trim();
+function cookieOpts() {
+  const o = { httpOnly: true, secure: true, sameSite: "lax", path: "/" };
+  if (COOKIE_DOMAIN) o.domain = COOKIE_DOMAIN;
+  return o;
+}
 const stripe = STRIPE_SECRET ? require("stripe")(STRIPE_SECRET) : null;
 
 // Image generation (Pro perk). Dormant until IMAGE_API_KEY is set in crown.env.
@@ -193,7 +203,7 @@ function getSessionUser(req){
   return rollPeriod(u);
 }
 function setSessionCookie(res, token){
-  res.cookie("crown_session", token, { httpOnly:true, secure:true, sameSite:"lax", path:"/", maxAge: SESSION_DAYS*24*60*60*1000 });
+  res.cookie("crown_session", token, { ...cookieOpts(), maxAge: SESSION_DAYS*24*60*60*1000 });
 }
 const effectiveTier = u => (isAdmin(u) ? "pro" : u.tier);   // owner/admins get full Pro access
 const userLimit = u => (effectiveTier(u) === "pro" ? PRO_FAIR_USE : FREE_LIMIT);
@@ -299,7 +309,8 @@ app.post("/api/login", (req, res) => {
 
 app.post("/api/logout", (req, res) => {
   const t = parseCookies(req).crown_session; if (t) q.delSession.run(t);
-  res.clearCookie("crown_session", { path:"/" });
+  res.clearCookie("crown_session", cookieOpts());
+  res.clearCookie("crown_session", { path:"/" });   // also clear any old host-only cookie from before COOKIE_DOMAIN
   res.json({ ok:true });
 });
 

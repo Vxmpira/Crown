@@ -1409,6 +1409,14 @@ function mdToHtml(src){
 $("send").onclick=send;
 $("input").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); }});
 $("input").addEventListener("input",function(){ this.style.height="28px"; this.style.height=Math.min(140,this.scrollHeight)+"px"; });
+/* paste an image (screenshot, copied picture) straight into the chat box; joins the normal attachment flow */
+$("input").addEventListener("paste",function(e){
+  const items = (e.clipboardData && e.clipboardData.items) ? [...e.clipboardData.items] : [];
+  const files = items.filter(it=>it.kind==="file" && /^image\//.test(it.type)).map(it=>it.getAsFile()).filter(Boolean);
+  if(!files.length) return;
+  e.preventDefault();
+  onFiles(files);
+});
 addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeUpgrade(); closeName(); closeCtx(); closeAccount(); closeInput(); closeLogin(); }});
 [$("upgradeModal"),$("nameModal"),$("accountModal"),$("inputModal"),$("loginModal"),$("topupModal")].forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("show"); }));
 $("proj-name").addEventListener("keydown",e=>{ if(e.key==="Enter") confirmProject(); });
@@ -1428,6 +1436,7 @@ const _wantSignup = (location.hash==="#upgrade" || location.hash==="#signup" || 
 
 if(_params.get("checkout")==="success"){ toast("👑 Payment received. Welcome to Pro!"); history.replaceState({}, "", location.pathname); if(IS_PREVIEW){ S.tier="pro"; render(); } }
 else if(_params.get("checkout")==="topup"){ toast("\ud83d\udc51 Tokens added to your account"); history.replaceState({}, "", location.pathname); setTimeout(refreshMe, 1200); setTimeout(refreshMe, 5000); }
+else if(_params.get("checkout")==="cancel"){ toast("Checkout canceled. No charge made."); history.replaceState({}, "", location.pathname); }
 else if(_params.get("checkout")==="cancel"){ toast("Checkout canceled. No charge was made"); history.replaceState({}, "", location.pathname); }
 
 (async function(){
