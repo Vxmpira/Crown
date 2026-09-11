@@ -430,7 +430,7 @@
     <div class="eyebrow" id="up-eyebrow">Create your account · Ascend to Pro</div>
     <h3 class="gold-text">BlackCrown Pro</h3>
     <p class="msub">Unlimited usage, live web access, image generation, file uploads, and Projects.</p>
-    <div class="mamt"><b class="gold-text">$19.99</b><span> / month</span></div>
+    <div class="mamt"><b class="gold-text">$49.99</b><span> / month</span></div>
 
     <div id="su-fields">
       <div class="field" id="f-user"><label>Username</label><input id="su-user" autocomplete="username" placeholder="yourname"><div class="err">Choose a username (3+ characters).</div></div>
@@ -446,6 +446,22 @@
       <button class="btn btn-gold" onclick="startCheckout()">Continue to secure checkout →</button>
       <div class="mnote">You'll be taken to Stripe to complete your subscription. Cancel anytime.</div>
     </div>
+  </div>
+</div>
+
+<!-- TOP-UP MODAL -->
+<div class="modal-bg" id="topupModal">
+  <div class="modal">
+    <button class="close" onclick="closeTopup()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="eyebrow">Token top-ups · Credited in seconds</div>
+    <h3 class="gold-text">Add tokens</h3>
+    <p class="msub">Deep-Logic runs on top-up tokens. They also carry every other room past the monthly ceiling. One-time purchase, no subscription change, balance never expires.</p>
+    <div style="display:grid;gap:10px;margin:16px 0 6px">
+      <button class="btn btn-ghost" style="justify-content:space-between" onclick="buyTopup('p5')"><span>250,000 tokens</span><b class="gold-text">$4.99</b></button>
+      <button class="btn btn-ghost" style="justify-content:space-between" onclick="buyTopup('p10')"><span>600,000 tokens</span><b class="gold-text">$9.99</b></button>
+      <button class="btn btn-gold" style="justify-content:space-between" onclick="buyTopup('p20')"><span>1,500,000 tokens · best value</span><b>$19.99</b></button>
+    </div>
+    <div class="mnote">Secure one-time checkout via Stripe. Tokens land on your account the moment payment clears.</div>
   </div>
 </div>
 
@@ -530,10 +546,14 @@ const ROOMS = {
   "unfiltered":      { num:"01", name:"Unfiltered",      label:"Room 01 \u00b7 Unfiltered",      tease:"Direct answers. No hedging.",     previewSys:"You are Room 01 Unfiltered of the BlackCrown Four Rooms: direct, candid, zero corporate hedging. Preview mode, answer in character." },
   "deep-logic":      { num:"02", name:"Deep-Logic",      label:"Room 02 \u00b7 Deep-Logic",      tease:"Step-by-step reasoning.",         previewSys:"You are Room 02 Deep-Logic of the BlackCrown Four Rooms: rigorous step-by-step reasoning, show your logic cleanly. Preview mode, answer in character." },
   "visual-analysis": { num:"03", name:"Visual Analysis", label:"Room 03 \u00b7 Visual Analysis", tease:"Charts, screens, documents.",     previewSys:"You are Room 03 Visual Analysis of the BlackCrown Four Rooms: focused on interpreting charts, screenshots and documents. Preview mode, answer in character." },
-  "creativity":      { num:"04", name:"Creativity",      label:"Room 04 \u00b7 Creativity",      tease:"Ideas without limits.",           previewSys:"You are Room 04 Creativity of the BlackCrown Four Rooms: vivid, imaginative, bold ideas. Preview mode, answer in character." }
+  "creativity":      { num:"04", name:"Creativity",      label:"Room 04 \u00b7 Creativity",      tease:"Ideas without limits.",           previewSys:"You are Room 04 Creativity of the BlackCrown Four Rooms: vivid, imaginative, bold ideas. Preview mode, answer in character." },
+  "the-floor":       { num:"05", name:"The Floor",       label:"Room 05 \u00b7 The Floor",       tease:"The trading room. Korvus wired in.", floor:true }
 };
+ROOMS["deep-logic"].topup = true;
+/* The Floor is a hidden product: it only exists in the UI for accounts carrying the floor flag. */
+function visibleRooms(){ return Object.keys(ROOMS).filter(sl => !ROOMS[sl].floor || S.floor); }
 S.room = "crown";
-try{ const _rr = localStorage.getItem("crown_room"); if(_rr && (_rr === "crown" || ROOMS[_rr])) S.room = _rr; }catch(e){}
+try{ const _rr = localStorage.getItem("crown_room"); if(_rr && (_rr === "crown" || (ROOMS[_rr] && (!ROOMS[_rr].floor || S.floor)))) S.room = _rr; }catch(e){}
 
 (function seedEmbers(){
   try{
@@ -571,7 +591,7 @@ async function refreshMe(){
     const r = await fetch("/api/me", { credentials:"include" });
     const d = await r.json().catch(()=>({}));
     if(d && d.user){
-      S.account={username:d.user.username,email:d.user.email,avatar:d.user.avatar||null}; S.tier=d.user.tier; S.tokensUsed=d.user.tokensUsed||0; S.freeLimit=d.user.limit||S.freeLimit;
+      S.account={username:d.user.username,email:d.user.email,avatar:d.user.avatar||null}; S.tier=d.user.tier; S.tokensUsed=d.user.tokensUsed||0; S.freeLimit=d.user.limit||S.freeLimit; S.topupTokens=d.user.topupTokens||0; S.floor=!!d.user.floor; if(S.room && ROOMS[S.room] && ROOMS[S.room].floor && !S.floor) S.room="crown";
       await loadWorkspace();   // pull this user's saved chats + projects
     } else {
       S.account=null; S.tier="free"; render();
@@ -742,7 +762,7 @@ function renderChat(){
       <p>Crown searches the live web, reads your files, and generates images. Begin your reign below.</p>
       <div class="chips">${HERO_CARDS.map(card=>`<button class="chip" data-q="${esc(card.q)}" onclick="useChip(this)"><span class="medallion">${card.icon}</span><span class="ct"><span class="ck">${esc(card.title)}</span><span class="cs">${esc(card.sub)}</span></span><svg class="ca" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>`).join("")}</div>
       <div class="rooms-eyebrow">The Four Rooms</div>
-      <div class="rooms-row">${Object.keys(ROOMS).map(sl=>{const r=ROOMS[sl];return `<button class="room-mini${S.room===sl?' on':''}" onclick="setRoom('${sl}')" title="${esc(r.tease)}"><span class="rn">${r.num}</span>${esc(r.name)}${S.tier==="pro"?"":'<span class="lk2">PRO</span>'}</button>`;}).join("")}</div></div>`;
+      <div class="rooms-row">${visibleRooms().map(sl=>{const r=ROOMS[sl];const tag=r.floor?'<span class="lk2" style="color:var(--gold-bright)">FLOOR</span>':(r.topup?'<span class="lk2">TOP-UP</span>':(S.tier==="pro"?"":'<span class="lk2">PRO</span>'));return `<button class="room-mini${S.room===sl?' on':''}" onclick="setRoom('${sl}')" title="${esc(r.tease)}"><span class="rn">${r.num}</span>${esc(r.name)}${tag}</button>`;}).join("")}</div></div>`;
     return;
   }
   chat.innerHTML = c.messages.map((m,i)=>{
@@ -804,12 +824,18 @@ function roomMenuHtml(){
   let h = `<div class="ctx-label">Crown</div>`;
   h += `<button onclick="setRoom('crown')">${cur==="crown"?"\ud83d\udc51 ":""}Crown \u00b7 ${pro?"Pro":"Standard"}</button>`;
   h += `<div class="sep"></div><div class="ctx-label">The Four Rooms${pro?"":" \u00b7 Crowned"}</div>`;
-  for(const slug of Object.keys(ROOMS)){
+  for(const slug of visibleRooms()){
     const r = ROOMS[slug];
-    h += `<button onclick="setRoom('${slug}')" title="${esc(r.tease)}">${cur===slug?"\ud83d\udc51 ":""}<span style="font-family:var(--display);font-size:.62rem;letter-spacing:.18em;color:var(--gold)">${r.num}</span> ${esc(r.name)}${pro?"":' <span class="lk">PRO</span>'}</button>`;
+    const tag = r.floor ? ' <span class="lk" style="color:var(--gold-bright)">FLOOR</span>' : (r.topup ? ' <span class="lk">TOP-UP</span>' : (pro ? "" : ' <span class="lk">PRO</span>'));
+    h += `<button onclick="setRoom('${slug}')" title="${esc(r.tease)}">${cur===slug?"\ud83d\udc51 ":""}<span style="font-family:var(--display);font-size:.62rem;letter-spacing:.18em;color:var(--gold)">${r.num}</span> ${esc(r.name)}${tag}</button>`;
+  }
+  if(S.account){
+    h += `<div class="sep"></div><div class="ctx-label">Top-up tokens \u00b7 ${fmtTokens(S.topupTokens||0)}</div>`;
+    h += `<button onclick="closeRoomMenu();openTopup()">\u2795 Add tokens</button>`;
   }
   return h;
 }
+function fmtTokens(n){ n=n||0; if(n>=1000000) return (n/1000000).toFixed(n%1000000?1:0)+"M"; if(n>=1000) return Math.floor(n/1000)+"k"; return String(n); }
 function openRoomMenu(e){
   e.stopPropagation();
   const m = $("roomMenu");
@@ -824,7 +850,9 @@ function closeRoomMenu(){ $("roomMenu").classList.remove("show"); }
 addEventListener("click", e=>{ if(!e.target.closest("#roomMenu") && !e.target.closest("#modelPill")) closeRoomMenu(); });
 function setRoom(slug){
   closeRoomMenu();
-  if(slug!=="crown" && S.tier!=="pro"){ proGate(ROOMS[slug].name + " (Room " + ROOMS[slug].num + ")"); return; }
+  if(slug!=="crown" && ROOMS[slug] && ROOMS[slug].floor){
+    if(!S.floor){ toast("The Floor is a private room."); return; }
+  } else if(slug!=="crown" && S.tier!=="pro"){ proGate(ROOMS[slug].name + " (Room " + ROOMS[slug].num + ")"); return; }
   S.room = slug;
   try{ localStorage.setItem("crown_room", slug); }catch(e){}
   renderHead(); renderChat();
@@ -951,7 +979,7 @@ async function removePhoto(){
 function editName(){ if(!S.account) return; openInput("Profile","Display name","Your name",S.account.username,v=>{ S.account.username=v; toast("Name updated"); render(); renderAccount(); }); }
 async function signOut(){
   if(!IS_PREVIEW){ try{ await fetch("/api/logout",{method:"POST",credentials:"include"}); }catch(e){} }
-  S.account=null; S.tier="free"; S.tokensUsed=0; S.freeLimit=CONFIG.FREE_TOKEN_LIMIT;
+  S.account=null; S.tier="free"; S.tokensUsed=0; S.freeLimit=CONFIG.FREE_TOKEN_LIMIT; S.topupTokens=0; S.floor=false; if(S.room && ROOMS[S.room] && ROOMS[S.room].floor) S.room="crown";
   S.chats=[]; S.projects=[]; S.activeId=null; newChat();
   closeAccount(); toast("Signed out");
 }
@@ -1085,6 +1113,16 @@ async function submitLogin(){
   const { ok:good, d } = await apiPost("/api/login", { email:em, password:pw });
   if(!good){ $("lf-email").classList.add("bad"); $("lf-pass").classList.add("bad"); toast(d.message || "Wrong email or password"); return; }
   closeLogin(); await refreshMe(); toast("👑 Welcome back, " + (S.account?.username || ""));
+}
+
+/* ===== token top-ups ===== */
+function openTopup(){ if(!S.account){ openUpgrade(); return; } $("topupModal").classList.add("show"); }
+function closeTopup(){ $("topupModal").classList.remove("show"); }
+async function buyTopup(pack){
+  const { ok, status, d } = await apiPost("/api/topup", { pack });
+  if(ok && d.url){ window.location.href = d.url; return; }
+  if(status===401){ closeTopup(); openLogin(); return; }
+  toast(d.message || "Couldn't start the token purchase");
 }
 
 /* ===== Stripe checkout (uses your logged-in session) ===== */
@@ -1264,6 +1302,7 @@ async function modelReply(c, lastText){
     if(usage){
       if(typeof usage.used==="number") S.tokensUsed=usage.used;
       if(typeof usage.limit==="number") S.freeLimit=usage.limit;
+      if(typeof usage.topupTokens==="number") S.topupTokens=usage.topupTokens;
       if(usage.tier) S.tier=usage.tier;
     }
     if(IS_PREVIEW && S.tier==="free"){ S.tokensUsed += est(lastText||"")+est(reply); }
@@ -1285,7 +1324,7 @@ async function roomReply(c, lastText){
   const chat=$("chat");
   const node = chat.querySelector(".msg:last-child");
   const bubble = node ? node.querySelector(".bubble") : null;
-  if(bubble){ bubble.classList.remove("md"); bubble.innerHTML='<span class="searching"><span class="tdots"><i></i><i></i><i></i></span> '+(slug==="deep-logic" ? "Deep-Logic is reasoning\u2026" : esc(R.name)+" is composing\u2026")+'</span>'; if(nearBottom(chat)) chat.scrollTop=chat.scrollHeight; }
+  if(bubble){ bubble.classList.remove("md"); bubble.innerHTML='<span class="searching"><span class="tdots"><i></i><i></i><i></i></span> '+(slug==="deep-logic" ? "Deep-Logic is reasoning\u2026" : (slug==="the-floor" ? "The Floor is reading the tape\u2026" : esc(R.name)+" is composing\u2026"))+'</span>'; if(nearBottom(chat)) chat.scrollTop=chat.scrollHeight; }
   try{
     let reply, usage=null;
     if(IS_PREVIEW){
@@ -1293,7 +1332,7 @@ async function roomReply(c, lastText){
     } else {
       const res = await fetch("/api/room-chat", { method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({ room:slug, message:lastText }) });
       const d = await res.json().catch(()=>({}));
-      if(res.status===402){ const e=new Error(d.message||"Limit reached"); e.code="limit"; throw e; }
+      if(res.status===402){ const e=new Error(d.message||"Limit reached"); e.code=(d.error==="topup_required")?"topup":"limit"; throw e; }
       if(res.status===403){ const e=new Error(d.message||"The Rooms are a Crowned feature."); e.code="crowned"; throw e; }
       if(res.status===429){ const e=new Error(d.message||"You're going a bit fast. Give it a moment."); e.code="rate"; throw e; }
       if(!res.ok) throw new Error(d.message || ("The room did not answer ("+res.status+")"));
@@ -1311,12 +1350,14 @@ async function roomReply(c, lastText){
     if(usage){
       if(typeof usage.used==="number") S.tokensUsed=usage.used;
       if(typeof usage.limit==="number") S.freeLimit=usage.limit;
+      if(typeof usage.topupTokens==="number") S.topupTokens=usage.topupTokens;
       if(usage.tier) S.tier=usage.tier;
     }
     render();
   }catch(err){
     c.messages.splice(idx,1);
-    if(err.code==="limit"){ c.messages.push({role:"assistant",content:"\ud83d\udc51 "+err.message}); render(); }
+    if(err.code==="limit"){ c.messages.push({role:"assistant",content:"\ud83d\udc51 "+err.message}); render(); openTopup(); }
+    else if(err.code==="topup"){ c.messages.push({role:"assistant",content:"\ud83d\udc51 "+err.message}); render(); openTopup(); }
     else if(err.code==="crowned"){ c.messages.push({role:"assistant",content:"\ud83d\udc51 "+err.message}); render(); openUpgrade(); }
     else if(err.code==="rate"){ c.messages.push({role:"assistant",content:err.message}); render(); }
     else { c.messages.push({role:"assistant",content:"\u26a0\ufe0f "+(err.message||"The room engine is not responding.")}); render(); }
@@ -1369,7 +1410,7 @@ $("send").onclick=send;
 $("input").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey){ e.preventDefault(); send(); }});
 $("input").addEventListener("input",function(){ this.style.height="28px"; this.style.height=Math.min(140,this.scrollHeight)+"px"; });
 addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeUpgrade(); closeName(); closeCtx(); closeAccount(); closeInput(); closeLogin(); }});
-[$("upgradeModal"),$("nameModal"),$("accountModal"),$("inputModal"),$("loginModal")].forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("show"); }));
+[$("upgradeModal"),$("nameModal"),$("accountModal"),$("inputModal"),$("loginModal"),$("topupModal")].forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("show"); }));
 $("proj-name").addEventListener("keydown",e=>{ if(e.key==="Enter") confirmProject(); });
 $("im-input").addEventListener("keydown",e=>{ if(e.key==="Enter") confirmInput(); });
 $("li-pass").addEventListener("keydown",e=>{ if(e.key==="Enter") submitLogin(); });
@@ -1386,6 +1427,7 @@ const _wantLogin  = (location.hash==="#login" || _path==="/login");
 const _wantSignup = (location.hash==="#upgrade" || location.hash==="#signup" || _path==="/signup");
 
 if(_params.get("checkout")==="success"){ toast("👑 Payment received. Welcome to Pro!"); history.replaceState({}, "", location.pathname); if(IS_PREVIEW){ S.tier="pro"; render(); } }
+else if(_params.get("checkout")==="topup"){ toast("\ud83d\udc51 Tokens added to your account"); history.replaceState({}, "", location.pathname); setTimeout(refreshMe, 1200); setTimeout(refreshMe, 5000); }
 else if(_params.get("checkout")==="cancel"){ toast("Checkout canceled. No charge was made"); history.replaceState({}, "", location.pathname); }
 
 (async function(){

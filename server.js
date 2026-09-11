@@ -54,9 +54,26 @@ const ROOMS_BASE = (process.env.ROOMS_BASE_URL || "http://127.0.0.1:3001/api/v1"
 const ROOMS_KEY  = process.env.ROOMS_API_KEY;
 // room slug -> credit multiplier. Reasoning-heavy rooms burn far more real tokens per answer, so they bill heavier.
 // Override from crown.env with ROOM_MULTIPLIERS='{"deep-logic":4}' style JSON if pricing needs tuning later.
-let ROOM_MULT = { "unfiltered": 1, "deep-logic": 3, "visual-analysis": 2, "creativity": 1 };
+let ROOM_MULT = { "unfiltered": 1, "deep-logic": 3, "visual-analysis": 2, "creativity": 1, "the-floor": 2 };
 try { if (process.env.ROOM_MULTIPLIERS) ROOM_MULT = Object.assign(ROOM_MULT, JSON.parse(process.env.ROOM_MULTIPLIERS)); } catch (_) { console.error("ROOM_MULTIPLIERS is not valid JSON; using defaults"); }
 const ROOM_SLUGS = Object.keys(ROOM_MULT);
+
+// ---- The Floor (Room 05): hidden product, sold via Discord side purchase, never part of Crowned ----
+// Access is a per-user flag flipped by the Stripe webhook (payment link metadata kind=floor, or a
+// subscription containing FLOOR_PRICE_ID). Context comes from a cached Korvus feed on disk.
+const FLOOR_PRICE_ID     = (process.env.FLOOR_PRICE_ID || "").trim();
+const FLOOR_CONTEXT_PATH = process.env.FLOOR_CONTEXT_PATH || "/var/lib/crown/floor-context.json";
+const FLOOR_MAX_AGE_MIN  = parseInt(process.env.FLOOR_MAX_AGE_MIN || "30", 10); // older than this = feed treated as offline
+
+// ---- Token top-ups: one-time Stripe payments that credit a separate balance ----
+// Deep-Logic runs on top-up tokens ONLY (paid-token room, like frontier reasoning tiers elsewhere).
+// Every other room drains the monthly pool first, then overflows into top-ups when the pool is dry.
+const TOPUP_ONLY_ROOMS = new Set(["deep-logic"]);
+const TOPUP_PACKS = {
+  p5:  { usd:  499, tokens:  250000, label: "250,000 tokens" },
+  p10: { usd:  999, tokens:  600000, label: "600,000 tokens" },
+  p20: { usd: 1999, tokens: 1500000, label: "1,500,000 tokens" }
+};
 
 // Admin portal: a logged-in user whose email is in ADMIN_EMAILS (comma-separated) gets admin access.
 const ADMIN_EMAILS  = String(process.env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -118,6 +135,8 @@ CREATE TABLE IF NOT EXISTS password_resets (
 
 // migration: profile photo column (added after the initial schema; safe to re-run on every boot)
 try { db.exec("ALTER TABLE users ADD COLUMN avatar TEXT"); } catch (e) { /* column already exists */ }
+try { db.exec("ALTER TABLE users ADD COLUMN topup_tokens INTEGER NOT NULL DEFAULT 0"); } catch (e) { /* column already exists */ }
+try { db.exec("ALTER TABLE users ADD COLUMN floor INTEGER NOT NULL DEFAULT 0"); } catch (e) { /* column already exists */ }
 
 const q = {
   userByEmail:    db.prepare("SELECT * FROM users WHERE email = ?"),
@@ -126,6 +145,8 @@ const q = {
   insertUser:     db.prepare("INSERT INTO users (email,username,password_hash,tier,tokens_used,period_start,created_at) VALUES (?,?,?,'free',0,?,?)"),
   setTokens:      db.prepare("UPDATE users SET tokens_used = ?, period_start = ? WHERE id = ?"),
   addTokens:      db.prepare("UPDATE users SET tokens_used = tokens_used + ? WHERE id = ?"),
+  addTopup:       db.prepare("UPDATE users SET topup_tokens = MAX(0, topup_tokens + ?) WHERE id = ?"),
+  setFloor:       db.prepare("UPDATE users SET floor = ? WHERE id = ?"),
   setTier:        db.prepare("UPDATE users SET tier = ? WHERE id = ?"),
   setTierCust:    db.prepare("UPDATE users SET tier = ?, stripe_customer_id = ? WHERE id = ?"),
   setCustomer:    db.prepare("UPDATE users SET stripe_customer_id = ? WHERE id = ?"),
@@ -176,7 +197,7 @@ function setSessionCookie(res, token){
 }
 const effectiveTier = u => (isAdmin(u) ? "pro" : u.tier);   // owner/admins get full Pro access
 const userLimit = u => (effectiveTier(u) === "pro" ? PRO_FAIR_USE : FREE_LIMIT);
-const publicUser = u => ({ username:u.username, email:u.email, tier:effectiveTier(u), tokensUsed:u.tokens_used, limit:userLimit(u), avatar:u.avatar||null });
+const publicUser = u => ({ username:u.username, email:u.email, tier:effectiveTier(u), tokensUsed:u.tokens_used, limit:userLimit(u), avatar:u.avatar||null, topupTokens:u.topup_tokens||0, floor:!!(u.floor || isAdmin(u)) });
 
 // in-memory rate limiter (per key)
 const rl = new Map();
@@ -192,6 +213,13 @@ const app = express();
 app.disable("x-powered-by");
 
 /* Stripe webhook: RAW body, registered BEFORE express.json() */
+// A subscription is a Floor subscription when it carries the FLOOR_PRICE_ID price.
+// Set FLOOR_PRICE_ID in crown.env to the price behind the Discord payment link.
+function isFloorSub(sub) {
+  try { return !!(FLOOR_PRICE_ID && sub.items && sub.items.data && sub.items.data.some(i => i.price && i.price.id === FLOOR_PRICE_ID)); }
+  catch (_) { return false; }
+}
+
 app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req, res) => {
   if (!stripe || !STRIPE_WHSEC) return res.status(400).send("Stripe not configured");
   let event;
@@ -200,16 +228,38 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req,
   try {
     if (event.type === "checkout.session.completed") {
       const s = event.data.object;
+      const md = s.metadata || {};
+      const email = String(s.customer_email || (s.customer_details && s.customer_details.email) || "").toLowerCase();
       let u = s.client_reference_id ? q.userById.get(parseInt(s.client_reference_id, 10)) : null;
-      if (!u && s.customer_email) u = q.userByEmail.get(String(s.customer_email).toLowerCase());
-      if (u) { q.setTierCust.run("pro", s.customer || u.stripe_customer_id || null, u.id); console.log("PRO  ->", u.email); }
-      else console.log("PAID but no matching user:", s.customer_email);
+      if (!u && email) u = q.userByEmail.get(email);
+
+      if (md.kind === "topup") {
+        // one-time token pack: credit the balance, touch nothing else
+        const tokens = parseInt(md.tokens || "0", 10) || 0;
+        if (u && tokens > 0) { q.addTopup.run(tokens, u.id); if (s.customer && !u.stripe_customer_id) q.setCustomer.run(s.customer, u.id); console.log("TOPUP +" + tokens + " ->", u.email); }
+        else console.log("TOPUP paid but no matching user:", email);
+      } else if (md.kind === "floor") {
+        // The Floor, bought through the Discord payment link. Grants the flag, never the Crowned tier.
+        if (u) { q.setFloor.run(1, u.id); if (s.customer && !u.stripe_customer_id) q.setCustomer.run(s.customer, u.id); console.log("FLOOR ->", u.email); }
+        else console.log("FLOOR paid but no matching Crown account for:", email, "(buyer must use their Crown login email; grant manually if needed)");
+      } else {
+        // default path: Crowned subscription
+        if (u) { q.setTierCust.run("pro", s.customer || u.stripe_customer_id || null, u.id); console.log("PRO  ->", u.email); }
+        else console.log("PAID but no matching user:", email);
+      }
     } else if (event.type === "customer.subscription.deleted") {
-      const u = q.userByCustomer.get(event.data.object.customer);
-      if (u) { q.setTier.run("free", u.id); console.log("FREE ->", u.email); }
+      const sub = event.data.object; const u = q.userByCustomer.get(sub.customer);
+      if (u) {
+        if (isFloorSub(sub)) { q.setFloor.run(0, u.id); console.log("FLOOR ended ->", u.email); }
+        else { q.setTier.run("free", u.id); console.log("FREE ->", u.email); }
+      }
     } else if (event.type === "customer.subscription.updated") {
       const sub = event.data.object; const u = q.userByCustomer.get(sub.customer);
-      if (u) q.setTier.run((sub.status === "active" || sub.status === "trialing") ? "pro" : "free", u.id);
+      if (u) {
+        const active = (sub.status === "active" || sub.status === "trialing");
+        if (isFloorSub(sub)) q.setFloor.run(active ? 1 : 0, u.id);
+        else q.setTier.run(active ? "pro" : "free", u.id);
+      }
     }
   } catch (e) { console.error("Webhook handler error:", e.message); }
   res.json({ received: true });
@@ -218,7 +268,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req,
 app.use(express.json({ limit: "14mb" }));   // headroom for image/PDF attachments (base64) on /api/chat
 
 app.get("/api/health", (_req, res) =>
-  res.json({ ok:true, model:MODEL, keyLoaded:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, db:true, accounts:true, images:!!IMAGE_KEY, email:!!mailer, rooms:!!ROOMS_KEY }));
+  res.json({ ok:true, model:MODEL, keyLoaded:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, db:true, accounts:true, images:!!IMAGE_KEY, email:!!mailer, rooms:!!ROOMS_KEY, floorFeed:fs.existsSync(FLOOR_CONTEXT_PATH) }));
 
 // ---- auth ----
 app.post("/api/register", (req, res) => {
@@ -503,6 +553,27 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
+
+// ---- The Floor: cached Korvus context, refreshed by /usr/local/bin/floor-feed.sh on a cron ----
+function readFloorContext() {
+  try {
+    const raw = fs.readFileSync(FLOOR_CONTEXT_PATH, "utf8");
+    const ctx = JSON.parse(raw);
+    if (!ctx || !Array.isArray(ctx.items) || !ctx.items.length) return "";
+    const ageMin = ctx.generated_at ? Math.round((Date.now() - ctx.generated_at) / 60000) : null;
+    if (ageMin !== null && ageMin > FLOOR_MAX_AGE_MIN)
+      return "[LIVE MARKET CONTEXT]\nThe Korvus feed is currently offline (last update " + ageMin + " minutes ago). Say so plainly if asked about live conditions; do not invent market data.\n[END CONTEXT]";
+    const lines = ["[LIVE MARKET CONTEXT · Korvus scored feed" + (ageMin !== null ? " · updated " + ageMin + " min ago" : "") + "]"];
+    if (ctx.smt && ctx.smt.verdict) lines.push("SMT DIVERGENCE (NQ/ES/YM): " + ctx.smt.verdict + (ctx.smt.note ? " · " + ctx.smt.note : ""));
+    for (const it of ctx.items.slice(0, 18)) {
+      const inst = Array.isArray(it.inst) && it.inst.length ? " {" + it.inst.join(",") + "}" : "";
+      lines.push("- [" + String(it.impact || "low").toUpperCase() + " · " + (it.dir || "neut") + " · " + (it.conf || 0) + "%]" + inst + " " + (it.headline || "") + (it.summary ? " :: " + it.summary : ""));
+    }
+    lines.push("[END CONTEXT · Ground answers in this feed. If it does not cover the question, say so. Information and context only, never financial advice, never a trade signal.]");
+    return lines.join("\n");
+  } catch (_) { return ""; }
+}
+
 // ---- Four Rooms (Crowned tier): proxied to the internal room engine ----
 // The frontend sends { room, message }. History threading is per user per room via sessionId,
 // so each room remembers its own conversation with that user and rooms never bleed into each other.
@@ -512,7 +583,6 @@ app.post("/api/room-chat", async (req, res) => {
 
   const u = getSessionUser(req);
   if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
-  if (effectiveTier(u) !== "pro") return res.status(403).json({ error:"crowned_only", message:"The Rooms are a Crowned feature. Upgrade to enter." });
 
   const room = String(req.body.room || "").trim().toLowerCase();
   if (!ROOM_SLUGS.includes(room)) return res.status(400).json({ error:"bad_room", message:"Unknown room." });
@@ -520,16 +590,38 @@ app.post("/api/room-chat", async (req, res) => {
   if (!message) return res.status(400).json({ error:"empty", message:"Nothing to send." });
   if (message.length > 32000) return res.status(413).json({ error:"too_long", message:"That message is too long." });
 
+  // The Floor is its own product: floor flag only, never bundled with Crowned.
+  // Every other room is Crowned. Admins pass both gates.
+  if (room === "the-floor") {
+    if (!u.floor && !isAdmin(u)) return res.status(403).json({ error:"floor_only", message:"The Floor is a private room. Access comes through the house." });
+  } else {
+    if (effectiveTier(u) !== "pro") return res.status(403).json({ error:"crowned_only", message:"The Rooms are a Crowned feature. Upgrade to enter." });
+  }
+
   const limit = userLimit(u);
-  if (u.tokens_used >= limit)
-    return res.status(402).json({ error:"limit", tier:"pro", used:u.tokens_used, limit,
-      message:"You've reached the fair-use ceiling for this period. Please contact support." });
+  const topup = u.topup_tokens || 0;
+  if (TOPUP_ONLY_ROOMS.has(room)) {
+    // Deep-Logic is a paid-token room: it never touches the monthly pool.
+    if (topup <= 0)
+      return res.status(402).json({ error:"topup_required", tier:effectiveTier(u), topupTokens:0,
+        message:"Deep-Logic runs on top-up tokens. Add tokens to your account to enter." });
+  } else if (u.tokens_used >= limit && topup <= 0) {
+    return res.status(402).json({ error:"limit", tier:effectiveTier(u), used:u.tokens_used, limit,
+      message:"You've hit this period's ceiling. Add top-up tokens to keep going, or wait for the reset." });
+  }
+
+  // The Floor answers about the session you are actually in: prepend the cached Korvus feed.
+  let outbound = message;
+  if (room === "the-floor") {
+    const ctx = readFloorContext();
+    outbound = (ctx ? ctx + "\n\n[TRADER QUESTION]\n" : "") + message;
+  }
 
   try {
     const upstream = await fetch(`${ROOMS_BASE}/workspace/${room}/chat`, {
       method: "POST",
       headers: { "content-type":"application/json", "authorization":"Bearer " + ROOMS_KEY },
-      body: JSON.stringify({ message, mode:"chat", sessionId: `u${u.id}-${room}` })
+      body: JSON.stringify({ message: outbound, mode:"chat", sessionId: `u${u.id}-${room}` })
     });
     const data = await upstream.json().catch(() => null);
     if (!upstream.ok || !data || data.error) {
@@ -545,12 +637,24 @@ app.post("/api/room-chat", async (req, res) => {
 
     // Meter real usage through the existing token system. If the engine reports token metrics use them,
     // otherwise estimate at ~4 chars per token. Multiplier makes heavy rooms drain the pool faster.
-    const rawTokens = (data.metrics && data.metrics.total_tokens) ? data.metrics.total_tokens : Math.ceil((message.length + text.length) / 4);
+    const rawTokens = (data.metrics && data.metrics.total_tokens) ? data.metrics.total_tokens : Math.ceil((outbound.length + text.length) / 4);
     const spent = Math.ceil(rawTokens * (ROOM_MULT[room] || 1));
-    q.addTokens.run(spent, u.id);
-    const nowUsed = u.tokens_used + spent;
 
-    res.json({ room, text, usage:{ tier:"pro", used:nowUsed, limit, remaining:Math.max(0, limit - nowUsed), multiplier: ROOM_MULT[room] || 1 } });
+    if (TOPUP_ONLY_ROOMS.has(room)) {
+      // paid-token room: spend from the top-up balance only (clamped at zero)
+      q.addTopup.run(-spent, u.id);
+    } else {
+      // pool first, overflow into top-ups once the pool is dry
+      const poolRoom  = Math.max(0, limit - u.tokens_used);
+      const fromPool  = Math.min(spent, poolRoom);
+      const overflow  = spent - fromPool;
+      if (fromPool > 0) q.addTokens.run(fromPool, u.id);
+      if (overflow > 0) q.addTopup.run(-overflow, u.id);
+    }
+    const fresh = q.userById.get(u.id);
+    res.json({ room, text, usage:{ tier:effectiveTier(u), used:fresh.tokens_used, limit,
+      remaining:Math.max(0, limit - fresh.tokens_used), topupTokens:fresh.topup_tokens||0,
+      multiplier: ROOM_MULT[room] || 1 } });
   } catch (e) {
     console.error("[room-chat] " + room + ": " + e.message);
     res.status(502).json({ error:"room_unreachable", message:"The room engine is not responding." });
@@ -674,6 +778,29 @@ app.post("/api/checkout", async (req, res) => {
     res.json({ url: session.url });
   } catch (e) { console.error("Checkout error:", e.message); res.status(500).json({ error:"checkout_failed", message:e.message }); }
 });
+// ---- token top-ups: one-time Stripe payment, credited by the webhook within seconds ----
+app.post("/api/topup", async (req, res) => {
+  if (!stripe) return res.status(503).json({ error:"stripe_unconfigured", message:"Stripe is not set up on the server yet." });
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
+  const pack = TOPUP_PACKS[String(req.body.pack || "")];
+  if (!pack) return res.status(400).json({ error:"bad_pack", message:"Unknown token pack." });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [{ quantity: 1, price_data: { currency: "usd", unit_amount: pack.usd,
+        product_data: { name: "Crown token top-up · " + pack.label } } }],
+      customer: u.stripe_customer_id || undefined,
+      customer_email: u.stripe_customer_id ? undefined : u.email,
+      client_reference_id: String(u.id),
+      metadata: { kind: "topup", tokens: String(pack.tokens), userId: String(u.id) },
+      success_url: `${PUBLIC_URL}/chat?checkout=topup`,
+      cancel_url: `${PUBLIC_URL}/chat?checkout=cancel`
+    });
+    res.json({ url: session.url });
+  } catch (e) { console.error("Topup error:", e.message); res.status(500).json({ error:"topup_failed", message:e.message }); }
+});
+
 app.post("/api/portal", async (req, res) => {
   if (!stripe) return res.status(503).json({ error:"stripe_unconfigured", message:"Stripe is not set up yet." });
   const u = getSessionUser(req);
