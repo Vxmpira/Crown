@@ -7,30 +7,30 @@
 <title>Reset your password | Crown</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 56'%3E%3Cpath d='M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z' fill='%23d4af37'/%3E%3Crect x='4' y='44' width='56' height='8' fill='%23d4af37'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 30' fill='none' stroke='%23FF2D95' stroke-width='2.4' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z'/%3E%3Cline x1='7' y1='28' x2='29' y2='28'/%3E%3C/svg%3E">
 <style>
   :root{
-    --obsidian:#070709;--panel:#13131a;--panel-2:#1a1a23;
-    --gold:#d4af37;--gold-bright:#f5e0a3;--gold-deep:#9c7c1f;
-    --ivory:#ece7dd;--muted:#8c867a;--muted-2:#5f5b52;
+    --obsidian:#000000;--panel:#0D0D11;--panel-2:#1a1a23;
+    --gold:#E8C77F;--gold-bright:#F3DCA8;--gold-deep:#C9A45C;
+    --ivory:#E8E8EF;--muted:#85838F;--muted-2:#55545E;
     --green:#3fb27f;--red:#c0445a;
-    --line:rgba(212,175,55,.16);--line-soft:rgba(236,231,221,.08);
-    --display:'Cinzel',serif;--body:'Hanken Grotesk',system-ui,sans-serif;
+    --line:rgba(232,199,127,.16);--line-soft:rgba(255,255,255,.08);
+    --display:'Space Grotesk',sans-serif;--body:'Manrope',system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--obsidian);color:var(--ivory);font-family:var(--body);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;
-    background-image:radial-gradient(900px 420px at 50% -10%,rgba(212,175,55,.08),transparent);}
+    background-image:radial-gradient(900px 420px at 50% -10%,rgba(232,199,127,.08),transparent);}
   .card{width:100%;max-width:430px;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:20px;padding:34px 30px;text-align:center}
   .crown{color:var(--gold)}
-  .eyebrow{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:16px 0 6px}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);font-weight:500;text-shadow:0 0 6px rgba(232,199,127,.40),0 0 18px rgba(232,199,127,.18)}
   h1{font-family:var(--display);font-weight:800;font-size:1.5rem;margin-bottom:8px}
   p.sub{color:var(--muted);font-size:.92rem;line-height:1.6;margin-bottom:22px}
   .field{text-align:left;margin-bottom:14px}
   label{display:block;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
   input{width:100%;background:var(--obsidian);border:1px solid var(--line);border-radius:12px;color:var(--ivory);font-family:var(--body);font-size:.96rem;padding:13px 15px;outline:none}
   input:focus{border-color:var(--gold)}
-  .btn{width:100%;font-family:var(--body);font-weight:700;font-size:.96rem;border:none;border-radius:999px;padding:14px;cursor:pointer;background:linear-gradient(115deg,var(--gold-deep),var(--gold) 52%,var(--gold-bright));color:#1a1405;margin-top:6px}
+  .btn{width:100%;font-family:var(--body);font-weight:700;font-size:.96rem;border:none;border-radius:999px;padding:14px;cursor:pointer;background:linear-gradient(115deg,var(--gold-deep),var(--gold) 52%,var(--gold-bright));color:#14100A;margin-top:6px}
   .btn:disabled{opacity:.6;cursor:default}
   .btn.ghost{background:rgba(255,255,255,.02);color:var(--ivory);border:1px solid var(--line)}
   .msg{font-size:.88rem;line-height:1.5;margin-top:14px;min-height:20px}
@@ -44,7 +44,7 @@
 <script>/*urlclean*/try{var _p=location.pathname;if(/\.html$/.test(_p))history.replaceState(null,"",_p.replace(/index\.html$/,"").replace(/\.html$/,"")+location.search+location.hash);}catch(e){}</script>
 
 <div class="card">
-  <svg class="crown" width="46" height="36" viewBox="0 0 64 50" fill="currentColor"><path d="M4 42 L10 14 L22 28 L32 6 L42 28 L54 14 L60 42 Z"/><rect x="4" y="42" width="56" height="6" rx="2"/><circle cx="10" cy="12" r="3.2"/><circle cx="32" cy="4" r="3.2"/><circle cx="54" cy="12" r="3.2"/></svg>
+  <svg class="crown" width="26" height="22" viewBox="0 0 36 30" fill="none" stroke="#FF2D95" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" style="filter:drop-shadow(0 0 5px rgba(255,45,149,.7))"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg>
 
   <!-- reset form -->
   <div id="form">
