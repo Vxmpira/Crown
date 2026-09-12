@@ -319,6 +319,26 @@
   .arow .v .pill{padding:3px 9px}
   .acct-actions{display:flex;flex-direction:column;gap:10px;margin-top:18px}
   .acct-actions .btn{width:100%;padding:12px;margin-top:0}
+  .acct-tierline{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .copy-mini{border:1px solid var(--line-cool);background:transparent;color:var(--muted);border-radius:8px;padding:3px 9px;font-size:.7rem;cursor:pointer;font-family:var(--mono);letter-spacing:.08em;transition:color .2s,border-color .2s}
+  .copy-mini:hover{color:var(--gold);border-color:var(--gold)}
+  .usage-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:560px){.usage-grid{grid-template-columns:1fr}}
+  .u-card{border:1px solid var(--line-cool);border-radius:14px;padding:14px;background:rgba(255,255,255,.02)}
+  .u-card .ul{font-family:var(--mono);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .u-card .un{font-family:var(--display);font-weight:700;font-size:1.45rem;color:var(--ivory);text-shadow:0 0 8px rgba(255,255,255,.18);line-height:1}
+  .u-card .un small{font-size:.78rem;color:var(--muted);font-weight:500;text-shadow:none;margin-left:4px}
+  .u-card .us{color:var(--muted);font-size:.76rem;margin-top:7px;line-height:1.45}
+  .u-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);margin-top:10px;overflow:hidden}
+  .u-bar i{display:block;height:100%;border-radius:99px;background:var(--gold);box-shadow:0 0 6px rgba(232,199,127,.40),0 0 14px rgba(232,199,127,.18);transition:width .4s}
+  .u-bar.warn i{background:#C81E73;box-shadow:0 0 6px rgba(255,45,149,.45)}
+  .u-cta{margin-top:10px}
+  .u-cta .btn{width:100%;padding:10px;margin-top:0;font-size:.86rem}
+  .floor-chip{display:inline-flex;align-items:center;gap:7px;margin-top:12px;font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:#FF2D95;border:1px solid rgba(255,45,149,.35);border-radius:99px;padding:6px 12px;text-shadow:0 0 6px rgba(255,45,149,.45)}
+  .floor-chip i{width:6px;height:6px;border-radius:50%;background:#FF2D95;box-shadow:0 0 6px rgba(255,45,149,.6)}
+  .sec-link{font-size:.78rem;color:var(--muted);margin-top:10px}
+  .sec-link a{color:var(--gold);text-decoration:none}
+  .sec-link a:hover{text-shadow:0 0 6px rgba(232,199,127,.4)}
 
   /* ---------- context menu ---------- */
   .ctx{position:fixed;z-index:70;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:6px;min-width:190px;box-shadow:0 20px 50px rgba(0,0,0,.7);display:none;backdrop-filter:var(--blur)}
@@ -861,18 +881,28 @@ function setRoom(slug){
 /* ===== account / profile ===== */
 function openAccount(){ renderAccount(); $("accountModal").classList.add("show"); }
 function closeAccount(){ $("accountModal").classList.remove("show"); }
+function copyEmail(){
+  const e=S.account&&S.account.email; if(!e) return;
+  (navigator.clipboard?navigator.clipboard.writeText(e):Promise.reject()).then(()=>toast("Email copied")).catch(()=>toast(e));
+}
 function renderAccount(){
   const a=S.account, pro=S.tier==="pro";
   const name=a?.username||"Guest", email=a?.email||"Not signed in";
   const hasPhoto=!!(a&&a.avatar);
   const cam='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.5"/></svg>';
   const plus='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+  const used=S.tokensUsed||0, lim=Math.max(1,S.freeLimit||1), pct=Math.min(100,Math.round(used/lim*100));
+  const usageCard = pro
+    ? `<div class="u-card"><div class="ul">Daily allowance</div><div class="un">Unlimited</div><div class="us">Crowned covers the standard rooms with no daily cap.</div></div>`
+    : `<div class="u-card"><div class="ul">Daily allowance</div><div class="un">${used.toLocaleString()}<small>/ ${lim.toLocaleString()}</small></div><div class="u-bar${pct>=85?' warn':''}"><i style="width:${pct}%"></i></div><div class="us">${pct}% used. Resets every day, free forever.</div></div>`;
+  const tokenCard = `<div class="u-card"><div class="ul">Deep-Logic tokens</div><div class="un">${fmtTokens(S.topupTokens||0)}</div><div class="us">Top-up balance. Never expires, and overflows to other rooms when your daily allowance runs dry.</div><div class="u-cta"><button class="btn btn-gold" onclick="closeAccount();openTopup()">${plus}&nbsp;Add tokens</button></div></div>`;
+  const floorChip = (a&&S.floor)?`<div class="floor-chip"><i></i>The Floor \u00b7 access granted</div>`:"";
   const subBtn = pro
     ? `<button class="btn btn-ghost" onclick="manageSub()">Manage</button>`
-    : `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Upgrade</button>`;
+    : `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Get Crowned</button>`;
   const footActions = a
     ? `<button class="btn btn-danger" onclick="signOut()">Sign out</button>`
-    : `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Create account · Go Pro</button><button class="btn btn-ghost" onclick="closeAccount();openLogin()">Log in</button>`;
+    : `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Create account \u00b7 Get Crowned</button><button class="btn btn-ghost" onclick="closeAccount();openLogin()">Log in</button>`;
   $("acctBody").innerHTML = `
     <div class="prof-id">
       <div class="prof-av-wrap">
@@ -880,10 +910,24 @@ function renderAccount(){
         ${a?`<button class="prof-cam" title="Change photo" onclick="pickPhoto()">${cam}</button>`:""}
       </div>
       <div class="acct-id">
-        <div class="an">${esc(name)}</div>
-        <div class="ae">${esc(email)}</div>
+        <div class="an">${esc(name)} ${pro?'<span class="pill pro">CROWNED</span>':(a?'<span class="pill">STANDARD</span>':"")}</div>
+        <div class="acct-tierline"><span class="ae" style="margin-top:0">${esc(email)}</span>${a?`<button class="copy-mini" onclick="copyEmail()">COPY</button>`:""}</div>
         ${a?`<div class="prof-actions"><button class="mini" onclick="pickPhoto()">${plus}Upload photo</button>${hasPhoto?`<button class="mini ghost" onclick="removePhoto()">Remove</button>`:""}</div>`:""}
+        ${floorChip}
       </div>
+    </div>
+    ${a?`
+    <div class="psect">
+      <div class="sect-label">Usage &amp; tokens</div>
+      <div class="usage-grid">${usageCard}${tokenCard}</div>
+    </div>`:""}
+    <div class="psect">
+      <div class="sect-label">Plan &amp; billing</div>
+      <div class="sub-card">
+        <div class="sub-info"><div class="st">${pro?'Crowned <span class="pill pro">ACTIVE</span>':'Standard <span class="pill">FREE</span>'}</div><div class="sd">${pro?'Unlimited standard rooms, billed monthly. Cancel any time.':'Three rooms with a daily allowance. Crowned removes the cap.'}</div></div>
+        ${subBtn}
+      </div>
+      ${a&&pro?`<div class="sec-link">Update your card, download invoices, or cancel in the secure Stripe portal via Manage.</div>`:""}
     </div>
     ${a?`
     <div class="psect">
@@ -892,7 +936,7 @@ function renderAccount(){
       <button class="btn btn-gold" id="saveNameBtn" disabled onclick="saveName()">Save name</button>
     </div>
     <div class="psect">
-      <div class="sect-label">Password</div>
+      <div class="sect-label">Security</div>
       <div class="field"><label>Current password</label><input type="password" id="pwCur" autocomplete="current-password" placeholder="Enter current password" oninput="onPwInput()"></div>
       <div class="frow">
         <div class="field"><label>New password</label><input type="password" id="pwNew" autocomplete="new-password" placeholder="At least 8 characters" oninput="onPwInput()"></div>
@@ -900,16 +944,10 @@ function renderAccount(){
       </div>
       <div class="hint" id="pwHint" style="margin-top:8px"></div>
       <button class="btn btn-gold" id="savePwBtn" disabled onclick="changePassword()">Update password</button>
+      <div class="sec-link">Forgot your current password? <a href="/reset">Email me a reset link</a></div>
     </div>`:""}
-    <div class="psect">
-      <div class="sect-label">Subscription</div>
-      <div class="sub-card">
-        <div class="sub-info"><div class="st">${pro?'Crown Pro <span class="pill pro">PRO</span>':'Free plan <span class="pill">FREE</span>'}</div><div class="sd">${pro?'Unlimited usage, billed monthly':esc(S.tokensUsed.toLocaleString()+' / '+S.freeLimit.toLocaleString()+' tokens this period')}</div></div>
-        ${subBtn}
-      </div>
-    </div>
     <div class="acct-actions">${footActions}</div>
-    <div class="mnote">Your subscription is managed securely through Stripe. Changes take effect immediately.</div>`;
+    <div class="mnote">Payments and subscriptions are handled securely by Stripe. Crown never sees your card.</div>`;
 }
 /* ===== profile actions (display name, password, photo) ===== */
 function onNameInput(){ const v=($("nameInput").value||"").trim(); const b=$("saveNameBtn"); if(b) b.disabled=(v.length<3 || v===(S.account&&S.account.username||"")); }
