@@ -548,6 +548,13 @@ const CONFIG = {
 
 /* ===== state (in-memory; real persistence arrives with the accounts/DB phase) ===== */
 const S = { tier:"free", account:null, chats:[], projects:[], activeId:null, tokensUsed:0, freeLimit:CONFIG.FREE_TOKEN_LIMIT, seq:0 };
+/* Instant-login hydration: paint the last known signed-in state on first render
+   (kills the logged-out flash when returning from Stripe); refreshMe() reconciles with the server right after. */
+(function(){ try{
+  if(typeof IS_PREVIEW !== "undefined" && IS_PREVIEW) return;
+  const c = JSON.parse(localStorage.getItem("crown_me")||"null");
+  if(c && c.account){ S.account=c.account; S.tier=c.tier||"free"; S.tokensUsed=c.tokensUsed||0; S.freeLimit=c.freeLimit||S.freeLimit; S.topupTokens=c.topupTokens||0; S.floor=!!c.floor; }
+}catch(e){} })();
 const $ = id => document.getElementById(id);
 const uid = p => p + (++S.seq) + "-" + Math.random().toString(36).slice(2,6);
 const CHIPS = ["Draft a launch announcement","Explain a concept simply","Write a Python script to…","Brainstorm brand names"];
@@ -609,10 +616,10 @@ async function refreshMe(){
     const r = await fetch("/api/me", { credentials:"include" });
     const d = await r.json().catch(()=>({}));
     if(d && d.user){
-      S.account={username:d.user.username,email:d.user.email,avatar:d.user.avatar||null}; S.tier=d.user.tier; S.tokensUsed=d.user.tokensUsed||0; S.freeLimit=d.user.limit||S.freeLimit; S.topupTokens=d.user.topupTokens||0; S.floor=!!d.user.floor; if(S.room && ROOMS[S.room] && ROOMS[S.room].floor && !S.floor) S.room="crown";
+      S.account={username:d.user.username,email:d.user.email,avatar:d.user.avatar||null}; S.tier=d.user.tier; S.tokensUsed=d.user.tokensUsed||0; S.freeLimit=d.user.limit||S.freeLimit; S.topupTokens=d.user.topupTokens||0; S.floor=!!d.user.floor; try{ localStorage.setItem("crown_me", JSON.stringify({account:S.account,tier:S.tier,tokensUsed:S.tokensUsed,freeLimit:S.freeLimit,topupTokens:S.topupTokens,floor:S.floor})); }catch(e){} if(S.room && ROOMS[S.room] && ROOMS[S.room].floor && !S.floor) S.room="crown";
       await loadWorkspace();   // pull this user's saved chats + projects
     } else {
-      S.account=null; S.tier="free"; render();
+      S.account=null; S.tier="free"; try{ localStorage.removeItem("crown_me"); }catch(e){} render();
     }
   }catch(e){}
 }
@@ -1012,7 +1019,7 @@ async function removePhoto(){
 }
 function editName(){ if(!S.account) return; openInput("Profile","Display name","Your name",S.account.username,v=>{ S.account.username=v; toast("Name updated"); render(); renderAccount(); }); }
 async function signOut(){
-  if(!IS_PREVIEW){ try{ await fetch("/api/logout",{method:"POST",credentials:"include"}); }catch(e){} }
+  try{ localStorage.removeItem("crown_me"); }catch(e){} if(!IS_PREVIEW){ try{ await fetch("/api/logout",{method:"POST",credentials:"include"}); }catch(e){} }
   S.account=null; S.tier="free"; S.tokensUsed=0; S.freeLimit=CONFIG.FREE_TOKEN_LIMIT; S.topupTokens=0; S.floor=false; if(S.room && ROOMS[S.room] && ROOMS[S.room].floor) S.room="crown";
   S.chats=[]; S.projects=[]; S.activeId=null; newChat();
   closeAccount(); toast("Signed out");
