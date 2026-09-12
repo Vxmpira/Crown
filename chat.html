@@ -892,10 +892,8 @@ function renderAccount(){
   const cam='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.5"/></svg>';
   const plus='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
   const used=S.tokensUsed||0, lim=Math.max(1,S.freeLimit||1), pct=Math.min(100,Math.round(used/lim*100));
-  const usageCard = pro
-    ? `<div class="u-card"><div class="ul">Daily allowance</div><div class="un">Unlimited</div><div class="us">Crowned covers the standard rooms with no daily cap.</div></div>`
-    : `<div class="u-card"><div class="ul">Daily allowance</div><div class="un">${used.toLocaleString()}<small>/ ${lim.toLocaleString()}</small></div><div class="u-bar${pct>=85?' warn':''}"><i style="width:${pct}%"></i></div><div class="us">${pct}% used. Resets every day, free forever.</div></div>`;
-  const tokenCard = `<div class="u-card"><div class="ul">Deep-Logic tokens</div><div class="un">${fmtTokens(S.topupTokens||0)}</div><div class="us">Top-up balance. Never expires, and overflows to other rooms when your daily allowance runs dry.</div><div class="u-cta"><button class="btn btn-gold" onclick="closeAccount();openTopup()">${plus}&nbsp;Add tokens</button></div></div>`;
+  const usageCard = `<div class="u-card"><div class="ul">Monthly allowance</div><div class="un">${used.toLocaleString()}<small>/ ${lim.toLocaleString()}</small></div><div class="u-bar${pct>=85?' warn':''}"><i style="width:${pct}%"></i></div><div class="us">${pct}% used · ${Math.max(0,lim-used).toLocaleString()} left. ${pro?'Covers all four rooms. Resets every 30 days.':'Crown console allowance. Resets every 30 days, free forever.'}</div></div>`;
+  const tokenCard = `<div class="u-card"><div class="ul">Deep-Logic tokens</div><div class="un">${fmtTokens(S.topupTokens||0)}</div><div class="us">Top-up balance. Never expires, and overflows to other rooms when your monthly allowance runs dry.</div><div class="u-cta"><button class="btn btn-gold" onclick="closeAccount();openTopup()">${plus}&nbsp;Add tokens</button></div></div>`;
   const floorChip = (a&&S.floor)?`<div class="floor-chip"><i></i>The Floor \u00b7 access granted</div>`:"";
   const subBtn = pro
     ? `<button class="btn btn-ghost" onclick="manageSub()">Manage</button>`
@@ -924,7 +922,7 @@ function renderAccount(){
     <div class="psect">
       <div class="sect-label">Plan &amp; billing</div>
       <div class="sub-card">
-        <div class="sub-info"><div class="st">${pro?'Crowned <span class="pill pro">ACTIVE</span>':'Standard <span class="pill">FREE</span>'}</div><div class="sd">${pro?'Unlimited standard rooms, billed monthly. Cancel any time.':'Three rooms with a daily allowance. Crowned removes the cap.'}</div></div>
+        <div class="sub-info"><div class="st">${pro?'Crowned <span class="pill pro">ACTIVE</span>':'Standard <span class="pill">FREE</span>'}</div><div class="sd">${pro?'All four rooms, 5,000,000 tokens a month. Cancel any time.':'The Crown console with a monthly allowance. Crowned unlocks the rooms.'}</div></div>
         ${subBtn}
       </div>
       ${a&&pro?`<div class="sec-link">Update your card, download invoices, or cancel in the secure Stripe portal via Manage.</div>`:""}
