@@ -404,6 +404,75 @@ app.post("/api/reset", (req, res) => {
   res.json({ ok:true });
 });
 
+/* ===== conversation memory compaction =====
+   Older messages in long chats are distilled into one compact "memory" message by a
+   cheap model, and the raw originals are dropped from storage. The chat keeps its
+   memory, the database stays small, and prompts stay cheap. Runs async after saves. */
+const SUMMARY_MODEL   = process.env.SUMMARY_MODEL || MODEL;
+const COMPACT_TRIGGER = parseInt(process.env.COMPACT_TRIGGER_TOKENS || "6000", 10); // distill once a chat's raw history passes this
+const COMPACT_KEEP    = parseInt(process.env.COMPACT_KEEP_MSGS || "10", 10);        // newest messages always kept verbatim
+const estTok = s => Math.ceil((s || "").length / 4);
+const compactTimers = new Map();
+const qWs = {
+  read:  db.prepare("SELECT data, updated_at FROM workspaces WHERE user_id = ?"),
+  write: db.prepare("UPDATE workspaces SET data = ?, updated_at = ? WHERE user_id = ? AND updated_at = ?")
+};
+function scheduleCompaction(userId){
+  if (!KEY) return;
+  clearTimeout(compactTimers.get(userId));
+  compactTimers.set(userId, setTimeout(() => {
+    compactTimers.delete(userId);
+    compactWorkspace(userId).catch(e => console.error("[compact]", e.message));
+  }, 5000));
+}
+async function distill(transcript, prevMemory){
+  const sys = "You distill chat transcripts into dense memory notes for an AI assistant. Keep every hard fact, name, number, decision, stated preference, open question, and the overall tone. Drop pleasantries and repetition. Write tight plain prose under 250 words. No preamble, no headers.";
+  const user = (prevMemory ? "EXISTING MEMORY (fold this into the update):\n" + prevMemory + "\n\n" : "") + "TRANSCRIPT TO DISTILL:\n" + transcript;
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type":"application/json", "x-api-key":KEY, "anthropic-version":"2023-06-01" },
+    body: JSON.stringify({ model: SUMMARY_MODEL, max_tokens: 600, system: sys, messages: [{ role:"user", content:user }] })
+  });
+  if (!r.ok) throw new Error("summarizer HTTP " + r.status);
+  const d = await r.json();
+  return (d.content || []).filter(b => b.type === "text").map(b => b.text).join("").trim();
+}
+async function compactWorkspace(userId){
+  const row = qWs.read.get(userId);
+  if (!row) return;
+  let d; try { d = JSON.parse(row.data); } catch (_) { return; }
+  const chats = Array.isArray(d.chats) ? d.chats : [];
+  let changed = false, budget = 3;                       // at most 3 distillations per pass
+  for (const c of chats){
+    if (budget <= 0) break;
+    const msgs = Array.isArray(c.messages) ? c.messages : [];
+    if (msgs.length <= COMPACT_KEEP + 2) continue;
+    const prevMem = msgs[0] && msgs[0].role === "memory" ? msgs[0] : null;
+    const body = prevMem ? msgs.slice(1) : msgs.slice();
+    const rawTok = body.reduce((n, m) => n + estTok(typeof m.content === "string" ? m.content : ""), 0);
+    if (rawTok < COMPACT_TRIGGER) continue;
+    const keep = body.slice(-COMPACT_KEEP);
+    const fold = body.slice(0, body.length - COMPACT_KEEP);
+    if (!fold.length) continue;
+    const transcript = fold.map(m => {
+      if (m.image) return "ASSISTANT: (generated an image" + (m.prompt ? ": " + m.prompt : "") + ")";
+      if (m.choice || typeof m.content !== "string" || !m.content) return null;
+      return (m.role === "user" ? "USER: " : "ASSISTANT: ") + m.content;
+    }).filter(Boolean).join("\n\n");
+    if (!transcript) continue;
+    try {
+      const memo = await distill(transcript, prevMem ? prevMem.content : null);
+      if (!memo) continue;
+      c.messages = [{ role:"memory", content:memo, folded:(prevMem ? prevMem.folded || 0 : 0) + fold.length, at:now() }, ...keep];
+      changed = true; budget--;
+    } catch (e) { console.error("[compact] chat", c.id, e.message); }
+  }
+  if (!changed) return;
+  const out = JSON.stringify({ chats, projects: Array.isArray(d.projects) ? d.projects : [] });
+  const res = qWs.write.run(out, now(), userId, row.updated_at);
+  if (res.changes === 0) scheduleCompaction(userId);     // a newer save landed mid-distill; redo against it
+}
+
 // ---- per-user workspace (chats + projects persistence) ----
 app.get("/api/workspace", (req, res) => {
   const u = getSessionUser(req);
@@ -424,6 +493,7 @@ app.put("/api/workspace", (req, res) => {
   if (data.length > 4500000) return res.status(413).json({ error:"too_large", message:"Workspace is too large to save." });
   q.upsertWorkspace.run(u.id, data, now());
   res.json({ ok:true });
+  scheduleCompaction(u.id);
 });
 
 // ---- admin portal (allowlisted by ADMIN_EMAILS) ----

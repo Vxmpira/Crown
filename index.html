@@ -44,6 +44,23 @@
     background:linear-gradient(180deg,transparent,rgba(232,199,127,.5),transparent);
     animation:sweep 16s linear infinite}
   @keyframes sweep{from{transform:translateY(-40vh)}to{transform:translateY(180vh)}}
+  /* live grid: the lattice wakes under the cursor */
+  .bgfx2{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .4s;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cg fill='none' stroke='%23E8C77F' stroke-opacity='.55'%3E%3Cpath d='M120 114v12M114 120h12'/%3E%3C/g%3E%3Cg fill='%23FFFFFF' fill-opacity='.4'%3E%3Ccircle cx='24' cy='24' r='1.2'/%3E%3Ccircle cx='72' cy='168' r='1.2'/%3E%3Ccircle cx='168' cy='72' r='1.2'/%3E%3Ccircle cx='216' cy='216' r='1.2'/%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask:radial-gradient(230px at var(--gx,-500px) var(--gy,-500px),#000,transparent 72%);
+    mask:radial-gradient(230px at var(--gx,-500px) var(--gy,-500px),#000,transparent 72%)}
+  body.gridlive .bgfx2{opacity:.5}
+  /* vault beams: light through the cracked door */
+  .beam{position:fixed;z-index:0;pointer-events:none;width:46vw;height:130vh;top:-18vh;filter:blur(46px);opacity:.05;
+    background:linear-gradient(180deg,rgba(232,199,127,.5),transparent 70%)}
+  .beam.b1{left:-9vw;transform:rotate(16deg);animation:beam 21s ease-in-out infinite alternate}
+  .beam.b2{right:-12vw;transform:rotate(-14deg);background:linear-gradient(180deg,rgba(232,199,127,.34),transparent 65%);animation:beam 27s ease-in-out infinite alternate-reverse}
+  @keyframes beam{from{opacity:.035}to{opacity:.085}}
+  /* signal motes: data in transit */
+  .motes{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .mote{position:absolute;bottom:-10px;border-radius:50%;background:#E8C77F;box-shadow:0 0 8px 1px rgba(232,199,127,.6);opacity:0;animation:mote linear infinite}
+  .mote.pk{background:#FF2D95;box-shadow:0 0 9px 1px rgba(255,45,149,.6)}
+  @keyframes mote{0%{transform:translateY(0);opacity:0}8%{opacity:.5}88%{opacity:.4}100%{transform:translateY(-108vh);opacity:0}}
   section.sec{overflow:hidden}
   section.sec .wrap{position:relative;z-index:2}
   .secmark{position:absolute;top:.6rem;right:-1.5rem;z-index:1;pointer-events:none;user-select:none;
@@ -58,7 +75,7 @@
   .ghostcrown.gc1{width:440px;height:366px;left:-120px;bottom:-90px;transform:rotate(-9deg);stroke:rgba(232,199,127,.055);stroke-width:.8}
   .ghostcrown.gc2{width:380px;height:316px;right:-100px;top:-60px;transform:rotate(7deg);stroke:rgba(255,45,149,.05);stroke-width:.8}
   @media(max-width:640px){.secmark{font-size:5rem;opacity:.7}.ghostcrown.gc1,.ghostcrown.gc2{width:260px;height:216px}}
-  @media(prefers-reduced-motion:reduce){.sweep{animation:none;display:none}}
+  @media(prefers-reduced-motion:reduce){.sweep{animation:none;display:none}.beam,.mote{animation:none;display:none}.bgfx2{display:none}}
 
   /* NAV */
   nav.top{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.9rem var(--pad);background:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.55));backdrop-filter:blur(12px);border-bottom:1px solid var(--line-soft)}
@@ -261,6 +278,10 @@
 <div class="grain"></div>
 <div class="bgfx" aria-hidden="true"></div>
 <div class="sweep" aria-hidden="true"></div>
+<div class="bgfx2" aria-hidden="true"></div>
+<div class="beam b1" aria-hidden="true"></div>
+<div class="beam b2" aria-hidden="true"></div>
+<div class="motes" aria-hidden="true" id="motes"></div>
 <div class="progress" id="progress"></div>
 
 <nav class="top">
@@ -631,6 +652,35 @@
     p.style.width=(max>0?(h.scrollTop/max)*100:0)+'%';
   },{passive:true});
 })();
+
+(function seedMotes(){
+  try{
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var box=document.getElementById('motes'); if(!box) return;
+    for(var i=0;i<16;i++){
+      var m=document.createElement('div');
+      m.className='mote'+(i%8===0?' pk':'');
+      m.style.left=(Math.random()*100)+'%';
+      m.style.animationDuration=(11+Math.random()*13)+'s';
+      m.style.animationDelay=(-Math.random()*20)+'s';
+      var sc=.6+Math.random()*1.1; m.style.width=(2.2*sc)+'px'; m.style.height=(2.2*sc)+'px';
+      box.appendChild(m);
+    }
+  }catch(_){}
+})();
+
+if(matchMedia('(hover:hover)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+  var _gq=false;
+  addEventListener('mousemove',function(e){
+    if(_gq) return; _gq=true;
+    requestAnimationFrame(function(){
+      _gq=false;
+      document.documentElement.style.setProperty('--gx',e.clientX+'px');
+      document.documentElement.style.setProperty('--gy',e.clientY+'px');
+      if(!document.body.classList.contains('gridlive')) document.body.classList.add('gridlive');
+    });
+  },{passive:true});
+}
 
 if(matchMedia('(hover:hover)').matches){
   document.querySelectorAll('.room,.plan').forEach(el=>{

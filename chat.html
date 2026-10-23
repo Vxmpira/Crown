@@ -259,6 +259,50 @@
   .send:hover{transform:translateY(-1px) scale(1.04)}.send:disabled{opacity:.4;cursor:not-allowed;transform:none}
   .composer-foot{max-width:768px;margin:11px auto 0;text-align:center;font-size:.71rem;color:var(--muted-2);letter-spacing:.02em}
 
+  /* ---------- room dock: the doors of the house, above the composer ---------- */
+  .room-dock{display:flex;gap:7px;align-items:stretch;justify-content:flex-start;max-width:min(960px,100%);width:max-content;margin:0 auto 9px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 3px}
+  .door.side{margin-left:14px}
+  .room-dock::-webkit-scrollbar{display:none}
+  .door{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;padding:7px 12px;border-radius:999px;cursor:pointer;
+    border:1px solid var(--line-cool);background:rgba(255,255,255,.02);color:var(--muted);font-size:.74rem;letter-spacing:.02em;
+    transition:border-color .18s,background .18s,color .18s,transform .18s,box-shadow .18s}
+  .door:hover{border-color:rgba(232,199,127,.42);color:var(--ivory);transform:translateY(-1px)}
+  .door .dnum{font-family:var(--display);font-size:.6rem;letter-spacing:.16em;color:var(--gold);display:inline-flex;align-items:center}
+  .door .dtag{font-size:.56rem;letter-spacing:.14em;color:var(--champagne);opacity:.8;margin-left:2px}
+  .door .dtag.floor{color:#FF2D95;opacity:1}
+  .door.on{border-color:rgba(232,199,127,.65);background:linear-gradient(180deg,rgba(232,199,127,.15),rgba(232,199,127,.05));color:var(--ivory);box-shadow:0 8px 24px -14px rgba(232,199,127,.55)}
+  .door.pink.on{border-color:rgba(255,45,149,.55);background:linear-gradient(180deg,rgba(255,45,149,.14),rgba(255,45,149,.04));box-shadow:0 8px 24px -14px rgba(255,45,149,.55)}
+  .room-now{font-family:var(--display);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-2)}
+  @media(max-width:700px){.door .dname{display:none}.door.side .dname{display:inline}.door{padding:7px 10px}.room-now{display:none}}
+
+  /* ---------- aurora wash + crown watermark: the room breathes ---------- */
+  .aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .aurora i{position:absolute;border-radius:50%;filter:blur(110px);opacity:.13;will-change:transform}
+  .aurora .au1{width:720px;height:720px;left:-14%;top:-22%;background:radial-gradient(circle,rgba(232,199,127,.5),transparent 65%);animation:aur 54s ease-in-out infinite alternate}
+  .aurora .au2{width:560px;height:560px;right:-12%;top:18%;background:radial-gradient(circle,rgba(255,45,149,.32),transparent 65%);animation:aur 68s ease-in-out infinite alternate-reverse}
+  .aurora .au3{width:640px;height:640px;left:28%;bottom:-30%;background:radial-gradient(circle,rgba(232,199,127,.3),transparent 65%);animation:aur 76s ease-in-out infinite alternate}
+  @keyframes aur{from{transform:translate(-4%,-3%) scale(1)}to{transform:translate(6%,5%) scale(1.16)}}
+  .main{position:relative}
+  .main::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.045;z-index:0;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 30' fill='none' stroke='%23E8C77F' stroke-width='1.2' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z'/%3E%3Cline x1='7' y1='28' x2='29' y2='28'/%3E%3C/svg%3E") center 36%/min(56vw,440px) no-repeat}
+  .main>*{position:relative;z-index:1}
+
+  /* ---------- distilled memory card ---------- */
+  .mem-card{max-width:768px;margin:6px auto 18px;padding:14px 17px;border:1px dashed rgba(232,199,127,.3);border-radius:14px;background:rgba(232,199,127,.03)}
+  .mem-head{display:flex;align-items:center;gap:9px;font-family:var(--display);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+  .mem-sub{color:var(--muted);font-size:.78rem;margin-top:6px;line-height:1.5}
+  .mem-card details{margin-top:8px}
+  .mem-card summary{cursor:pointer;color:var(--champagne);font-size:.76rem;letter-spacing:.04em}
+  .mem-body{margin-top:8px;color:var(--muted);font-size:.84rem;line-height:1.6}
+
+  /* ---------- account modal: tabbed, airy ---------- */
+  #accountModal .modal{max-width:540px}
+  .acct-tabs{display:flex;gap:4px;margin-top:20px;padding:4px;border:1px solid var(--line-cool);border-radius:13px;background:rgba(255,255,255,.02)}
+  .acct-tabs button{flex:1;background:transparent;border:none;color:var(--muted);font-family:var(--display);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;padding:9px 4px;border-radius:9px;cursor:pointer;transition:background .15s,color .15s}
+  .acct-tabs button:hover{color:var(--ivory)}
+  .acct-tabs button.on{background:linear-gradient(180deg,rgba(232,199,127,.16),rgba(232,199,127,.05));color:var(--gold-bright)}
+  .acct-pane{min-height:200px}
+
   /* ---------- modals ---------- */
   .modal-bg{position:fixed;inset:0;z-index:60;background:rgba(5,6,9,.74);backdrop-filter:blur(7px);display:none;align-items:center;justify-content:center;padding:22px;animation:fade .25s}
   .modal-bg.show{display:flex}
@@ -379,7 +423,7 @@
     .main-head{padding:13px 16px}.chat{padding:24px 14px}.composer-wrap{padding:8px 14px 16px}
   }
   @media(max-width:560px){.frow{flex-direction:column;gap:0}}
-  @media(prefers-reduced-motion:reduce){.msg{animation:none}.model-pill .dot{animation:none}}
+  @media(prefers-reduced-motion:reduce){.msg{animation:none}.model-pill .dot{animation:none}.aurora i{animation:none}.door{transition:none}}
 </style>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 30' fill='none' stroke='%23FF2D95' stroke-width='2.4' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z'/%3E%3Cline x1='7' y1='28' x2='29' y2='28'/%3E%3C/svg%3E">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -388,6 +432,7 @@
 <body>
 <script>/*urlclean*/try{var _p=location.pathname;if(/\.html$/.test(_p))history.replaceState(null,"",_p.replace(/index\.html$/,"").replace(/\.html$/,"")+location.search+location.hash);}catch(e){}</script>
 <div class="bg-glow"><div class="rays"></div><div class="grid"></div></div>
+<div class="aurora" aria-hidden="true"><i class="au1"></i><i class="au2"></i><i class="au3"></i></div>
 <div class="embers" id="embers"></div>
 <div class="topedge"></div>
 <div class="app">
@@ -413,8 +458,7 @@
         <span class="mh-title" id="headTitle">New chat</span>
       </div>
       <div class="mh-right">
-        <span class="model-pill" id="modelPill" onclick="openRoomMenu(event)" title="Choose your room"><span class="dot"></span> <span id="modelName">Crown · Standard</span><svg class="mp-chev" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
-        <span class="pill" id="tierPill">FREE</span>
+        <span class="room-now" id="roomNow"></span>
         <div class="avatar" id="avatar" onclick="openAccount()" title="Account"><svg width="17" height="14" viewBox="0 0 36 30" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg></div>
       </div>
     </header>
@@ -428,6 +472,7 @@
       </div>
       <div class="att-bar" id="attBar"></div>
       <input id="fileInput" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif,.pdf,.txt,.md,.markdown,.csv,.json,.js,.ts,.jsx,.tsx,.py,.rb,.go,.rs,.java,.c,.cpp,.h,.html,.css,.xml,.yml,.yaml,.sh,.sql,.log" style="display:none" onchange="onFiles(this.files)">
+      <div class="room-dock" id="roomDock"></div>
       <div class="composer" id="composer">
         <button class="ic-btn" id="webBtn" onclick="toggleWeb()" title="Web access (Pro)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></button>
         <button class="ic-btn" onclick="pickFiles()" title="Attach files (Pro)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
@@ -534,7 +579,6 @@
 
 <input id="photoInput" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="onPhoto(this.files)">
 <div class="ctx" id="ctxMenu"></div>
-<div class="ctx" id="roomMenu"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -767,15 +811,31 @@ function renderProfile(){
 function renderHead(){
   const c = activeChat();
   $("headTitle").textContent = c ? c.title : "New chat";
-  $("tierPill").textContent = S.tier==="pro"?"PRO":"FREE";
-  $("tierPill").classList.toggle("pro", S.tier==="pro");
   const rm = S.room && S.room!=="crown" ? ROOMS[S.room] : null;
-  $("modelName").textContent = rm ? rm.label : (S.tier==="pro" ? "Crown · Pro" : "Crown · Standard");
-  $("modelPill").classList.toggle("roomed", !!rm);
+  const rn = $("roomNow"); if(rn) rn.textContent = rm ? rm.label : (S.tier==="pro" ? "Crown \u00b7 Pro" : "Crown \u00b7 Standard");
   $("avatar").innerHTML = avInner('<svg width="17" height="14" viewBox="0 0 36 30" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg>');
   const out = S.tier==="free" && S.tokensUsed>=S.freeLimit;
   $("lockedBar").classList.toggle("show", out);
   $("composer").style.display = out ? "none" : "flex";
+  renderDock();
+}
+/* the room dock: every door of the house, one tap away */
+function renderDock(){
+  const d = $("roomDock"); if(!d) return;
+  const pro = S.tier==="pro", cur = S.room || "crown";
+  let h = `<button class="door${cur==="crown"?" on":""}" onclick="setRoom('crown')" title="The Crown console"><span class="dnum">${CROWN_AV}</span><span class="dname">Crown</span></button>`;
+  for(const sl of visibleRooms()){
+    const r = ROOMS[sl];
+    const tag = r.floor ? '<span class="dtag floor">FLOOR</span>' : (r.topup ? '<span class="dtag">TOP-UP</span>' : (pro ? "" : '<span class="dtag">CROWNED</span>'));
+    h += `<button class="door${cur===sl?" on":""}${r.floor?" pink":""}" onclick="setRoom('${sl}')" title="${esc(r.tease)}"><span class="dnum">${r.num}</span><span class="dname">${esc(r.name)}</span>${tag}</button>`;
+  }
+  if(S.account) h += `<button class="door side" onclick="openTopup()" title="Top-up balance. Add tokens."><span class="dnum">+</span><span class="dname">${fmtTokens(S.topupTokens||0)} tokens</span></button>`;
+  d.innerHTML = h;
+}
+function memCardHtml(m){
+  return `<div class="mem-card"><div class="mem-head">${CROWN_AV}<span>Earlier, distilled</span></div>
+    <div class="mem-sub">${m.folded?m.folded+" earlier messages":"Earlier messages"} condensed into Crown memory. Nothing forgotten, just folded tight.</div>
+    <details><summary>Read the memory</summary><div class="mem-body md">${mdToHtml(m.content||"")}</div></details></div>`;
 }
 function renderChat(){
   const chat = $("chat"), c = activeChat();
@@ -791,6 +851,7 @@ function renderChat(){
     return;
   }
   chat.innerHTML = c.messages.map((m,i)=>{
+    if(m.role==="memory") return memCardHtml(m);
     const u = m.role==='user';
     const nm = u ? (S.account?.username || "You") : (m.room && ROOMS[m.room] ? ROOMS[m.room].label : "Crown");
     const av = u ? avInner("You") : CROWN_AV;
@@ -844,37 +905,9 @@ function closeCtx(){ $("ctxMenu").classList.remove("show"); }
 addEventListener("click", e=>{ if(!e.target.closest(".ctx") && !e.target.closest(".dots") && !e.target.closest(".pdots")) closeCtx(); });
 
 /* ===== Four Rooms selector ===== */
-function roomMenuHtml(){
-  const cur = S.room || "crown", pro = S.tier==="pro";
-  let h = `<div class="ctx-label">Crown</div>`;
-  h += `<button onclick="setRoom('crown')">${cur==="crown"?"\ud83d\udc51 ":""}Crown \u00b7 ${pro?"Pro":"Standard"}</button>`;
-  h += `<div class="sep"></div><div class="ctx-label">The Four Rooms${pro?"":" \u00b7 Crowned"}</div>`;
-  for(const slug of visibleRooms()){
-    const r = ROOMS[slug];
-    const tag = r.floor ? ' <span class="lk" style="color:var(--gold-bright)">FLOOR</span>' : (r.topup ? ' <span class="lk">TOP-UP</span>' : (pro ? "" : ' <span class="lk">PRO</span>'));
-    h += `<button onclick="setRoom('${slug}')" title="${esc(r.tease)}">${cur===slug?"\ud83d\udc51 ":""}<span style="font-family:var(--display);font-size:.62rem;letter-spacing:.18em;color:var(--gold)">${r.num}</span> ${esc(r.name)}${tag}</button>`;
-  }
-  if(S.account){
-    h += `<div class="sep"></div><div class="ctx-label">Top-up tokens \u00b7 ${fmtTokens(S.topupTokens||0)}</div>`;
-    h += `<button onclick="closeRoomMenu();openTopup()">\u2795 Add tokens</button>`;
-  }
-  return h;
-}
 function fmtTokens(n){ n=n||0; if(n>=1000000) return (n/1000000).toFixed(n%1000000?1:0)+"M"; if(n>=1000) return Math.floor(n/1000)+"k"; return String(n); }
-function openRoomMenu(e){
-  e.stopPropagation();
-  const m = $("roomMenu");
-  if(m.classList.contains("show")){ m.classList.remove("show"); return; }
-  m.innerHTML = roomMenuHtml();
-  m.classList.add("show");
-  const r = $("modelPill").getBoundingClientRect(), w = 236;
-  m.style.left = Math.max(8, Math.min(r.right - w, innerWidth - w - 8)) + "px";
-  m.style.top  = (r.bottom + 8) + "px";
-}
-function closeRoomMenu(){ $("roomMenu").classList.remove("show"); }
-addEventListener("click", e=>{ if(!e.target.closest("#roomMenu") && !e.target.closest("#modelPill")) closeRoomMenu(); });
+
 function setRoom(slug){
-  closeRoomMenu();
   if(slug!=="crown" && ROOMS[slug] && ROOMS[slug].floor){
     if(!S.floor){ toast("The Floor is a private room."); return; }
   } else if(slug!=="crown" && S.tier!=="pro"){ proGate(ROOMS[slug].name + " (Room " + ROOMS[slug].num + ")"); return; }
@@ -886,7 +919,7 @@ function setRoom(slug){
 }
 
 /* ===== account / profile ===== */
-function openAccount(){ renderAccount(); $("accountModal").classList.add("show"); }
+function openAccount(){ if(!S.acctTab) S.acctTab="profile"; renderAccount(); $("accountModal").classList.add("show"); }
 function closeAccount(){ $("accountModal").classList.remove("show"); }
 function copyEmail(){
   const e=S.account&&S.account.email; if(!e) return;
@@ -898,17 +931,8 @@ function renderAccount(){
   const hasPhoto=!!(a&&a.avatar);
   const cam='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="3.5"/></svg>';
   const plus='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
-  const used=S.tokensUsed||0, lim=Math.max(1,S.freeLimit||1), pct=Math.min(100,Math.round(used/lim*100));
-  const usageCard = `<div class="u-card"><div class="ul">Monthly allowance</div><div class="un">${used.toLocaleString()}<small>/ ${lim.toLocaleString()}</small></div><div class="u-bar${pct>=85?' warn':''}"><i style="width:${pct}%"></i></div><div class="us">${pct}% used · ${Math.max(0,lim-used).toLocaleString()} left. ${pro?'Covers all four rooms. Resets every 30 days.':'Crown console allowance. Resets every 30 days, free forever.'}</div></div>`;
-  const tokenCard = `<div class="u-card"><div class="ul">Deep-Logic tokens</div><div class="un">${fmtTokens(S.topupTokens||0)}</div><div class="us">Top-up balance. Never expires, and overflows to other rooms when your monthly allowance runs dry.</div><div class="u-cta"><button class="btn btn-gold" onclick="closeAccount();openTopup()">${plus}&nbsp;Add tokens</button></div></div>`;
-  const floorChip = (a&&S.floor)?`<div class="floor-chip"><i></i>The Floor \u00b7 access granted</div>`:"";
-  const subBtn = pro
-    ? `<button class="btn btn-ghost" onclick="manageSub()">Manage</button>`
-    : `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Get Crowned</button>`;
-  const footActions = a
-    ? `<button class="btn btn-danger" onclick="signOut()">Sign out</button>`
-    : `<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Create account \u00b7 Get Crowned</button><button class="btn btn-ghost" onclick="closeAccount();openLogin()">Log in</button>`;
-  $("acctBody").innerHTML = `
+  const floorChip=(a&&S.floor)?`<div class="floor-chip"><i></i>The Floor \u00b7 access granted</div>`:"";
+  const ident = `
     <div class="prof-id">
       <div class="prof-av-wrap">
         <div class="acct-av">${avInner(CROWN_AV)}</div>
@@ -917,43 +941,79 @@ function renderAccount(){
       <div class="acct-id">
         <div class="an">${esc(name)} ${pro?'<span class="pill pro">CROWNED</span>':(a?'<span class="pill">STANDARD</span>':"")}</div>
         <div class="acct-tierline"><span class="ae" style="margin-top:0">${esc(email)}</span>${a?`<button class="copy-mini" onclick="copyEmail()">COPY</button>`:""}</div>
-        ${a?`<div class="prof-actions"><button class="mini" onclick="pickPhoto()">${plus}Upload photo</button>${hasPhoto?`<button class="mini ghost" onclick="removePhoto()">Remove</button>`:""}</div>`:""}
         ${floorChip}
       </div>
-    </div>
-    ${a?`
-    <div class="psect">
-      <div class="sect-label">Usage &amp; tokens</div>
-      <div class="usage-grid">${usageCard}${tokenCard}</div>
-    </div>`:""}
-    <div class="psect">
-      <div class="sect-label">Plan &amp; billing</div>
-      <div class="sub-card">
-        <div class="sub-info"><div class="st">${pro?'Crowned <span class="pill pro">ACTIVE</span>':'Standard <span class="pill">FREE</span>'}</div><div class="sd">${pro?'All four rooms, 5,000,000 tokens a month. Cancel any time.':'The Crown console with a monthly allowance. Crowned unlocks the rooms.'}</div></div>
-        ${subBtn}
+    </div>`;
+  if(!a){
+    $("acctBody").innerHTML = ident + `
+      <div class="psect">
+        <div class="sect-label">Plan &amp; billing</div>
+        <div class="sub-card">
+          <div class="sub-info"><div class="st">Standard <span class="pill">FREE</span></div><div class="sd">The Crown console with a monthly allowance. Crowned unlocks the rooms.</div></div>
+          <button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Get Crowned</button>
+        </div>
       </div>
-      ${a&&pro?`<div class="sec-link">Update your card, download invoices, or cancel in the secure Stripe portal via Manage.</div>`:""}
-    </div>
-    ${a?`
-    <div class="psect">
-      <div class="sect-label">Account</div>
-      <div class="field"><label>Display name</label><input id="nameInput" value="${esc(name)}" maxlength="40" autocomplete="off" oninput="onNameInput()"><div class="hint">This is how Crown greets you and signs your chats.</div></div>
-      <button class="btn btn-gold" id="saveNameBtn" disabled onclick="saveName()">Save name</button>
-    </div>
-    <div class="psect">
-      <div class="sect-label">Security</div>
-      <div class="field"><label>Current password</label><input type="password" id="pwCur" autocomplete="current-password" placeholder="Enter current password" oninput="onPwInput()"></div>
-      <div class="frow">
-        <div class="field"><label>New password</label><input type="password" id="pwNew" autocomplete="new-password" placeholder="At least 8 characters" oninput="onPwInput()"></div>
-        <div class="field"><label>Confirm new</label><input type="password" id="pwConf" autocomplete="new-password" placeholder="Repeat new password" oninput="onPwInput()"></div>
+      <div class="acct-actions">
+        <button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Create account \u00b7 Get Crowned</button>
+        <button class="btn btn-ghost" onclick="closeAccount();openLogin()">Log in</button>
       </div>
-      <div class="hint" id="pwHint" style="margin-top:8px"></div>
-      <button class="btn btn-gold" id="savePwBtn" disabled onclick="changePassword()">Update password</button>
-      <div class="sec-link">Forgot your current password? <a href="/reset">Email me a reset link</a></div>
-    </div>`:""}
-    <div class="acct-actions">${footActions}</div>
-    <div class="mnote">Payments and subscriptions are handled securely by Stripe. Crown never sees your card.</div>`;
+      <div class="mnote">Payments and subscriptions are handled securely by Stripe. Crown never sees your card.</div>`;
+    return;
+  }
+  const t = S.acctTab || "profile";
+  const tabs=[["profile","Profile"],["usage","Usage"],["billing","Billing"],["security","Security"]];
+  const tabBar = `<div class="acct-tabs">`+tabs.map(x=>`<button class="${t===x[0]?"on":""}" onclick="setAcctTab('${x[0]}')">${x[1]}</button>`).join("")+`</div>`;
+  let pane="";
+  if(t==="profile"){
+    pane = `
+      <div class="psect">
+        <div class="sect-label">Photo</div>
+        <div class="prof-actions"><button class="mini" onclick="pickPhoto()">${plus}Upload photo</button>${hasPhoto?`<button class="mini ghost" onclick="removePhoto()">Remove</button>`:""}</div>
+      </div>
+      <div class="psect">
+        <div class="sect-label">Display name</div>
+        <div class="field"><input id="nameInput" value="${esc(name)}" maxlength="40" autocomplete="off" oninput="onNameInput()"><div class="hint">This is how Crown greets you and signs your chats.</div></div>
+        <button class="btn btn-gold" id="saveNameBtn" disabled onclick="saveName()">Save name</button>
+      </div>
+      <div class="acct-actions"><button class="btn btn-danger" onclick="signOut()">Sign out</button></div>`;
+  } else if(t==="usage"){
+    const used=S.tokensUsed||0, lim=Math.max(1,S.freeLimit||1), pct=Math.min(100,Math.round(used/lim*100));
+    pane = `
+      <div class="psect">
+        <div class="sect-label">Usage &amp; tokens</div>
+        <div class="usage-grid">
+          <div class="u-card"><div class="ul">Monthly allowance</div><div class="un">${used.toLocaleString()}<small>/ ${lim.toLocaleString()}</small></div><div class="u-bar${pct>=85?' warn':''}"><i style="width:${pct}%"></i></div><div class="us">${pct}% used \u00b7 ${Math.max(0,lim-used).toLocaleString()} left. ${pro?'Covers all four rooms. Resets every 30 days.':'Crown console allowance. Resets every 30 days, free forever.'}</div></div>
+          <div class="u-card"><div class="ul">Deep-Logic tokens</div><div class="un">${fmtTokens(S.topupTokens||0)}</div><div class="us">Top-up balance. Never expires, and overflows to other rooms when your monthly allowance runs dry.</div><div class="u-cta"><button class="btn btn-gold" onclick="closeAccount();openTopup()">${plus}&nbsp;Add tokens</button></div></div>
+        </div>
+      </div>`;
+  } else if(t==="billing"){
+    pane = `
+      <div class="psect">
+        <div class="sect-label">Plan &amp; billing</div>
+        <div class="sub-card">
+          <div class="sub-info"><div class="st">${pro?'Crowned <span class="pill pro">ACTIVE</span>':'Standard <span class="pill">FREE</span>'}</div><div class="sd">${pro?'All four rooms, 5,000,000 tokens a month. Cancel any time.':'The Crown console with a monthly allowance. Crowned unlocks the rooms.'}</div></div>
+          ${pro?`<button class="btn btn-ghost" onclick="manageSub()">Manage</button>`:`<button class="btn btn-gold" onclick="closeAccount();openUpgrade()">Get Crowned</button>`}
+        </div>
+        ${pro?`<div class="sec-link">Update your card, download invoices, or cancel in the secure Stripe portal via Manage.</div>`:""}
+        <div class="mnote">Payments and subscriptions are handled securely by Stripe. Crown never sees your card.</div>
+      </div>`;
+  } else {
+    pane = `
+      <div class="psect">
+        <div class="sect-label">Security</div>
+        <div class="field"><label>Current password</label><input type="password" id="pwCur" autocomplete="current-password" placeholder="Enter current password" oninput="onPwInput()"></div>
+        <div class="frow">
+          <div class="field"><label>New password</label><input type="password" id="pwNew" autocomplete="new-password" placeholder="At least 8 characters" oninput="onPwInput()"></div>
+          <div class="field"><label>Confirm new</label><input type="password" id="pwConf" autocomplete="new-password" placeholder="Repeat new password" oninput="onPwInput()"></div>
+        </div>
+        <div class="hint" id="pwHint" style="margin-top:8px"></div>
+        <button class="btn btn-gold" id="savePwBtn" disabled onclick="changePassword()">Update password</button>
+        <div class="sec-link">Forgot your current password? <a href="/reset">Email me a reset link</a></div>
+      </div>`;
+  }
+  $("acctBody").innerHTML = ident + tabBar + `<div class="acct-pane">${pane}</div>`;
 }
+function setAcctTab(t){ S.acctTab = t; renderAccount(); }
 /* ===== profile actions (display name, password, photo) ===== */
 function onNameInput(){ const v=($("nameInput").value||"").trim(); const b=$("saveNameBtn"); if(b) b.disabled=(v.length<3 || v===(S.account&&S.account.username||"")); }
 async function saveName(){
@@ -1336,7 +1396,9 @@ async function modelReply(c, lastText){
   try{
     const history = c.messages
       .filter((m,j)=> j!==idx && !m.image && !m.choice && (m._api || m.content))
-      .map(m=>({ role:m.role, content: m._api ? m._api : m.content }));
+      .map(m=> m.role==="memory"
+        ? { role:"user", content:"[CONVERSATION MEMORY \u00b7 distilled from earlier in this chat. Treat as established context.]\n"+m.content }
+        : { role:m.role, content: m._api ? m._api : m.content });
     const { reply, usage, sources } = await streamModel(history, { onToken, onStatus });
     c.messages[idx].content = reply || "…"; delete c.messages[idx].streaming;
     if(sources && sources.length) c.messages[idx].sources = sources;
