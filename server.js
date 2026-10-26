@@ -1054,18 +1054,24 @@ app.post("/api/room-image", async (req, res) => {
   if (!ROOMS_KEY) return res.status(503).json({ error:"rooms_unconfigured", message:"The Rooms are not open yet." });
   const u = getSessionUser(req);
   if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
-  if (!u.floor && !isAdmin(u)) return res.status(403).json({ error:"floor_only", message:"The Floor is a private room." });
+  const room = String(req.body.room || "the-floor").trim().toLowerCase();
+  if (!ROOM_SLUGS.includes(room)) return res.status(400).json({ error:"bad_room", message:"Unknown room." });
+  if (room === "the-floor") {
+    if (!u.floor && !isAdmin(u)) return res.status(403).json({ error:"floor_only", message:"The Floor is a private room." });
+  } else if (effectiveTier(u) !== "pro") {
+    return res.status(403).json({ error:"crowned_only", message:"The Rooms are a Crowned feature." });
+  }
   const ask = String(req.body.prompt || "").trim();
   if (!ask) return res.status(400).json({ error:"no_prompt", message:"Describe the image you want." });
   if (ask.length > 2000) return res.status(413).json({ error:"too_long", message:"Keep the request under 2000 characters." });
   try {
     // Step 1: the Floor writes the brief in its own voice and knowledge.
-    const brief = await fetch(`${ROOMS_BASE}/workspace/the-floor/chat`, {
+    const brief = await fetch(`${ROOMS_BASE}/workspace/${room}/chat`, {
       method: "POST",
       headers: { "content-type":"application/json", "authorization":"Bearer " + ROOMS_KEY },
       body: JSON.stringify({
-        message: "[IMAGE COMMISSION] The trader asks for an image: \"" + ask + "\". Reply with ONLY a single image-generation brief, 120 words or fewer: subject, composition, every label, level and number that should appear, style, and palette. Use your market knowledge to make the content accurate. No preamble, no commentary, just the brief.",
-        mode:"chat", sessionId: `u${u.id}-the-floor-brief`
+        message: "[IMAGE COMMISSION] The user asks for an image: \"" + ask + "\". Reply with ONLY a single image-generation brief, 120 words or fewer: subject, composition, every label and number that should appear, style, and palette. Use your knowledge to make the content accurate and in this room's character. No preamble, no commentary, just the brief.",
+        mode:"chat", sessionId: `u${u.id}-${room}-brief`
       })
     });
     const bdata = await brief.json().catch(() => null);
@@ -1077,12 +1083,12 @@ app.post("/api/room-image", async (req, res) => {
     if (!image) return res.status(502).json({ error:"image_empty", message:"No image returned by the provider." });
     // Meter the brief through the Floor's normal multiplier.
     const specTokens = Math.ceil((ask.length + spec.length) / 4);
-    const spent = Math.ceil(specTokens * (ROOM_MULT["the-floor"] || 1));
+    const spent = Math.ceil(specTokens * (ROOM_MULT[room] || 1));
     const poolRoom = Math.max(0, userLimit(u) - u.tokens_used);
     const fromPool = Math.min(spent, poolRoom);
     if (fromPool > 0) q.addTokens.run(fromPool, u.id);
     if (spent - fromPool > 0) q.addTopup.run(-(spent - fromPool), u.id);
-    logUse(u.id, "room:the-floor", spent);
+    logUse(u.id, "room:" + room, spent);
     res.json({ image, spec });
   } catch (e) {
     console.error("[room-image] " + e.message);

@@ -940,7 +940,7 @@ function renderChat(){
     const av = u ? avInner("You") : CROWN_AV;
     let bubble, actions="";
     if(m.fchoice){
-      bubble = `<div class="bubble">The Floor can have that rendered: it writes the brief from its own market read, the desk's image engine paints it.<div class="choice-row"><button class="cbtn gold" onclick="floorImage(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-4.5-4.5L5 21"/></svg> Commission the render</button><button class="cbtn" onclick="floorText(${i})">Answer in text instead</button></div></div>`;
+      bubble = `<div class="bubble">${esc((ROOMS[m.fchoice&&m.fchoice.room]||{}).name||"This room")} can have that rendered: it writes the brief, the house's image engine paints it.<div class="choice-row"><button class="cbtn gold" onclick="floorImage(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-4.5-4.5L5 21"/></svg> Commission the render</button><button class="cbtn" onclick="floorText(${i})">Answer in text instead</button></div></div>`;
     } else if(m.choice){
       bubble = `<div class="bubble">That looks like an image request. Want the Crown to generate it?<div class="choice-row"><button class="cbtn gold" onclick="chooseImage(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-4.5-4.5L5 21"/></svg> Generate image${S.tier!=='pro'?' · Pro':''}</button><button class="cbtn" onclick="chooseText(${i})">Answer in text</button></div></div>`;
     } else if(m.image){
@@ -1526,8 +1526,8 @@ async function send(){
   // Room sends: The Floor can also commission a render; other rooms answer in text.
   if(S.room && S.room!=="crown"){
     if(S.tier!=="pro" && !(S.room==="the-floor" && S.floor)){ render(); openUpgrade(); return; }
-    if(S.room==="the-floor" && !atts.length && IMG_RE.test(text)){
-      c.messages.push({role:"assistant", room:"the-floor", fchoice:{prompt:text}}); render(); return;
+    if(!atts.length && IMG_RE.test(text)){
+      c.messages.push({role:"assistant", room:S.room, fchoice:{prompt:text, room:S.room}}); render(); return;
     }
     render();
     await roomReply(c, text, atts.filter(a=>a.kind==="image"));
@@ -1590,18 +1590,18 @@ async function floorText(i){
 }
 async function floorImage(i){
   const c=activeChat(); if(!c||!c.messages[i]||!c.messages[i].fchoice) return;
-  const prompt=c.messages[i].fchoice.prompt;
-  c.messages[i]={role:"assistant", room:"the-floor", content:"", streaming:true}; render();
+  const prompt=c.messages[i].fchoice.prompt, rm=c.messages[i].fchoice.room||"the-floor";
+  c.messages[i]={role:"assistant", room:rm, content:"", streaming:true}; render();
   const chat=$("chat"); const node=chat.querySelectorAll(".msg")[i]; const bubble=node?node.querySelector(".bubble"):null;
-  if(bubble){ bubble.classList.remove("md"); bubble.innerHTML='<span class="searching"><span class="tdots"><i></i><i></i><i></i></span> The Floor is drafting the brief and commissioning the render\u2026</span>'; }
+  if(bubble){ bubble.classList.remove("md"); bubble.innerHTML='<span class="searching"><span class="tdots"><i></i><i></i><i></i></span> '+esc((ROOMS[rm]||{}).name||"The room")+' is drafting the brief and commissioning the render\u2026</span>'; }
   try{
-    const res=await fetch("/api/room-image",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({prompt})});
+    const res=await fetch("/api/room-image",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({prompt, room:rm})});
     const d=await res.json().catch(()=>({}));
     if(!res.ok) throw new Error(d.message||"The render did not come back.");
-    c.messages[i]={role:"assistant", room:"the-floor", image:d.image, alt:(d.spec||prompt).slice(0,220)};
+    c.messages[i]={role:"assistant", room:rm, image:d.image, alt:(d.spec||prompt).slice(0,220)};
     render();
   }catch(err){
-    c.messages[i]={role:"assistant", room:"the-floor", content:"\u26a0\ufe0f "+(err.message||"The render did not come back.")+" You can try again, or ask for it in text."};
+    c.messages[i]={role:"assistant", room:rm, content:"\u26a0\ufe0f "+(err.message||"The render did not come back.")+" You can try again, or ask for it in text."};
     render();
   }
 }
