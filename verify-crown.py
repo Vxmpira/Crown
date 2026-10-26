@@ -28,10 +28,11 @@ jar = http.cookiejar.CookieJar()
 opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
 
 RESULTS = []
+def clip(x, n=130): return (x or "").replace("\n", " ").strip()[:n]
 def record(section, name, ok, note="", ms=0):
     RESULTS.append((section, name, ok, note, ms))
     mark = "PASS" if ok else "FAIL"
-    print(f"  [{mark}] {name}" + (f"  ({ms/1000:.1f}s)" if ms else "") + (f"  {note}" if note else ""))
+    print(f"  [{mark}] {name}" + (f"  ({ms/1000:.1f}s)" if ms else "") + (f"  {clip(note)}" if note else ""))
 
 def post(path, payload, stream=False):
     req = urllib.request.Request(BASE + path, data=json.dumps(payload).encode(),
@@ -66,10 +67,16 @@ def chat_sse(messages, web=False):
                 if ev.get("done"): sources = ev.get("sources") or []
                 if ev.get("error"): err = ev.get("message") or ev["error"]
     except urllib.error.HTTPError as e:
-        try: err = json.loads(e.read().decode()).get("message", str(e))
-        except Exception: err = str(e)
+        try:
+            body = json.loads(e.read().decode())
+            err = f"HTTP {e.code}: " + str(body.get("message") or body.get("error") or body)[:160]
+            d = body.get("detail")
+            if isinstance(d, dict) and isinstance(d.get("error"), dict):
+                err += f" [{d['error'].get('type')}] " + str(d['error'].get('message', ''))[:120]
+        except Exception: err = f"HTTP {e.code}: {e}"
     except Exception as e:
         err = str(e)
+    if not text and not err: err = "(empty stream: no deltas, no error event)"
     return text, searched, sources, err, int((time.time()-t0)*1000)
 
 # ---------- tiny solid-color PNG (stdlib only) ----------
@@ -134,10 +141,19 @@ CODE = "OBSIDIAN-" + str(int(time.time()))[-5:]
 
 # ---- Crown console (/api/chat) ----
 print("\n-- Crown console (Anthropic, streaming) --")
+def chat_sse_retry(messages, web=False):
+    t, se, so, err, ms = chat_sse(messages, web)
+    if (not t) or err:
+        time.sleep(4)
+        t2, se2, so2, err2, ms2 = chat_sse(messages, web)
+        if t2 and not err2: return t2, se2, so2, err2, ms + ms2
+        return t2 or t, se or se2, so2 or so, err2 or err, ms + ms2
+    return t, se, so, err, ms
+
 t, _, _, err, ms = chat_sse([{"role": "user", "content": "In one short sentence, who are you?"}])
 record("crown", "Basic reply", bool(t) and not err, (err or t[:70]).replace("\n", " "), ms)
 
-t, _, _, err, ms = chat_sse([{"role": "user", "content":
+t, _, _, err, ms = chat_sse_retry([{"role": "user", "content":
     "Two parts, answer both precisely: 1) 17 multiplied by 23. 2) Spell the word crown backwards."}])
 record("crown", "Complex reasoning", has_any(t, "391") and has_any(t, "nworc"), (err or t[:80]).replace("\n", " "), ms)
 
@@ -147,17 +163,20 @@ for k in range(14):
     hist.append({"role": "user", "content": f"Filler question {k}: name a color."})
     hist.append({"role": "assistant", "content": f"Color {k}: blue."})
 hist.append({"role": "user", "content": "What was the codeword I gave you at the start of this chat? Reply with just the codeword."})
-t, _, _, err, ms = chat_sse(hist)
+time.sleep(1.5)
+t, _, _, err, ms = chat_sse_retry(hist)
 record("crown", f"Long chat memory ({len(hist)} msgs)", CODE.lower() in t.lower(), (err or t[:60]).replace("\n", " "), ms)
 
 img = solid_png((255, 45, 149))  # the house pink
-t, _, _, err, ms = chat_sse([{"role": "user", "content": [
+time.sleep(1.5)
+t, _, _, err, ms = chat_sse_retry([{"role": "user", "content": [
     {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": img}},
     {"type": "text", "text": "One word: what color is this square?"}]}])
 record("crown", "Image upload", has_any(t, "pink", "magenta", "fuchsia", "rose"), (err or t[:60]).replace("\n", " "), ms)
 
 pdf = tiny_pdf(CODE)
-t, _, _, err, ms = chat_sse([{"role": "user", "content": [
+time.sleep(1.5)
+t, _, _, err, ms = chat_sse_retry([{"role": "user", "content": [
     {"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": pdf}},
     {"type": "text", "text": "What codeword does this PDF contain? Reply with just the codeword."}]}])
 record("crown", "PDF upload", CODE.lower() in t.lower(), (err or t[:60]).replace("\n", " "), ms)
@@ -171,14 +190,34 @@ else:
     record("crown", "Live web search", True, "skipped: account is not Crowned")
 
 # ---- The rooms (/api/room-chat) ----
+ROOM_CALLS = []  # the server allows 20 room calls per minute per IP; stay under it
 def room_chat(room, message, images=None):
     payload = {"room": room, "message": message}
     if images: payload["images"] = images
-    return post_json("/api/room-chat", payload)
+    for attempt in range(4):
+        now = time.time()
+        ROOM_CALLS[:] = [t for t in ROOM_CALLS if now - t < 62]
+        if len(ROOM_CALLS) >= 17:
+            wait = 63 - (now - ROOM_CALLS[0])
+            print(f"      (pacing: waiting {wait:.0f}s for the rate-limit window)")
+            time.sleep(max(1, wait))
+        ROOM_CALLS.append(time.time())
+        r, code, ms = post_json("/api/room-chat", payload)
+        if code == 429 or (r or {}).get("error") == "rate":
+            time.sleep(12); continue
+        return r, code, ms
+    return r, code, ms
 
+TOPUP = int(user.get("topupTokens") or 0)
 ROOM_LIST = ["unfiltered", "deep-logic", "visual-analysis", "creativity"] + (["the-floor"] if HAS_FLOOR else [])
 for room in ROOM_LIST:
     print(f"\n-- Room: {room} --")
+    if room == "deep-logic" and TOPUP <= 0:
+        r, code, ms = room_chat(room, "ping")
+        gated = code == 402 and (r or {}).get("error") == "topup_required"
+        record(room, "Top-up paywall enforced ($0 balance)", gated, (r or {}).get("message", ""), ms)
+        record(room, "Model checks", True, "skipped: add top-up credit to exercise the Deep-Logic model itself")
+        continue
     r, code, ms = room_chat(room, "In one sentence, what is this room for?")
     txt = (r or {}).get("text", "")
     record(room, "Basic reply", bool(txt) and not code, (r.get("message", "") if code else txt[:70]).replace("\n", " "), ms)
@@ -197,8 +236,12 @@ for room in ROOM_LIST:
         r, code, ms = room_chat(room, "One word: what color is this square?",
                                 images=[{"name": "swatch.png", "mime": "image/png", "data": solid_png((212, 172, 95))}])
         txt = (r or {}).get("text", "")
-        record(room, "Image upload (vision model)", has_any(txt, "gold", "yellow", "tan", "mustard", "ochre", "beige", "brown", "orange"),
-               (r.get("message", "") if code else txt[:60]).replace("\n", " "), ms)
+        vis_ok = has_any(txt, "gold", "yellow", "tan", "mustard", "ochre", "beige", "brown", "orange")
+        vis_note = (r.get("message", "") if code else txt[:60])
+        if not vis_ok and not code and ms < 2000:
+            vis_note = (f"'{txt[:24]}' in {ms/1000:.1f}s: too fast for a 72B vision model, the engine likely "
+                        "ignored the attachment. Update it: cd /opt/crown-rooms && docker compose pull && docker compose up -d")
+        record(room, "Image upload (vision model)", vis_ok, vis_note, ms)
         r, code, ms = room_chat("unfiltered", "describe this", images=[{"name": "x.png", "mime": "image/png", "data": solid_png((1, 2, 3))}])
         record(room, "Non-vision room rejects images cleanly", code == 400 and (r or {}).get("error") == "no_vision",
                (r or {}).get("message", "")[:70], ms)
