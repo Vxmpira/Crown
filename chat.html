@@ -1672,5 +1672,6 @@ else if(_params.get("checkout")==="cancel"){ toast("Checkout canceled. No charge
   }
 })();
 </script>
+<script>try{navigator.sendBeacon?navigator.sendBeacon("/api/beacon?p="+encodeURIComponent(location.pathname)+"&r="+encodeURIComponent((document.referrer||"").slice(0,180))):fetch("/api/beacon?p="+encodeURIComponent(location.pathname)+"&r="+encodeURIComponent((document.referrer||"").slice(0,180)),{keepalive:true});}catch(e){}</script>
 </body>
 </html>

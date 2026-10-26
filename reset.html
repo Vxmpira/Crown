@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<title>Reset your password | Crown</title>
+<title>Reset your password — BlackCrown Intelligence</title>
+<meta property="og:title" content="Reset your password — BlackCrown Intelligence"/>
+<meta property="og:description" content="Reset the password on your Crown account."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://blackcrown-intelligence.com/reset"/>
+<link rel="canonical" href="https://blackcrown-intelligence.com/reset"/>
+<meta name="description" content="Reset the password on your Crown account."/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -98,5 +104,6 @@ async function submit(){
 }
 $("pw2") && $("pw2").addEventListener("keydown",e=>{ if(e.key==="Enter") submit(); });
 </script>
+<script>try{navigator.sendBeacon?navigator.sendBeacon("/api/beacon?p="+encodeURIComponent(location.pathname)+"&r="+encodeURIComponent((document.referrer||"").slice(0,180))):fetch("/api/beacon?p="+encodeURIComponent(location.pathname)+"&r="+encodeURIComponent((document.referrer||"").slice(0,180)),{keepalive:true});}catch(e){}</script>
 </body>
 </html>

@@ -153,6 +153,25 @@ try { db.exec("ALTER TABLE users ADD COLUMN avatar TEXT"); } catch (e) { /* colu
 try { db.exec("ALTER TABLE users ADD COLUMN topup_tokens INTEGER NOT NULL DEFAULT 0"); } catch (e) { /* column already exists */ }
 try { db.exec("ALTER TABLE users ADD COLUMN floor INTEGER NOT NULL DEFAULT 0"); } catch (e) { /* column already exists */ }
 
+// ---- first-party analytics: page views, token usage, Stripe receipts ----
+db.exec(`
+CREATE TABLE IF NOT EXISTS events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER NOT NULL,
+  path TEXT NOT NULL, ref TEXT, ip_hash TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_events_ts ON events(ts);
+CREATE TABLE IF NOT EXISTS usage_log (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER NOT NULL,
+  user_id INTEGER, kind TEXT NOT NULL, tokens INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_usage_ts ON usage_log(ts);
+CREATE TABLE IF NOT EXISTS payments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER NOT NULL,
+  user_id INTEGER, email TEXT, kind TEXT NOT NULL,
+  amount_cents INTEGER NOT NULL, currency TEXT NOT NULL, stripe_id TEXT UNIQUE
+);
+CREATE INDEX IF NOT EXISTS idx_payments_ts ON payments(ts);`);
+
 const q = {
   userByEmail:    db.prepare("SELECT * FROM users WHERE email = ?"),
   userById:       db.prepare("SELECT * FROM users WHERE id = ?"),
@@ -172,7 +191,7 @@ const q = {
   anonUpsert:     db.prepare("INSERT INTO anon_usage (ip,tokens_used,period_start) VALUES (?,?,?) ON CONFLICT(ip) DO UPDATE SET tokens_used=excluded.tokens_used, period_start=excluded.period_start"),
   getWorkspace:   db.prepare("SELECT data FROM workspaces WHERE user_id = ?"),
   upsertWorkspace:db.prepare("INSERT INTO workspaces (user_id,data,updated_at) VALUES (?,?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data, updated_at=excluded.updated_at"),
-  adminUsers:     db.prepare("SELECT username, email, tier, created_at FROM users ORDER BY created_at DESC LIMIT 2000"),
+  adminUsers:     db.prepare("SELECT username, email, tier, created_at, tokens_used, topup_tokens, floor FROM users ORDER BY created_at DESC LIMIT 2000"),
   countAll:       db.prepare("SELECT COUNT(*) AS c FROM users"),
   countPro:       db.prepare("SELECT COUNT(*) AS c FROM users WHERE tier='pro'"),
   countSince:     db.prepare("SELECT COUNT(*) AS c FROM users WHERE created_at >= ?"),
@@ -212,7 +231,33 @@ function setSessionCookie(res, token){
 }
 const effectiveTier = u => (isAdmin(u) ? "pro" : u.tier);   // owner/admins get full Pro access
 const userLimit = u => (effectiveTier(u) === "pro" ? PRO_FAIR_USE : FREE_LIMIT);
-const publicUser = u => ({ username:u.username, email:u.email, tier:effectiveTier(u), tokensUsed:u.tokens_used, limit:userLimit(u), avatar:u.avatar||null, topupTokens:u.topup_tokens||0, floor:!!(u.floor || isAdmin(u)) });
+const publicUser = u => ({ username:u.username, email:u.email, tier:effectiveTier(u), tokensUsed:u.tokens_used, limit:userLimit(u), avatar:u.avatar||null, topupTokens:u.topup_tokens||0, floor:!!(u.floor || isAdmin(u)), admin:isAdmin(u) });
+
+// ---- analytics plumbing ----
+const qa = {
+  logEvent:   db.prepare("INSERT INTO events (ts, path, ref, ip_hash) VALUES (?,?,?,?)"),
+  logUse:     db.prepare("INSERT INTO usage_log (ts, user_id, kind, tokens) VALUES (?,?,?,?)"),
+  logPay:     db.prepare("INSERT OR IGNORE INTO payments (ts, user_id, email, kind, amount_cents, currency, stripe_id) VALUES (?,?,?,?,?,?,?)"),
+  viewsSince: db.prepare("SELECT COUNT(*) AS c FROM events WHERE ts >= ?"),
+  uniqSince:  db.prepare("SELECT COUNT(DISTINCT ip_hash) AS c FROM events WHERE ts >= ?"),
+  viewsRange: db.prepare("SELECT COUNT(*) AS c FROM events WHERE ts >= ? AND ts < ?"),
+  uniqRange:  db.prepare("SELECT COUNT(DISTINCT ip_hash) AS c FROM events WHERE ts >= ? AND ts < ?"),
+  topPaths:   db.prepare("SELECT path, COUNT(*) AS c FROM events WHERE ts >= ? GROUP BY path ORDER BY c DESC LIMIT 8"),
+  topRefs:    db.prepare("SELECT ref, COUNT(*) AS c FROM events WHERE ts >= ? AND ref IS NOT NULL AND ref != '' GROUP BY ref ORDER BY c DESC LIMIT 8"),
+  tokSince:   db.prepare("SELECT COALESCE(SUM(tokens),0) AS t, COUNT(*) AS c FROM usage_log WHERE ts >= ?"),
+  tokRange:   db.prepare("SELECT COALESCE(SUM(tokens),0) AS t FROM usage_log WHERE ts >= ? AND ts < ?"),
+  tokByKind:  db.prepare("SELECT kind, COALESCE(SUM(tokens),0) AS t, COUNT(*) AS c FROM usage_log WHERE ts >= ? GROUP BY kind ORDER BY t DESC"),
+  activeSince:db.prepare("SELECT COUNT(DISTINCT user_id) AS c FROM usage_log WHERE ts >= ? AND user_id IS NOT NULL"),
+  paySince:   db.prepare("SELECT COALESCE(SUM(amount_cents),0) AS s, COUNT(*) AS c FROM payments WHERE ts >= ?"),
+  payByKind:  db.prepare("SELECT kind, COALESCE(SUM(amount_cents),0) AS s, COUNT(*) AS c FROM payments WHERE ts >= ? GROUP BY kind ORDER BY s DESC"),
+  payRecent:  db.prepare("SELECT ts, email, kind, amount_cents, currency FROM payments ORDER BY ts DESC LIMIT 8"),
+  payLife:    db.prepare("SELECT COALESCE(SUM(amount_cents),0) AS s, COUNT(*) AS c FROM payments"),
+};
+const BEACON_SALT = process.env.BEACON_SALT || STRIPE_WHSEC || "crown-house";
+const dayHash = ip => crypto.createHash("sha256")
+  .update(ip + "|" + new Date().toISOString().slice(0, 10) + "|" + BEACON_SALT)
+  .digest("hex").slice(0, 16);
+const logUse = (uid, kind, tokens) => { try { qa.logUse.run(now(), uid, kind, Math.max(0, tokens | 0)); } catch (_) {} };
 
 // in-memory rate limiter (per key)
 const rl = new Map();
@@ -247,6 +292,7 @@ app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), (req,
       const email = String(s.customer_email || (s.customer_details && s.customer_details.email) || "").toLowerCase();
       let u = s.client_reference_id ? q.userById.get(parseInt(s.client_reference_id, 10)) : null;
       if (!u && email) u = q.userByEmail.get(email);
+      try { qa.logPay.run(now(), u ? u.id : null, email || null, String(md.kind || "crowned"), (s.amount_total | 0), String(s.currency || "usd"), String(s.id || "")); } catch (_) {}
 
       if (md.kind === "topup") {
         // one-time token pack: credit the balance, touch nothing else
@@ -501,6 +547,23 @@ app.put("/api/workspace", (req, res) => {
   scheduleCompaction(u.id);
 });
 
+// ---- first-party page-view beacon: no cookies, no PII, IPs hashed with a daily salt ----
+app.get("/api/beacon", (req, res) => {
+  try {
+    const ua = String(req.headers["user-agent"] || "");
+    if (/bot|crawl|spider|slurp|bingpreview|headless|lighthouse|pingdom|monitor/i.test(ua)) return res.status(204).end();
+    const ip = clientIp(req);
+    if (rateLimited("beacon:" + ip, 60, 60000)) return res.status(204).end();
+    let p = String(req.query.p || "/").slice(0, 120);
+    if (!p.startsWith("/")) p = "/";
+    p = p.replace(/[?#].*$/, "").replace(/\.html$/, "") || "/";
+    let ref = "";
+    try { const h = new URL(String(req.query.r || "")).hostname.replace(/^www\./, ""); if (h && !/blackcrown-intelligence\.com$/i.test(h)) ref = h.slice(0, 80); } catch (_) {}
+    qa.logEvent.run(now(), p, ref, dayHash(ip));
+  } catch (_) {}
+  res.status(204).end();
+});
+
 // ---- admin portal (allowlisted by ADMIN_EMAILS) ----
 app.get("/api/admin/overview", (req, res) => {
   const u = getSessionUser(req);
@@ -512,10 +575,35 @@ app.get("/api/admin/overview", (req, res) => {
   const free  = total - pro;
   const d7    = q.countSince.get(now() - 7  * DAY).c;
   const d30   = q.countSince.get(now() - 30 * DAY).c;
+  const dayStart = now() - (now() % DAY);
+  const series = [];
+  for (let i = 13; i >= 0; i--) {
+    const a0 = dayStart - i * DAY, b0 = a0 + DAY;
+    const d = new Date(a0);
+    series.push({ d: String(d.getUTCMonth()+1).padStart(2,"0") + "/" + String(d.getUTCDate()).padStart(2,"0"),
+      v: qa.viewsRange.get(a0, b0).c, u: qa.uniqRange.get(a0, b0).c, t: qa.tokRange.get(a0, b0).t });
+  }
+  const r30 = qa.paySince.get(now() - 30 * DAY);
+  const life = qa.payLife.get();
   res.json({
-    statuses: { anthropic:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, images:!!IMAGE_KEY, db:true },
+    statuses: { anthropic:!!KEY, stripe:!!stripe, priceSet:!!STRIPE_PRICE, images:!!IMAGE_KEY, db:true, rooms:!!ROOMS_KEY, floorFeed:fs.existsSync(FLOOR_CONTEXT_PATH), email:!!mailer },
     stats:    { total, pro, free, signups7d:d7, signups30d:d30, conversionPct: total ? Math.round((pro/total)*1000)/10 : 0 },
     revenue:  { proCount:pro, pricePerMonth:PRO_PRICE_USD, mrr: Math.round(pro*PRO_PRICE_USD*100)/100, annualRunRate: Math.round(pro*PRO_PRICE_USD*12*100)/100, currency:"USD" },
+    traffic: {
+      today:  { views: qa.viewsSince.get(dayStart).c, uniques: qa.uniqSince.get(dayStart).c },
+      d7:     { views: qa.viewsSince.get(now()-7*DAY).c,  uniques: qa.uniqSince.get(now()-7*DAY).c },
+      d30:    { views: qa.viewsSince.get(now()-30*DAY).c, uniques: qa.uniqSince.get(now()-30*DAY).c },
+      series, topPaths: qa.topPaths.all(now()-30*DAY), topRefs: qa.topRefs.all(now()-30*DAY)
+    },
+    usage: {
+      today: qa.tokSince.get(dayStart), d30: qa.tokSince.get(now()-30*DAY),
+      byKind30: qa.tokByKind.all(now()-30*DAY),
+      activeToday: qa.activeSince.get(dayStart).c, active7d: qa.activeSince.get(now()-7*DAY).c
+    },
+    receipts: {
+      d30: { cents: r30.s, count: r30.c }, byKind30: qa.payByKind.all(now()-30*DAY),
+      lifetime: { cents: life.s, count: life.c }, recent: qa.payRecent.all()
+    },
     users:    q.adminUsers.all()
   });
 });
@@ -639,6 +727,7 @@ app.post("/api/chat", async (req, res) => {
 
     const spent = inTok + outTok;
     apply(spent);
+    logUse(u ? u.id : null, "console", spent);
     const nowUsed = used + spent;
     send({ done:true, usage:{ tier, used:nowUsed, limit, remaining:Math.max(0, limit - nowUsed) }, sources });
     res.end();
@@ -764,6 +853,7 @@ app.post("/api/room-chat", async (req, res) => {
         const overflow = vSpent - fromPool;
         if (fromPool > 0) q.addTokens.run(fromPool, u.id);
         if (overflow > 0) q.addTopup.run(-overflow, u.id);
+        logUse(u.id, "room:" + room, vSpent);
         const freshV = q.userById.get(u.id);
         return res.json({ room, text: vtext, usage:{ tier:effectiveTier(u), used:freshV.tokens_used, limit,
           remaining:Math.max(0, limit - freshV.tokens_used), topupTokens:freshV.topup_tokens||0,
@@ -797,6 +887,7 @@ app.post("/api/room-chat", async (req, res) => {
     // otherwise estimate at ~4 chars per token. Multiplier makes heavy rooms drain the pool faster.
     const rawTokens = (data.metrics && data.metrics.total_tokens) ? data.metrics.total_tokens : Math.ceil((outbound.length + text.length) / 4) + images.length * 1100;
     const spent = Math.ceil(rawTokens * (ROOM_MULT[room] || 1));
+    logUse(u.id, "room:" + room, spent);
 
     if (TOPUP_ONLY_ROOMS.has(room)) {
       // paid-token room: spend from the top-up balance only (clamped at zero)

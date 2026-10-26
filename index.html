@@ -214,6 +214,33 @@
   @keyframes rise{to{opacity:1;transform:none}}
   @media(prefers-reduced-motion:reduce){.rise{animation:none;opacity:1;transform:none}}
 </style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+ {"@type":"Organization","@id":"https://blackcrown-intelligence.com/#org",
+  "name":"BlackCrown Intelligence","legalName":"BlackCrownVxJ LLC",
+  "url":"https://blackcrown-intelligence.com/",
+  "email":"BlackCrownVxJ.LLC@outlook.com","telephone":"+1-703-298-9426",
+  "parentOrganization":{"@type":"Organization","name":"BlackCrownVxJ LLC","url":"https://blackcrownvxj.com/"},
+  "sameAs":["https://blackcrownvxj.com/","https://korvus.industries/","https://discord.gg/xmuSA5mMTN"]},
+ {"@type":"WebSite","@id":"https://blackcrown-intelligence.com/#site",
+  "url":"https://blackcrown-intelligence.com/","name":"BlackCrown Intelligence",
+  "publisher":{"@id":"https://blackcrown-intelligence.com/#org"}},
+ {"@type":"SoftwareApplication","name":"Crown",
+  "applicationCategory":"BusinessApplication","operatingSystem":"Web",
+  "url":"https://blackcrown-intelligence.com/",
+  "description":"A private AI workspace with four rooms. Nothing you write is sold, and nothing you write trains a model.",
+  "publisher":{"@id":"https://blackcrown-intelligence.com/#org"},
+  "offers":[
+    {"@type":"Offer","name":"Standard","price":"0","priceCurrency":"USD","description":"The Crown console with a monthly allowance. Free, no card."},
+    {"@type":"Offer","name":"Crowned","price":"49.99","priceCurrency":"USD","description":"All four rooms with 5,000,000 tokens a month."}]},
+ {"@type":"FAQPage","mainEntity":[
+  {"@type":"Question","name":"Is the free tier actually free?","acceptedAnswer":{"@type":"Answer","text":"Yes. No card, no trial clock. Standard gives you the Crown console with a monthly allowance that resets every 30 days. The four rooms are Crowned territory."}},
+  {"@type":"Question","name":"What happens to my data?","acceptedAnswer":{"@type":"Answer","text":"Nothing you write, upload, or track in Crown is sold or used to train a model. That is the standard across every BlackCrownVxJ product."}},
+  {"@type":"Question","name":"What are tokens and why does Deep-Logic need them?","acceptedAnswer":{"@type":"Answer","text":"Deep-Logic runs a heavier reasoning model that costs real compute per answer. Top-ups start at $4.99 inside the console, never expire, and overflow into the other rooms."}},
+  {"@type":"Question","name":"How is this connected to Korvus and Eclipse-X?","acceptedAnswer":{"@type":"Answer","text":"Same house. BlackCrown Intelligence is the AI division of BlackCrownVxJ LLC, which also ships Korvus market intelligence, the LodeStone indicator, and runs the Eclipse-X community on Discord."}},
+  {"@type":"Question","name":"Can I cancel Crowned any time?","acceptedAnswer":{"@type":"Answer","text":"Yes, from inside the console in two clicks. You keep Crowned until the end of the paid period, then land back on Standard."}}]}
+]}
+</script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -578,5 +605,6 @@
   }
 })();
 </script>
+<script>try{navigator.sendBeacon?navigator.sendBeacon("/api/beacon?p="+encodeURIComponent(location.pathname)+"&r="+encodeURIComponent((document.referrer||"").slice(0,180))):fetch("/api/beacon?p="+encodeURIComponent(location.pathname)+"&r="+encodeURIComponent((document.referrer||"").slice(0,180)),{keepalive:true});}catch(e){}</script>
 </body>
 </html>
