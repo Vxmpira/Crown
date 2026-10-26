@@ -719,7 +719,10 @@ app.post("/api/chat", async (req, res) => {
     if (!sentText) {
       const why = "The model stream ended with no text (stop: " + (stopReason || "none") + ", events: " + JSON.stringify(evCount) + ", in: " + inTok + ", out: " + outTok + ")";
       console.error("[chat] empty answer: " + why);
-      send({ error:"empty_answer", message: why });
+      const friendly = stopReason === "refusal"
+        ? "Crown declined to answer that one. Rephrase it or ask in a different way and it will take another run at it."
+        : "Crown came back empty on that one. Ask again, and if it keeps happening the house has already logged it.";
+      send({ error:"empty_answer", message: friendly, debug: why });
     }
 
     const dedup = arr => { const seen = new Set(), out = []; for (const s of arr) { if (s.url && !seen.has(s.url)) { seen.add(s.url); out.push(s); } } return out; };
