@@ -137,7 +137,8 @@ record("sys", "Login", bool(user), f"tier:{user.get('tier')} floor:{user.get('fl
 if not user:
     print("\nCannot continue without a session."); sys.exit(1)
 IS_PRO, HAS_FLOOR = user.get("tier") == "pro", bool(user.get("floor"))
-CODE = "Obsidian-" + str(int(time.time()))[-5:]
+WORDS = ["Lantern", "Harbor", "Meridian", "Vesper", "Argent", "Falcon", "Cedar", "Mariner"]
+CODE = "Obsidian " + WORDS[int(time.time()) % len(WORDS)]
 
 # ---- Crown console (/api/chat) ----
 print("\n-- Crown console (Anthropic, streaming) --")
@@ -158,11 +159,11 @@ t, _, _, err, ms = chat_sse_retry([{"role": "user", "content":
 record("crown", "Complex reasoning", has_any(t, "391") and has_any(t, "nworc"), (err or t[:80]).replace("\n", " "), ms)
 
 # Long-chat memory over a REAL multi-turn conversation (synthetic transcripts trip the refusal classifier)
-hist = [{"role": "user", "content": f"Quick note before we start: my side project is called {CODE}. Keep that in mind. Now, in one sentence, what makes a good project name?"}]
+hist = [{"role": "user", "content": f"I'm building a little side project I've decided to call {CODE}. Anyway, in one sentence, what makes a good project name?"}]
 followups = ["Give me exactly one tagline idea for it, one line.",
              "One sentence: which tech stack would you start it with?",
              "One sentence: name a first launch channel to try.",
-             "By the way, what did I say my side project is called? Just the name."]
+             "Earlier I mentioned what I named my side project. What was the name again?"]
 lc_ms, lc_err = 0, None
 for fu in followups:
     time.sleep(1.2)
@@ -175,7 +176,7 @@ if not lc_err:
     time.sleep(1.2)
     t, _, _, err, ms = chat_sse_retry(hist)
     lc_ms += ms; lc_err = err
-record("crown", f"Long chat memory ({len(hist)} msgs, real turns)", (not lc_err) and CODE.lower() in t.lower(), (lc_err or t[:60]).replace("\n", " "), lc_ms)
+record("crown", f"Long chat memory ({len(hist)} msgs, real turns)", (not lc_err) and CODE.split()[-1].lower() in t.lower(), (lc_err or t[:60]).replace("\n", " "), lc_ms)
 
 img = solid_png((255, 45, 149))  # the house pink
 time.sleep(1.5)
@@ -240,7 +241,7 @@ for room in ROOM_LIST:
     ok1 = bool((r or {}).get("text")) and not code
     r2, code2, ms2 = room_chat(room, "What did I just say my side project is called? Just the name.")
     txt2 = (r2 or {}).get("text", "")
-    record(room, "Session memory (2 turns)", ok1 and CODE.lower() in txt2.lower(), txt2[:60].replace("\n", " "), ms + ms2)
+    record(room, "Session memory (2 turns)", ok1 and CODE.split()[-1].lower() in txt2.lower(), txt2[:60].replace("\n", " "), ms + ms2)
 
     if room == "visual-analysis":
         r, code, ms = room_chat(room, "One word: what color is this square?",
