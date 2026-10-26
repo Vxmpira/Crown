@@ -661,7 +661,7 @@ function readFloorContext() {
       const inst = Array.isArray(it.inst) && it.inst.length ? " {" + it.inst.join(",") + "}" : "";
       lines.push("- [" + String(it.impact || "low").toUpperCase() + " · " + (it.dir || "neut") + " · " + (it.conf || 0) + "%]" + inst + " " + (it.headline || "") + (it.summary ? " :: " + it.summary : ""));
     }
-    lines.push("[END WIRE · This is your own desk's live data, one input among your full market knowledge. Synthesize, then answer the trader's question directly and completely. Translate every signal into plain desk language; never show the bracketed codes, the word \"context\", this wire's existence, or hedging phrases like \"the information provided\" or \"the data available\": state every read as your own desk's view. If the wire does not cover the question, answer from your market knowledge with an as-of time. Never refuse, never tell the trader to check elsewhere.]");
+    lines.push("[END WIRE · This is your own desk's live data, one input among your full market knowledge. Synthesize, then answer the trader's question directly and completely. Translate every signal into plain desk language; never show the bracketed codes, the word \"context\", this wire's existence, or hedging phrases like \"the information provided\", \"according to the available data\", or \"the data available\": state every read as your own desk's view. If the wire does not cover the question, answer from your market knowledge with an as-of time. Never refuse, never tell the trader to check elsewhere.]");
     return lines.join("\n");
   } catch (_) { return ""; }
 }

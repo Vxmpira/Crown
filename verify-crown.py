@@ -93,7 +93,7 @@ def solid_png(rgb, size=64):
 
 # ---------- minimal one-page PDF containing a known word ----------
 def tiny_pdf(word):
-    stream = f"BT /F1 24 Tf 72 700 Td (The codeword is {word}) Tj ET".encode()
+    stream = f"BT /F1 24 Tf 72 700 Td (Project reference: {word}) Tj ET".encode()
     objs = [
         b"<< /Type /Catalog /Pages 2 0 R >>",
         b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
@@ -137,7 +137,7 @@ record("sys", "Login", bool(user), f"tier:{user.get('tier')} floor:{user.get('fl
 if not user:
     print("\nCannot continue without a session."); sys.exit(1)
 IS_PRO, HAS_FLOOR = user.get("tier") == "pro", bool(user.get("floor"))
-CODE = "OBSIDIAN-" + str(int(time.time()))[-5:]
+CODE = "Obsidian-" + str(int(time.time()))[-5:]
 
 # ---- Crown console (/api/chat) ----
 print("\n-- Crown console (Anthropic, streaming) --")
@@ -157,12 +157,12 @@ t, _, _, err, ms = chat_sse_retry([{"role": "user", "content":
     "Two parts, answer both precisely: 1) 17 multiplied by 23. 2) Spell the word crown backwards."}])
 record("crown", "Complex reasoning", has_any(t, "391") and has_any(t, "nworc"), (err or t[:80]).replace("\n", " "), ms)
 
-hist = [{"role": "user", "content": f"Remember this codeword for later in our chat: {CODE}. Just acknowledge."},
-        {"role": "assistant", "content": "Noted. I will remember it."}]
+hist = [{"role": "user", "content": f"Quick note before we start: my side project is called {CODE}. Keep that in mind."},
+        {"role": "assistant", "content": "Got it, nice name. What would you like to work on?"}]
 for k in range(14):
     hist.append({"role": "user", "content": f"Filler question {k}: name a color."})
     hist.append({"role": "assistant", "content": f"Color {k}: blue."})
-hist.append({"role": "user", "content": "What was the codeword I gave you at the start of this chat? Reply with just the codeword."})
+hist.append({"role": "user", "content": "By the way, what did I say my side project is called? Just the name."})
 time.sleep(1.5)
 t, _, _, err, ms = chat_sse_retry(hist)
 record("crown", f"Long chat memory ({len(hist)} msgs)", CODE.lower() in t.lower(), (err or t[:60]).replace("\n", " "), ms)
@@ -178,7 +178,7 @@ pdf = tiny_pdf(CODE)
 time.sleep(1.5)
 t, _, _, err, ms = chat_sse_retry([{"role": "user", "content": [
     {"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": pdf}},
-    {"type": "text", "text": "What codeword does this PDF contain? Reply with just the codeword."}]}])
+    {"type": "text", "text": "What is the project reference named in this PDF? Just the name."}]}])
 record("crown", "PDF upload", CODE.lower() in t.lower(), (err or t[:60]).replace("\n", " "), ms)
 
 if IS_PRO:
@@ -226,9 +226,9 @@ for room in ROOM_LIST:
     txt = (r or {}).get("text", "")
     record(room, "Complex / arithmetic", has_any(txt, "391"), (r.get("message", "") if code else txt[:60]).replace("\n", " "), ms)
 
-    r, code, ms = room_chat(room, f"Remember this codeword for this session: {CODE}. Just acknowledge it.")
+    r, code, ms = room_chat(room, f"Quick note: my side project is called {CODE}. Keep that in mind for this chat.")
     ok1 = bool((r or {}).get("text")) and not code
-    r2, code2, ms2 = room_chat(room, "What codeword did I just give you? Reply with only the codeword.")
+    r2, code2, ms2 = room_chat(room, "What did I just say my side project is called? Just the name.")
     txt2 = (r2 or {}).get("text", "")
     record(room, "Session memory (2 turns)", ok1 and CODE.lower() in txt2.lower(), txt2[:60].replace("\n", " "), ms + ms2)
 
