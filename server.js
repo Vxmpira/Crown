@@ -775,8 +775,10 @@ app.post("/api/room-chat", async (req, res) => {
 
   const room = String(req.body.room || "").trim().toLowerCase();
   if (!ROOM_SLUGS.includes(room)) return res.status(400).json({ error:"bad_room", message:"Unknown room." });
-  const message = String(req.body.message || "").trim();
-  if (!message) return res.status(400).json({ error:"empty", message:"Nothing to send." });
+  let message = String(req.body.message || "").trim();
+  const hasImgs = Array.isArray(req.body.images) && req.body.images.length > 0;
+  if (!message && !hasImgs) return res.status(400).json({ error:"empty", message:"Nothing to send." });
+  if (!message) message = "Read this in full detail and give me your analysis.";
   if (message.length > 32000) return res.status(413).json({ error:"too_long", message:"That message is too long." });
 
   // The Floor is its own product: floor flag only, never bundled with Crowned.

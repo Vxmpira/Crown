@@ -1649,11 +1649,11 @@ async function roomReply(c, lastText, roomImgs){
     render();
   }catch(err){
     c.messages.splice(idx,1);
-    if(err.code==="limit"){ c.messages.push({role:"assistant",content:"\ud83d\udc51 "+err.message}); render(); openTopup(); }
-    else if(err.code==="topup"){ c.messages.push({role:"assistant",content:"\ud83d\udc51 "+err.message}); render(); openTopup(); }
-    else if(err.code==="crowned"){ c.messages.push({role:"assistant",content:"\ud83d\udc51 "+err.message}); render(); openUpgrade(); }
-    else if(err.code==="rate"){ c.messages.push({role:"assistant",content:err.message}); render(); }
-    else { c.messages.push({role:"assistant",content:"\u26a0\ufe0f "+(err.message||"The room engine is not responding.")}); render(); }
+    if(err.code==="limit"){ c.messages.push({role:"assistant",room:slug,content:"\ud83d\udc51 "+err.message}); render(); openTopup(); }
+    else if(err.code==="topup"){ c.messages.push({role:"assistant",room:slug,content:"\ud83d\udc51 "+err.message}); render(); openTopup(); }
+    else if(err.code==="crowned"){ c.messages.push({role:"assistant",room:slug,content:"\ud83d\udc51 "+err.message}); render(); openUpgrade(); }
+    else if(err.code==="rate"){ c.messages.push({role:"assistant",room:slug,content:err.message}); render(); }
+    else { c.messages.push({role:"assistant",room:slug,content:"\u26a0\ufe0f "+(err.message||"The room engine is not responding.")}); render(); }
   }finally{ busy=false; $("send").disabled=false; renderHead(); $("input").focus(); }
 }
 /* user picked an option on the "looks like an image?" prompt */
