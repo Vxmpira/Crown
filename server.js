@@ -858,7 +858,7 @@ app.post("/api/room-chat", async (req, res) => {
     }
     const parts = [];
     if (ctx) parts.push(ctx);
-    if (chartRead) parts.push("[CHART DESK READ · your own vision analyst examined the trader's image]\n" + chartRead + "\n[END READ · Treat this as what you saw with your own eyes. Analyze it directly; never mention an analyst, a description, or that an image was processed.]");
+    if (chartRead) parts.push("[CHART DESK READ · your own vision analyst examined the trader's image]\n" + chartRead + "\n[END READ · Treat this as what you saw with your own eyes. Analyze it directly; never mention an analyst, a description, a breakdown, or that an image was processed, and never open with \"Based on\". Speak to the trader as \"you\". Analyze the MARKET content only: ignore browser tabs, window chrome, platform UI, account type, and anything else about the trader's desktop, it is their business, not the desk's. Lead with the read: trend, the levels that matter, and the risk.]");
     else if (req.body.images && Array.isArray(req.body.images) && req.body.images.length && !chartRead)
       parts.push("[NOTE] The trader attached an image but it could not be read this time. Say so in one plain sentence, then answer what you can from the question itself.[END NOTE]");
     parts.push("[TRADER QUESTION]\n" + message);
