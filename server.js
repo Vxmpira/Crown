@@ -584,6 +584,7 @@ app.post("/api/chat", async (req, res) => {
 
     const dec = new TextDecoder();
     let buf = "", inTok = 0, outTok = 0, searched = false;
+    let sentText = false, stopReason = null; const evCount = {};
     const results = [], cites = [];
     try {
       const reader = upstream.body.getReader();
@@ -599,6 +600,7 @@ app.post("/api/chat", async (req, res) => {
           const payload2 = line.slice(5).trim();
           if (!payload2 || payload2 === "[DONE]") continue;
           let ev; try { ev = JSON.parse(payload2); } catch { continue; }
+          evCount[ev.type] = (evCount[ev.type] || 0) + 1;
           if (ev.type === "message_start") { inTok = ev.message?.usage?.input_tokens || 0; }
           else if (ev.type === "content_block_start") {
             const cb = ev.content_block || {};
@@ -609,15 +611,22 @@ app.post("/api/chat", async (req, res) => {
             }
           }
           else if (ev.type === "content_block_delta") {
-            if (ev.delta?.type === "text_delta") send({ t: ev.delta.text });
+            if (ev.delta?.type === "text_delta") { sentText = true; send({ t: ev.delta.text }); }
             else if (ev.delta?.type === "citations_delta" && ev.delta.citation?.url) cites.push({ title: ev.delta.citation.title || ev.delta.citation.url, url: ev.delta.citation.url });
           }
-          else if (ev.type === "message_delta" && ev.usage?.output_tokens != null) { outTok = ev.usage.output_tokens; }
+          else if (ev.type === "message_delta") { if (ev.usage?.output_tokens != null) outTok = ev.usage.output_tokens; if (ev.delta?.stop_reason) stopReason = ev.delta.stop_reason; }
           else if (ev.type === "error") { send({ error:"model_error", message: ev.error?.message || "stream error" }); }
         }
       }
     } catch (streamErr) {
       send({ error:"stream_error", message: streamErr.message });
+    }
+
+    // The stream finished without a single word: say exactly what the model sent instead of going silent.
+    if (!sentText) {
+      const why = "The model stream ended with no text (stop: " + (stopReason || "none") + ", events: " + JSON.stringify(evCount) + ", in: " + inTok + ", out: " + outTok + ")";
+      console.error("[chat] empty answer: " + why);
+      send({ error:"empty_answer", message: why });
     }
 
     const dedup = arr => { const seen = new Set(), out = []; for (const s of arr) { if (s.url && !seen.has(s.url)) { seen.add(s.url); out.push(s); } } return out; };
@@ -652,7 +661,7 @@ function readFloorContext() {
       const inst = Array.isArray(it.inst) && it.inst.length ? " {" + it.inst.join(",") + "}" : "";
       lines.push("- [" + String(it.impact || "low").toUpperCase() + " · " + (it.dir || "neut") + " · " + (it.conf || 0) + "%]" + inst + " " + (it.headline || "") + (it.summary ? " :: " + it.summary : ""));
     }
-    lines.push("[END WIRE · This is your own desk's live data, one input among your full market knowledge. Synthesize, then answer the trader's question directly and completely. Translate every signal into plain desk language; never show the bracketed codes, the word \"context\", or this wire's existence. If the wire does not cover the question, answer from your market knowledge with an as-of time. Never refuse, never tell the trader to check elsewhere.]");
+    lines.push("[END WIRE · This is your own desk's live data, one input among your full market knowledge. Synthesize, then answer the trader's question directly and completely. Translate every signal into plain desk language; never show the bracketed codes, the word \"context\", this wire's existence, or hedging phrases like \"the information provided\" or \"the data available\": state every read as your own desk's view. If the wire does not cover the question, answer from your market knowledge with an as-of time. Never refuse, never tell the trader to check elsewhere.]");
     return lines.join("\n");
   } catch (_) { return ""; }
 }
