@@ -1065,21 +1065,48 @@ app.post("/api/room-image", async (req, res) => {
   if (!ask) return res.status(400).json({ error:"no_prompt", message:"Describe the image you want." });
   if (ask.length > 2000) return res.status(413).json({ error:"too_long", message:"Keep the request under 2000 characters." });
   try {
-    // Step 1: the Floor writes the brief in its own voice and knowledge.
+    // Step 1: the room drafts the commission. Data charts are DRAWN (precise text and
+    // numbers via a chart renderer); everything else is PAINTED (diffusion, house style).
     const brief = await fetch(`${ROOMS_BASE}/workspace/${room}/chat`, {
       method: "POST",
       headers: { "content-type":"application/json", "authorization":"Bearer " + ROOMS_KEY },
       body: JSON.stringify({
-        message: "[IMAGE COMMISSION] The user asks for an image: \"" + ask + "\". Reply with ONLY a single image-generation brief, 120 words or fewer: subject, composition, every label and number that should appear, style, and palette. Use your knowledge to make the content accurate and in this room's character. No preamble, no commentary, just the brief.",
+        message: "[IMAGE COMMISSION] The user asks for an image: \"" + ask + "\". Decide the right medium and reply in EXACTLY one of two forms, nothing else.\n" +
+          "FORM 1, for any data chart, graph, or plot: the word CHART on the first line, then a single valid Chart.js v4 config JSON object (type, data with labels and datasets, options). Style it for a dark page: dataset colors from #D2AC5F, #F3E2B3, #FF2D95, #58B88A; set options.plugins.title.display true with a short title and color #F0EBDF; set options.plugins.legend.labels.color, and for every scale set ticks.color #C0B8A4 and grid.color 'rgba(210,172,95,0.15)'. Use your knowledge to make every number and label accurate. No markdown fences.\n" +
+          "FORM 2, for anything artistic or non-data: the word ART on the first line, then a brief of 100 words or fewer: subject, composition, style, palette. The painter cannot spell, so demand at most a three-word title and no other text in the image.",
         mode:"chat", sessionId: `u${u.id}-${room}-brief`
       })
     });
     const bdata = await brief.json().catch(() => null);
-    let spec = bdata && bdata.textResponse ? String(bdata.textResponse).replace(/<think>[\s\S]*?<\/think>/g, "").trim() : "";
-    if (!brief.ok || !spec) return res.status(502).json({ error:"brief_failed", message:"The Floor could not draft the brief. Try rephrasing the request." });
-    spec = spec.slice(0, 1800);
-    // Step 2: the render.
-    const image = IMAGE_PROVIDER === "openai" ? await generateOpenAI(spec) : await generatePicsart(spec);
+    let spec = bdata && bdata.textResponse ? String(bdata.textResponse).replace(/<think>[\s\S]*?<\/think>/g, "").replace(/```(?:json)?/g, "").trim() : "";
+    if (!brief.ok || !spec) return res.status(502).json({ error:"brief_failed", message:"The room could not draft the brief. Try rephrasing the request." });
+
+    let image = null, specOut = "";
+    const asChart = /^CHART\b/i.test(spec);
+    if (asChart) {
+      // The draughtsman's path: render the config, exact text, exact numbers.
+      try {
+        const jsonStr = spec.replace(/^CHART\s*/i, "").trim();
+        const cfg = JSON.parse(jsonStr.slice(jsonStr.indexOf("{")));
+        const qc = await fetch("https://quickchart.io/chart", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ chart: cfg, width: 1000, height: 620, backgroundColor: "#0B0906", format: "png", version: "4" }),
+          signal: AbortSignal.timeout(25000)
+        });
+        if (qc.ok) {
+          const buf = Buffer.from(await qc.arrayBuffer());
+          if (buf.length > 200) { image = "data:image/png;base64," + buf.toString("base64"); specOut = (cfg.options && cfg.options.plugins && cfg.options.plugins.title && cfg.options.plugins.title.text) ? String(cfg.options.plugins.title.text) : "Chart"; }
+        }
+        if (!image) console.error("[room-image] chart render failed (" + qc.status + "), falling back to paint");
+      } catch (e) { console.error("[room-image] chart config invalid: " + e.message + ", falling back to paint"); }
+    }
+    if (!image) {
+      // The painter's path: diffusion with the house finish.
+      specOut = spec.replace(/^(CHART|ART)\s*/i, "").trim().slice(0, 1600);
+      const painted = specOut + " | Elegant premium composition on a near-black charcoal background with antique gold and warm cream accents; minimal text.";
+      image = IMAGE_PROVIDER === "openai" ? await generateOpenAI(painted) : await generatePicsart(painted);
+    }
+    spec = specOut.slice(0, 1800);
     if (!image) return res.status(502).json({ error:"image_empty", message:"No image returned by the provider." });
     // Meter the brief through the Floor's normal multiplier.
     const specTokens = Math.ceil((ask.length + spec.length) / 4);
