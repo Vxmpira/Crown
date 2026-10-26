@@ -550,7 +550,7 @@
 
     <div id="su-fields">
       <div class="field" id="f-user"><label>Username</label><input id="su-user" autocomplete="username" placeholder="yourname"><div class="err">Choose a username (3+ characters).</div></div>
-      <div class="field" id="f-email"><label>Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@example.com"><div class="err">Enter a valid email address.</div></div>
+      <div class="field" id="f-email"><label>Email</label><input id="su-email" type="email" autocomplete="email" placeholder="you@example.com"><div class="err" id="f-email-err">Enter a valid email address.</div></div>
       <div class="field" id="f-pass"><label>Password</label><input id="su-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters"><div class="err">Password must be at least 8 characters.</div></div>
       <button class="btn btn-gold" onclick="submitSignup()">Create account &amp; Ascend →</button>
       <div class="switch">Already have an account? <a onclick="closeUpgrade();openLogin()">Log in</a></div>
@@ -1261,7 +1261,8 @@ function openUpgrade(){
 }
 function closeUpgrade(){ $("upgradeModal").classList.remove("show"); ["f-user","f-email","f-pass"].forEach(id=>$(id).classList.remove("bad")); setURL("/chat"); }
 async function submitSignup(){
-  const u=$("su-user").value.trim(), em=$("su-email").value.trim(), pw=$("su-pass").value;
+  const u=$("su-user").value.trim(), em=$("su-email").value.trim().toLowerCase(), pw=$("su-pass").value;
+  $("f-email-err").textContent="Enter a valid email address.";
   let ok=true;
   const bad=(id,c)=>{ $(id).classList.toggle("bad",c); if(c) ok=false; };
   bad("f-user", u.length<3);
@@ -1271,7 +1272,8 @@ async function submitSignup(){
   if(IS_PREVIEW){ S.account={username:u,email:em}; closeUpgrade(); render(); startCheckout(); return; }
   const { ok:good, status, d } = await apiPost("/api/register", { username:u, email:em, password:pw });
   if(!good){
-    if(status===409){ $("f-email").classList.add("bad"); }
+    if(status===409){ $("f-email-err").textContent="That email already has an account. Log in below instead."; $("f-email").classList.add("bad"); }
+    else if(d && d.error==="bad_email"){ $("f-email").classList.add("bad"); }
     toast(d.message || "Couldn't create your account"); return;
   }
   S.account={username:u,email:em,avatar:(d.user&&d.user.avatar)||null}; S.tier="free"; S.freeLimit=d.user?.limit||S.freeLimit;
@@ -1281,6 +1283,11 @@ async function submitSignup(){
 
 /* ===== login (existing users) ===== */
 function setURL(p){ try{ history.replaceState({}, "", p); }catch(e){} }
+/* a field stops being wrong the moment the user edits it (covers typing, paste, and browser autofill) */
+[["su-user","f-user"],["su-email","f-email"],["su-pass","f-pass"],["li-email","lf-email"],["li-pass","lf-pass"]].forEach(([inp,fld])=>{
+  const el=$(inp); if(!el) return;
+  ["input","change"].forEach(ev=>el.addEventListener(ev,()=>{ $(fld).classList.remove("bad"); if(fld==="f-email") $("f-email-err").textContent="Enter a valid email address."; }));
+});
 function forgotPassword(){
   closeLogin();
   openInput("Account recovery","Reset your password","Email","you@example.com", async v=>{
