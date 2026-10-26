@@ -76,7 +76,7 @@ const FLOOR_CONTEXT_PATH = process.env.FLOOR_CONTEXT_PATH || "/var/lib/crown/flo
 // Visual room vision: when images arrive, call OpenRouter's vision model directly
 // instead of relying on the room engine's attachment support (release-proof).
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || "";
-const VISION_MODEL   = process.env.VISION_MODEL || "qwen/qwen2.5-vl-72b-instruct";
+const VISION_MODEL   = process.env.VISION_MODEL || "qwen/qwen3.8-max-prime";
 const VISUAL_PERSONA = "You are Room 03: Visual Analysis, inside Crown by BlackCrown VxJ. The user shows you charts, screenshots, photos, and documents. Work from what you actually SEE, not just what the user describes. Read axes, labels, numbers, and fine print. Describe what is present, extract the data, then analyze it. If the image is unclear or something is unreadable, say exactly what you cannot make out. Never mention which underlying model you are.";
 const FLOOR_MAX_AGE_MIN  = parseInt(process.env.FLOOR_MAX_AGE_MIN || "30", 10); // older than this = feed treated as offline
 

@@ -159,9 +159,23 @@ record("crown", "Complex reasoning", has_any(t, "391") and has_any(t, "nworc"), 
 
 hist = [{"role": "user", "content": f"Quick note before we start: my side project is called {CODE}. Keep that in mind."},
         {"role": "assistant", "content": "Got it, nice name. What would you like to work on?"}]
-for k in range(14):
-    hist.append({"role": "user", "content": f"Filler question {k}: name a color."})
-    hist.append({"role": "assistant", "content": f"Color {k}: blue."})
+NATURAL = [
+    ("What's the capital of France?", "Paris."),
+    ("And 12 times 12?", "144."),
+    ("Name a planet with rings.", "Saturn is the classic answer."),
+    ("Who wrote 1984?", "George Orwell."),
+    ("Quick one: water's boiling point at sea level?", "100 degrees Celsius, 212 Fahrenheit."),
+    ("What's a synonym for 'quick'?", "Rapid, swift, or speedy."),
+    ("How many sides does a hexagon have?", "Six."),
+    ("What's the largest ocean?", "The Pacific."),
+    ("Translate 'hello' to Spanish.", "Hola."),
+    ("What year did the web go public?", "1991, when CERN opened it up."),
+    ("Name a primary color.", "Red."),
+    ("What's 2 to the 8th?", "256."),
+]
+for qq, aa in NATURAL:
+    hist.append({"role": "user", "content": qq})
+    hist.append({"role": "assistant", "content": aa})
 hist.append({"role": "user", "content": "By the way, what did I say my side project is called? Just the name."})
 time.sleep(1.5)
 t, _, _, err, ms = chat_sse_retry(hist)
