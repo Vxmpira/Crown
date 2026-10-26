@@ -157,29 +157,25 @@ t, _, _, err, ms = chat_sse_retry([{"role": "user", "content":
     "Two parts, answer both precisely: 1) 17 multiplied by 23. 2) Spell the word crown backwards."}])
 record("crown", "Complex reasoning", has_any(t, "391") and has_any(t, "nworc"), (err or t[:80]).replace("\n", " "), ms)
 
-hist = [{"role": "user", "content": f"Quick note before we start: my side project is called {CODE}. Keep that in mind."},
-        {"role": "assistant", "content": "Got it, nice name. What would you like to work on?"}]
-NATURAL = [
-    ("What's the capital of France?", "Paris."),
-    ("And 12 times 12?", "144."),
-    ("Name a planet with rings.", "Saturn is the classic answer."),
-    ("Who wrote 1984?", "George Orwell."),
-    ("Quick one: water's boiling point at sea level?", "100 degrees Celsius, 212 Fahrenheit."),
-    ("What's a synonym for 'quick'?", "Rapid, swift, or speedy."),
-    ("How many sides does a hexagon have?", "Six."),
-    ("What's the largest ocean?", "The Pacific."),
-    ("Translate 'hello' to Spanish.", "Hola."),
-    ("What year did the web go public?", "1991, when CERN opened it up."),
-    ("Name a primary color.", "Red."),
-    ("What's 2 to the 8th?", "256."),
-]
-for qq, aa in NATURAL:
-    hist.append({"role": "user", "content": qq})
-    hist.append({"role": "assistant", "content": aa})
-hist.append({"role": "user", "content": "By the way, what did I say my side project is called? Just the name."})
-time.sleep(1.5)
-t, _, _, err, ms = chat_sse_retry(hist)
-record("crown", f"Long chat memory ({len(hist)} msgs)", CODE.lower() in t.lower(), (err or t[:60]).replace("\n", " "), ms)
+# Long-chat memory over a REAL multi-turn conversation (synthetic transcripts trip the refusal classifier)
+hist = [{"role": "user", "content": f"Quick note before we start: my side project is called {CODE}. Keep that in mind. Now, in one sentence, what makes a good project name?"}]
+followups = ["Give me exactly one tagline idea for it, one line.",
+             "One sentence: which tech stack would you start it with?",
+             "One sentence: name a first launch channel to try.",
+             "By the way, what did I say my side project is called? Just the name."]
+lc_ms, lc_err = 0, None
+for fu in followups:
+    time.sleep(1.2)
+    t, _, _, err, ms = chat_sse(hist)
+    lc_ms += ms
+    if err or not t: lc_err = err or "(empty)"; break
+    hist.append({"role": "assistant", "content": t[:600]})
+    hist.append({"role": "user", "content": fu})
+if not lc_err:
+    time.sleep(1.2)
+    t, _, _, err, ms = chat_sse_retry(hist)
+    lc_ms += ms; lc_err = err
+record("crown", f"Long chat memory ({len(hist)} msgs, real turns)", (not lc_err) and CODE.lower() in t.lower(), (lc_err or t[:60]).replace("\n", " "), lc_ms)
 
 img = solid_png((255, 45, 149))  # the house pink
 time.sleep(1.5)

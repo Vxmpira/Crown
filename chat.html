@@ -519,8 +519,8 @@
 
     <div class="composer-wrap">
       <div class="locked" id="lockedBar">
-        <p>👑 You've reached your <b>Free</b> monthly allowance. Crowned unlocks all four rooms, $100 of room credit a month, live web access, image tools, file uploads, and Projects.</p>
-        <button class="btn btn-gold" style="padding:11px 22px" onclick="openUpgrade()">Upgrade to Pro</button>
+        <p>👑 You've reached your <b>Standard</b> monthly allowance. Crowned unlocks all four rooms, $100 of room credit a month, live web access, image tools, file uploads, and Projects.</p>
+        <button class="btn btn-gold" style="padding:11px 22px" onclick="openUpgrade()">Get Crowned &#183; $49.99/mo</button>
       </div>
       <div class="att-bar" id="attBar"></div>
       <input id="imgInput" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" style="display:none" onchange="onFiles(this.files)">
@@ -543,9 +543,9 @@
   <div class="modal">
     <button class="close" onclick="closeUpgrade()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     <svg class="mcrown" viewBox="0 0 36 30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 0 7px rgba(210,172,95,.55))"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg>
-    <div class="eyebrow" id="up-eyebrow">Create your account · Ascend to Pro</div>
-    <h3 class="gold-text">BlackCrown Pro</h3>
-    <p class="msub">Unlimited usage, live web access, image generation, file uploads, and Projects.</p>
+    <div class="eyebrow" id="up-eyebrow">Create your account · Get Crowned</div>
+    <h3 class="gold-text">Crowned</h3>
+    <p class="msub">All four rooms, $100 of room credit a month, live web access, image generation, file uploads, and Projects.</p>
     <div class="mamt"><b class="gold-text">$49.99</b><span> / month</span></div>
 
     <div id="su-fields">
@@ -878,10 +878,10 @@ function renderPlan(){
       <div class="meter"><div class="fill ${pct>80?'warn':''}" style="width:${pct}%"></div></div>
       <div class="pc-usage">${fmtCredit(Math.max(0,S.freeLimit-S.tokensUsed))} of ${fmtCredit(S.freeLimit)} left this month</div>`;
   } else {
-    el.innerHTML = `<div class="pc-top"><span class="lbl">Free plan</span><span class="pill">FREE</span></div>
+    el.innerHTML = `<div class="pc-top"><span class="lbl">Standard</span><span class="pill">FREE</span></div>
       <div class="meter"><div class="fill ${pct>80?'warn':''}" style="width:${pct}%"></div></div>
       <div class="pc-usage">${Math.round(pct)}% of your monthly allowance used</div>
-      <button class="btn btn-gold upgrade-btn" onclick="openUpgrade()"><svg width="15" height="12" viewBox="0 0 36 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg> Upgrade to Pro</button>`;
+      <button class="btn btn-gold upgrade-btn" onclick="openUpgrade()"><svg width="15" height="12" viewBox="0 0 36 30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg> Get Crowned</button>`;
   }
 }
 function renderProfile(){
@@ -1250,7 +1250,7 @@ function applyUpgradeMode(){
   const loggedIn = !!S.account;
   $("su-fields").style.display = loggedIn ? "none" : "";
   $("su-buy").style.display = loggedIn ? "" : "none";
-  $("up-eyebrow").textContent = loggedIn ? "Ascend to Pro" : "Create your account · Ascend to Pro";
+  $("up-eyebrow").textContent = loggedIn ? "Get Crowned" : "Create your account · Get Crowned";
   if(loggedIn) $("su-buy-who").textContent = "Signed in as " + (S.account.email || S.account.username) + ". Upgrade to unlock everything.";
 }
 function openUpgrade(){

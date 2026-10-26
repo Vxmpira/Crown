@@ -26,7 +26,7 @@ fi
 # The room NAME is the brand. The model behind it is just config.
 MODEL_UNFILTERED="cognitivecomputations/dolphin-mistral-24b-venice-edition"
 MODEL_DEEPLOGIC="deepseek/deepseek-r1-0528"
-MODEL_VISUAL="qwen/qwen3.8-max-prime"
+MODEL_VISUAL="google/gemini-4-argon"
 MODEL_CREATIVITY="meta-llama/llama-3.3-70b-instruct"
 
 # ---- Room system prompts ----

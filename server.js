@@ -76,7 +76,7 @@ const FLOOR_CONTEXT_PATH = process.env.FLOOR_CONTEXT_PATH || "/var/lib/crown/flo
 // Visual room vision: when images arrive, call OpenRouter's vision model directly
 // instead of relying on the room engine's attachment support (release-proof).
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || "";
-const VISION_MODEL   = process.env.VISION_MODEL || "qwen/qwen3.8-max-prime";
+const VISION_MODEL   = process.env.VISION_MODEL || "google/gemini-4-argon";
 const VISUAL_PERSONA = "You are Room 03: Visual Analysis, inside Crown by BlackCrown VxJ. The user shows you charts, screenshots, photos, and documents. Work from what you actually SEE, not just what the user describes. Read axes, labels, numbers, and fine print. Describe what is present, extract the data, then analyze it. If the image is unclear or something is unreadable, say exactly what you cannot make out. Never mention which underlying model you are.";
 const FLOOR_MAX_AGE_MIN  = parseInt(process.env.FLOOR_MAX_AGE_MIN || "30", 10); // older than this = feed treated as offline
 
@@ -92,7 +92,7 @@ const TOPUP_PACKS = {
 
 // Admin portal: a logged-in user whose email is in ADMIN_EMAILS (comma-separated) gets admin access.
 const ADMIN_EMAILS  = String(process.env.ADMIN_EMAILS || "").split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
-const PRO_PRICE_USD = parseFloat(process.env.PRO_PRICE_USD || "19.99");
+const PRO_PRICE_USD = parseFloat(process.env.PRO_PRICE_USD || "49.99");
 const isAdmin = u => !!u && ADMIN_EMAILS.includes(String(u.email).toLowerCase());
 
 // Email (AWS SES via SMTP). Dormant until SMTP_* are set in crown.env. Powers password reset.
@@ -631,7 +631,7 @@ app.post("/api/chat", async (req, res) => {
     return res.status(402).json({ error:"limit", tier, used, limit,
       message: u ? (tier === "pro"
             ? "You've reached the fair-use ceiling for this period. Please contact support."
-            : "You've used your free monthly allotment. Upgrade to Pro for unlimited use.")
+            : "You've used your free monthly allowance. Get Crowned for all four rooms and a $100 monthly allowance.")
           : "You've reached the free trial limit. Create an account to keep going." });
   }
   try {
@@ -842,8 +842,10 @@ app.post("/api/room-chat", async (req, res) => {
         })
       });
       const vdata = await vres.json().catch(() => null);
-      const vtext = vdata && vdata.choices && vdata.choices[0] && vdata.choices[0].message
-        ? String(vdata.choices[0].message.content || "").trim() : "";
+      const vmsg = vdata && vdata.choices && vdata.choices[0] ? vdata.choices[0].message : null;
+      let vtext = vmsg ? String(vmsg.content || (vmsg.reasoning ? "" : "") || "") : "";
+      if (!vtext && vmsg && vmsg.reasoning) vtext = String(vmsg.reasoning);
+      vtext = vtext.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
       if (vres.ok && vtext) {
         const vTokens = (vdata.usage && vdata.usage.total_tokens) ? vdata.usage.total_tokens
           : Math.ceil((message.length + vtext.length) / 4) + images.length * 1100;

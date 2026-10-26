@@ -2,7 +2,7 @@
 # ==============================================================================
 #  update-visual.sh  ·  safe to re-run on the CROWN box
 #  Repoints the visual-analysis workspace at a vision model that currently
-#  exists on OpenRouter. The old qwen2.5-vl-72b slug was retired, so the
+#  exists on OpenRouter. Retired slugs (qwen2.5-vl, and qwen3.8-max-prime whose reasoning style stalls chat) are replaced, so the
 #  engine had been silently falling back to a text-only default and
 #  ignoring every image. Usage:  sudo bash update-visual.sh
 # ==============================================================================
@@ -12,7 +12,7 @@ BASE="http://127.0.0.1:3001/api/v1"
 KEY="${ROOMS_API_KEY:-$(grep -E '^ROOMS_API_KEY=' /etc/crown/crown.env | cut -d= -f2- | tr -d '"' | tr -d "'")}"
 [ -z "${KEY}" ] && { echo "ROOMS_API_KEY not found"; exit 1; }
 AUTH=(-H "Authorization: Bearer ${KEY}" -H "Content-Type: application/json")
-MODEL="${VISION_MODEL:-qwen/qwen3.8-max-prime}"
+MODEL="${VISION_MODEL:-google/gemini-4-argon}"
 
 echo "== repointing visual-analysis to ${MODEL} =="
 curl -s "${AUTH[@]}" -X POST "${BASE}/workspace/visual-analysis/update" \
