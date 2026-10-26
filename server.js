@@ -73,6 +73,11 @@ const ROOM_SLUGS = Object.keys(ROOM_MULT);
 // subscription containing FLOOR_PRICE_ID). Context comes from a cached Korvus feed on disk.
 const FLOOR_PRICE_ID     = (process.env.FLOOR_PRICE_ID || "").trim();
 const FLOOR_CONTEXT_PATH = process.env.FLOOR_CONTEXT_PATH || "/var/lib/crown/floor-context.json";
+// Visual room vision: when images arrive, call OpenRouter's vision model directly
+// instead of relying on the room engine's attachment support (release-proof).
+const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || "";
+const VISION_MODEL   = process.env.VISION_MODEL || "qwen/qwen2.5-vl-72b-instruct";
+const VISUAL_PERSONA = "You are Room 03: Visual Analysis, inside Crown by BlackCrown VxJ. The user shows you charts, screenshots, photos, and documents. Work from what you actually SEE, not just what the user describes. Read axes, labels, numbers, and fine print. Describe what is present, extract the data, then analyze it. If the image is unclear or something is unreadable, say exactly what you cannot make out. Never mention which underlying model you are.";
 const FLOOR_MAX_AGE_MIN  = parseInt(process.env.FLOOR_MAX_AGE_MIN || "30", 10); // older than this = feed treated as offline
 
 // ---- Token top-ups: one-time Stripe payments that credit a separate balance ----
@@ -729,6 +734,48 @@ app.post("/api/room-chat", async (req, res) => {
   }
 
   try {
+    // Direct vision path: the Visual room with images goes straight to OpenRouter,
+    // so image reads never depend on the engine release's attachment support.
+    if (room === "visual-analysis" && images.length && OPENROUTER_KEY) {
+      const vres = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: { "content-type":"application/json", "authorization":"Bearer " + OPENROUTER_KEY,
+                   "HTTP-Referer":"https://blackcrown-intelligence.com", "X-Title":"Crown Visual Analysis" },
+        body: JSON.stringify({
+          model: VISION_MODEL, max_tokens: 1200, temperature: 0.4,
+          messages: [
+            { role:"system", content: VISUAL_PERSONA },
+            { role:"user", content: [
+                { type:"text", text: message || "Describe and analyze this image." },
+                ...images.map(im => ({ type:"image_url", image_url:{ url: im.contentString } }))
+            ] }
+          ]
+        })
+      });
+      const vdata = await vres.json().catch(() => null);
+      const vtext = vdata && vdata.choices && vdata.choices[0] && vdata.choices[0].message
+        ? String(vdata.choices[0].message.content || "").trim() : "";
+      if (vres.ok && vtext) {
+        const vTokens = (vdata.usage && vdata.usage.total_tokens) ? vdata.usage.total_tokens
+          : Math.ceil((message.length + vtext.length) / 4) + images.length * 1100;
+        const vSpent = Math.ceil(vTokens * (ROOM_MULT[room] || 1));
+        const poolRoom = Math.max(0, limit - u.tokens_used);
+        const fromPool = Math.min(vSpent, poolRoom);
+        const overflow = vSpent - fromPool;
+        if (fromPool > 0) q.addTokens.run(fromPool, u.id);
+        if (overflow > 0) q.addTopup.run(-overflow, u.id);
+        const freshV = q.userById.get(u.id);
+        return res.json({ room, text: vtext, usage:{ tier:effectiveTier(u), used:freshV.tokens_used, limit,
+          remaining:Math.max(0, limit - freshV.tokens_used), topupTokens:freshV.topup_tokens||0,
+          multiplier: ROOM_MULT[room] || 1 } });
+      }
+      // Vision call failed: log it and fall through to the engine path with attachments.
+      console.error("[room-chat] direct vision failed (" + vres.status + "): " +
+        JSON.stringify((vdata && vdata.error) || "").slice(0, 200) + " - falling back to the engine");
+    } else if (room === "visual-analysis" && images.length && !OPENROUTER_KEY) {
+      console.error("[room-chat] images sent to Visual but OPENROUTER_API_KEY is not set in crown.env; relying on engine attachment support");
+    }
+
     const upstream = await fetch(`${ROOMS_BASE}/workspace/${room}/chat`, {
       method: "POST",
       headers: { "content-type":"application/json", "authorization":"Bearer " + ROOMS_KEY },
