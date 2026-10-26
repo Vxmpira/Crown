@@ -12,11 +12,11 @@
     /* re-valued for v5 "obsidian glass" (existing names kept so inline styles still resolve) */
     --obsidian:#060504; --obsidian-2:#0B0906; --panel:#100D08; --panel-2:#15110A; --panel-3:#1D160C;
     --gold:#D2AC5F; --gold-bright:#F3E2B3; --gold-deep:#8A6A33; --garnet:#7c1626; --garnet-soft:#C81E73;
-    --ivory:#EDE7DA; --muted:#9A917E; --muted-2:#6E6557;
+    --ivory:#F0EBDF; --muted:#B6AD99; --muted-2:#8B816D;
     --line:rgba(210,172,95,.26); --line-soft:rgba(210,172,95,.10);
     --display:'Cinzel',serif; --body:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
     /* v5 additions */
-    --void:#060504; --steel:#9A917E; --champagne:#F3E2B3; --platinum:#EDE7DA;
+    --void:#060504; --steel:#B6AD99; --champagne:#F3E2B3; --platinum:#EDE7DA;
     --glass:rgba(18,14,9,.6); --glass-2:rgba(23,18,11,.74); --line-cool:rgba(210,172,95,.12); --line-warm:rgba(210,172,95,.12);
     --blur:saturate(140%) blur(18px); --r:9px; --r-pill:999px;
   }
@@ -78,7 +78,7 @@
   .proj-head .pdots{opacity:.7;color:var(--muted-2);transition:.2s;cursor:pointer;font-size:1.05rem;line-height:1;padding:0 2px}
   .proj-head:hover .pdots{opacity:1}.proj-head .pdots:hover{color:var(--champagne)}
   .proj-chats{display:flex;flex-direction:column;gap:2px;padding-left:11px;margin:2px 0 2px 9px;border-left:1px solid var(--line-cool)}
-  .row{display:flex;align-items:center;gap:10px;padding:9px;border-radius:9px;color:var(--muted);font-size:.84rem;cursor:pointer;position:relative;transition:background .2s,color .2s}
+  .row{display:flex;align-items:center;gap:10px;padding:9px;border-radius:9px;color:var(--muted);font-size:.87rem;cursor:pointer;position:relative;transition:background .2s,color .2s}
   .row:hover{background:var(--panel);color:var(--ivory)}
   .row.active{color:var(--ivory);background:linear-gradient(90deg,rgba(210,172,95,.1),rgba(210,172,95,.01))}
   .row.active::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:2px;border-radius:2px;background:linear-gradient(180deg,var(--champagne),var(--gold-deep));box-shadow:0 0 10px -1px rgba(210,172,95,.8)}
@@ -119,7 +119,7 @@
     background:radial-gradient(125% 125% at 30% 20%,var(--champagne),var(--gold) 54%,var(--gold-deep));box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}
   .pf-meta{flex:1;min-width:0;text-align:left}
   .pf-name{display:block;font-size:.84rem;color:var(--ivory);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .pf-sub{display:block;font-size:.69rem;color:var(--muted-2)}
+  .pf-sub{display:block;font-size:.73rem;color:var(--muted-2)}
   .pf-chev{color:var(--muted-2);flex-shrink:0}
   .av-photo{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
 
@@ -161,7 +161,7 @@
   .empty .eyebrow2{font-family:var(--display);letter-spacing:.4em;text-transform:uppercase;font-size:.68rem;color:var(--gold);font-weight:600;margin-bottom:16px;text-indent:.4em}
   .empty h2{font-family:var(--display);font-weight:700;font-size:clamp(2rem,5.4vw,3.05rem);line-height:1.12;margin-bottom:14px;letter-spacing:.01em;
     background:linear-gradient(100deg,#fff 6%,var(--champagne) 32%,#fff 52%,var(--ivory) 70%,var(--steel));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 2px 40px rgba(210,172,95,.18)}
-  .empty p{color:var(--muted);font-size:1.04rem;line-height:1.6;margin-bottom:34px;max-width:480px}
+  .empty p{color:var(--ivory);opacity:.78;font-size:1.04rem;line-height:1.6;margin-bottom:34px;max-width:480px}
   .chips{display:grid;grid-template-columns:1fr 1fr;gap:13px;width:100%;max-width:600px}
   .chip{display:flex;align-items:center;gap:14px;text-align:left;padding:15px 16px;border-radius:9px;cursor:pointer;position:relative;overflow:hidden;font-family:var(--body);
     background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--line-cool);transition:border-color .28s,transform .2s,box-shadow .3s}
@@ -172,7 +172,7 @@
     background:radial-gradient(125% 125% at 30% 20%,var(--champagne),var(--gold) 56%,var(--gold-deep));box-shadow:0 8px 20px -8px rgba(210,172,95,.6),inset 0 0 0 1px rgba(255,255,255,.22)}
   .chip .ct{flex:1;min-width:0}
   .ck{display:block;font-size:.92rem;color:var(--ivory);font-weight:600}
-  .cs{display:block;font-size:.76rem;color:var(--muted-2);margin-top:3px}
+  .cs{display:block;font-size:.8rem;color:var(--muted);margin-top:3px}
   .chip .ca{color:var(--muted-2);opacity:0;transform:translateX(-6px);transition:.24s;margin-left:auto;flex-shrink:0}
   .chip:hover .ca{opacity:1;transform:none;color:var(--champagne)}
   @media(max-width:560px){.chips{grid-template-columns:1fr}}
@@ -188,7 +188,7 @@
   .msg.user .mcol{align-items:flex-end}
   .mname{font-family:var(--display);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);padding:0 3px}
   .msg.bot .mname{color:var(--gold)}
-  .bubble{padding:13px 17px;border-radius:var(--r);font-size:.94rem;line-height:1.65;white-space:pre-wrap;max-width:100%}
+  .bubble{padding:13px 17px;border-radius:var(--r);font-size:.97rem;line-height:1.68;white-space:pre-wrap;max-width:100%}
   .msg.bot .bubble{position:relative;background:var(--glass);backdrop-filter:var(--blur);border:1px solid var(--line-cool);border-top-left-radius:5px;box-shadow:0 22px 46px -34px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.04)}
   .msg.bot .bubble.md::before{content:"";position:absolute;left:15px;right:15px;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(243,226,179,.45),transparent)}
   .msg.user .bubble{background:linear-gradient(150deg,rgba(210,172,95,.17),rgba(210,172,95,.04));border:1px solid var(--line);border-top-right-radius:5px;color:var(--ivory);box-shadow:0 16px 38px -30px rgba(210,172,95,.6)}
@@ -237,7 +237,7 @@
 
   .sources{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:12px;padding-top:11px;border-top:1px solid var(--line-cool)}
   .sources .shead{font-family:var(--display);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);display:inline-flex;align-items:center;gap:6px}
-  .sources a{font-size:.77rem;color:var(--champagne);text-decoration:none;background:var(--void);border:1px solid var(--line-cool);border-radius:7px;padding:4px 10px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:border-color .2s}
+  .sources a{font-size:.8rem;color:var(--champagne);text-decoration:none;background:var(--void);border:1px solid var(--line-cool);border-radius:7px;padding:4px 10px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:border-color .2s}
   .sources a:hover{border-color:var(--gold)}
 
   /* ---------- composer (glass capsule) ---------- */
@@ -258,14 +258,14 @@
   .send{width:44px;height:44px;flex-shrink:0;border-radius:8px;border:none;cursor:pointer;color:#14100A;display:flex;align-items:center;justify-content:center;
     background:radial-gradient(130% 130% at 28% 18%,var(--champagne),var(--gold) 55%,var(--gold-deep));box-shadow:0 10px 24px -10px rgba(210,172,95,.7),inset 0 0 0 1px rgba(255,255,255,.16);transition:transform .2s,box-shadow .3s}
   .send:hover{transform:translateY(-1px) scale(1.04)}.send:disabled{opacity:.4;cursor:not-allowed;transform:none}
-  .composer-foot{max-width:768px;margin:11px auto 0;text-align:center;font-size:.71rem;color:var(--muted-2);letter-spacing:.02em}
+  .composer-foot{max-width:768px;margin:11px auto 0;text-align:center;font-size:.74rem;color:var(--muted-2);letter-spacing:.02em}
 
   /* ---------- room dock: the doors of the house, above the composer ---------- */
   .room-dock{display:flex;gap:7px;align-items:stretch;justify-content:flex-start;max-width:min(960px,100%);width:max-content;margin:0 auto 9px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 3px}
   .door.side{margin-left:14px}
   .room-dock::-webkit-scrollbar{display:none}
   .door{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;padding:7px 12px;border-radius:999px;cursor:pointer;
-    border:1px solid var(--line-cool);background:rgba(255,255,255,.02);color:var(--muted);font-size:.74rem;letter-spacing:.02em;
+    border:1px solid var(--line-cool);background:rgba(255,255,255,.02);color:var(--muted);font-size:.78rem;letter-spacing:.02em;
     transition:border-color .18s,background .18s,color .18s,transform .18s,box-shadow .18s}
   .door:hover{border-color:rgba(210,172,95,.42);color:var(--ivory);transform:translateY(-1px)}
   .door .dnum{font-family:var(--display);font-size:.6rem;letter-spacing:.16em;color:var(--gold);display:inline-flex;align-items:center}
@@ -291,7 +291,7 @@
   /* ---------- distilled memory card ---------- */
   .mem-card{max-width:768px;margin:6px auto 18px;padding:14px 17px;border:1px dashed rgba(210,172,95,.3);border-radius:9px;background:rgba(210,172,95,.03)}
   .mem-head{display:flex;align-items:center;gap:9px;font-family:var(--display);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
-  .mem-sub{color:var(--muted);font-size:.78rem;margin-top:6px;line-height:1.5}
+  .mem-sub{color:var(--muted);font-size:.82rem;margin-top:6px;line-height:1.5}
   .mem-card details{margin-top:8px}
   .mem-card summary{cursor:pointer;color:var(--champagne);font-size:.76rem;letter-spacing:.04em}
   .mem-body{margin-top:8px;color:var(--muted);font-size:.84rem;line-height:1.6}
@@ -354,7 +354,7 @@
   .sub-card{border:1px solid var(--line);border-radius:9px;padding:15px 17px;display:flex;align-items:center;justify-content:space-between;gap:14px;
     background:linear-gradient(150deg,rgba(210,172,95,.09),rgba(138,106,51,.04))}
   .sub-info .st{font-family:var(--display);font-weight:700;font-size:.98rem;display:flex;align-items:center;gap:9px}
-  .sub-info .sd{color:var(--muted);font-size:.8rem;margin-top:3px}
+  .sub-info .sd{color:var(--muted);font-size:.84rem;margin-top:3px}
   .sub-card .btn{width:auto;margin-top:0;padding:11px 16px;white-space:nowrap}
   .acct-rows{margin-top:16px;border:1px solid var(--line-cool);border-radius:9px;overflow:hidden}
   .arow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px}
@@ -373,7 +373,7 @@
   .u-card .ul{font-family:var(--mono);font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
   .u-card .un{font-family:var(--display);font-weight:700;font-size:1.45rem;color:var(--ivory);text-shadow:0 0 8px rgba(255,255,255,.18);line-height:1}
   .u-card .un small{font-size:.78rem;color:var(--muted);font-weight:500;text-shadow:none;margin-left:4px}
-  .u-card .us{color:var(--muted);font-size:.76rem;margin-top:7px;line-height:1.45}
+  .u-card .us{color:var(--muted);font-size:.8rem;margin-top:7px;line-height:1.45}
   .u-bar{height:6px;border-radius:99px;background:rgba(255,255,255,.07);margin-top:10px;overflow:hidden}
   .u-bar i{display:block;height:100%;border-radius:99px;background:var(--gold);box-shadow:0 0 6px rgba(210,172,95,.40),0 0 14px rgba(210,172,95,.18);transition:width .4s}
   .u-bar.warn i{background:#C81E73;box-shadow:0 0 6px rgba(255,45,149,.45)}
@@ -1454,7 +1454,14 @@ const est = s => Math.max(1, Math.ceil((s||"").length/4));
 async function send(){
   const text=$("input").value.trim();
   if((!text && !pendingAtts.length) || busy) return;
-  if(S.room && S.room!=="crown" && pendingAtts.length){ toast("Attachments run in Crown chat for now. Switch to Crown or remove the files."); return; }
+  if(S.room && S.room!=="crown" && pendingAtts.length){
+    const onlyImgs = pendingAtts.every(a=>a.kind==="image");
+    if(!(S.room==="visual-analysis" && onlyImgs)){
+      toast(S.room==="visual-analysis" ? "Visual Analysis reads images. Other file types run in Crown chat."
+                                       : "Images go to Visual Analysis (Room III). Other files run in Crown chat.");
+      return;
+    }
+  }
   if(S.tier!=="pro" && S.tokensUsed>=S.freeLimit){ renderHead(); openUpgrade(); return; }
   let c=activeChat(); if(!c){ newChat(); c=activeChat(); }
   const atts = pendingAtts; pendingAtts=[]; renderAtts();
@@ -1468,7 +1475,7 @@ async function send(){
   if(S.room && S.room!=="crown"){
     if(S.tier!=="pro"){ render(); openUpgrade(); return; }
     render();
-    await roomReply(c, text);
+    await roomReply(c, text, atts.filter(a=>a.kind==="image"));
     return;
   }
   // If it reads like an image request (and nothing is attached), offer to generate instead.
@@ -1521,7 +1528,7 @@ async function modelReply(c, lastText){
   }finally{ busy=false; $("send").disabled=false; renderHead(); $("input").focus(); }
 }
 /* ===== Four Rooms reply (Crowned): non-streaming POST to /api/room-chat, typewriter reveal ===== */
-async function roomReply(c, lastText){
+async function roomReply(c, lastText, roomImgs){
   busy=true; $("send").disabled=true;
   const slug = S.room, R = ROOMS[slug] || { name:"Room", label:"Room" };
   const idx = c.messages.push({ role:"assistant", content:"", streaming:true, room:slug }) - 1;
@@ -1535,7 +1542,9 @@ async function roomReply(c, lastText){
     if(IS_PREVIEW){
       reply = await previewFull([{ role:"user", content:(R.previewSys ? R.previewSys+"\n\n" : "")+lastText }]);
     } else {
-      const res = await fetch("/api/room-chat", { method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({ room:slug, message:lastText }) });
+      const body = { room:slug, message:lastText };
+      if(roomImgs && roomImgs.length) body.images = roomImgs.map(a=>({ name:a.name, mime:a.media, data:a.data }));
+      const res = await fetch("/api/room-chat", { method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify(body) });
       const d = await res.json().catch(()=>({}));
       if(res.status===402){ const e=new Error(d.message||"Limit reached"); e.code=(d.error==="topup_required")?"topup":"limit"; throw e; }
       if(res.status===403){ const e=new Error(d.message||"The Rooms are a Crowned feature."); e.code="crowned"; throw e; }

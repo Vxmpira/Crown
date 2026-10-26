@@ -693,6 +693,25 @@ app.post("/api/room-chat", async (req, res) => {
       message:"You've hit this period's ceiling. Add top-up tokens to keep going, or wait for the reset." });
   }
 
+  // Images: only the Visual room runs a vision model; every other room is text.
+  let images = [];
+  if (Array.isArray(req.body.images) && req.body.images.length) {
+    if (room !== "visual-analysis")
+      return res.status(400).json({ error:"no_vision", message:"Only Visual Analysis (Room III) reads images. Switch rooms, or ask in Crown chat." });
+    const okMime = /^image\/(png|jpe?g|webp|gif)$/;
+    let bytes = 0;
+    for (const im of req.body.images.slice(0, 4)) {
+      const mime = String((im && im.mime) || "image/png");
+      const data = String((im && im.data) || "");
+      if (!okMime.test(mime) || !/^[A-Za-z0-9+/=]+$/.test(data) || data.length < 100) continue;
+      bytes += data.length;
+      if (bytes > 9000000) break; // ~6.7MB of raw image across the batch
+      images.push({ name: String((im && im.name) || "image"), mime, contentString: "data:" + mime + ";base64," + data });
+    }
+    if (!images.length)
+      return res.status(400).json({ error:"bad_image", message:"Those images could not be read. PNG, JPEG, WebP or GIF, up to about 6MB total." });
+  }
+
   // The Floor answers about the session you are actually in: prepend the cached Korvus feed.
   let outbound = message;
   if (room === "the-floor") {
@@ -704,7 +723,7 @@ app.post("/api/room-chat", async (req, res) => {
     const upstream = await fetch(`${ROOMS_BASE}/workspace/${room}/chat`, {
       method: "POST",
       headers: { "content-type":"application/json", "authorization":"Bearer " + ROOMS_KEY },
-      body: JSON.stringify({ message: outbound, mode:"chat", sessionId: `u${u.id}-${room}` })
+      body: JSON.stringify(Object.assign({ message: outbound, mode:"chat", sessionId: `u${u.id}-${room}` }, images.length ? { attachments: images } : {}))
     });
     const data = await upstream.json().catch(() => null);
     if (!upstream.ok || !data || data.error) {
@@ -720,7 +739,7 @@ app.post("/api/room-chat", async (req, res) => {
 
     // Meter real usage through the existing token system. If the engine reports token metrics use them,
     // otherwise estimate at ~4 chars per token. Multiplier makes heavy rooms drain the pool faster.
-    const rawTokens = (data.metrics && data.metrics.total_tokens) ? data.metrics.total_tokens : Math.ceil((outbound.length + text.length) / 4);
+    const rawTokens = (data.metrics && data.metrics.total_tokens) ? data.metrics.total_tokens : Math.ceil((outbound.length + text.length) / 4) + images.length * 1100;
     const spent = Math.ceil(rawTokens * (ROOM_MULT[room] || 1));
 
     if (TOPUP_ONLY_ROOMS.has(room)) {
