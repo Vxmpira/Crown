@@ -1621,7 +1621,7 @@ async function roomReply(c, lastText, roomImgs){
     if(IS_PREVIEW){
       reply = await previewFull([{ role:"user", content:(R.previewSys ? R.previewSys+"\n\n" : "")+lastText }]);
     } else {
-      const body = { room:slug, message:lastText };
+      const body = { room:slug, message:lastText, thread:String(c.id||"main") };
       if(roomImgs && roomImgs.length) body.images = roomImgs.map(a=>({ name:a.name, mime:a.media, data:a.data }));
       const res = await fetch("/api/room-chat", { method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify(body) });
       const d = await res.json().catch(()=>({}));

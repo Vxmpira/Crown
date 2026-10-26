@@ -201,9 +201,10 @@ else:
     record("crown", "Live web search", True, "skipped: account is not Crowned")
 
 # ---- The rooms (/api/room-chat) ----
+RUN_THREAD = "verify-" + str(int(time.time()))
 ROOM_CALLS = []  # the server allows 20 room calls per minute per IP; stay under it
 def room_chat(room, message, images=None):
-    payload = {"room": room, "message": message}
+    payload = {"room": room, "message": message, "thread": RUN_THREAD}
     if images: payload["images"] = images
     for attempt in range(4):
         now = time.time()

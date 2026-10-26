@@ -722,7 +722,7 @@ app.post("/api/chat", async (req, res) => {
       const friendly = stopReason === "refusal"
         ? "Crown declined to answer that one. Rephrase it or ask in a different way and it will take another run at it."
         : "Crown came back empty on that one. Ask again, and if it keeps happening the house has already logged it.";
-      send({ error:"empty_answer", message: friendly, debug: why });
+      send({ error:"empty_answer", message: friendly });
     }
 
     const dedup = arr => { const seen = new Set(), out = []; for (const s of arr) { if (s.url && !seen.has(s.url)) { seen.add(s.url); out.push(s); } } return out; };
@@ -776,6 +776,9 @@ app.post("/api/room-chat", async (req, res) => {
   const room = String(req.body.room || "").trim().toLowerCase();
   if (!ROOM_SLUGS.includes(room)) return res.status(400).json({ error:"bad_room", message:"Unknown room." });
   let message = String(req.body.message || "").trim();
+  // Thread isolation: each UI chat gets its own engine session, so separate
+  // conversations (and any test harness) can never bleed memory into each other.
+  const thread = (String(req.body.thread || "main").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 48)) || "main";
   const hasImgs = Array.isArray(req.body.images) && req.body.images.length > 0;
   if (!message && !hasImgs) return res.status(400).json({ error:"empty", message:"Nothing to send." });
   if (!message) message = "Read this in full detail and give me your analysis.";
@@ -914,7 +917,7 @@ app.post("/api/room-chat", async (req, res) => {
     const upstream = await fetch(`${ROOMS_BASE}/workspace/${room}/chat`, {
       method: "POST",
       headers: { "content-type":"application/json", "authorization":"Bearer " + ROOMS_KEY },
-      body: JSON.stringify(Object.assign({ message: outbound, mode:"chat", sessionId: `u${u.id}-${room}` }, images.length ? { attachments: images } : {}))
+      body: JSON.stringify(Object.assign({ message: outbound, mode:"chat", sessionId: `u${u.id}-${room}-${thread}` }, images.length ? { attachments: images } : {}))
     });
     const data = await upstream.json().catch(() => null);
     if (!upstream.ok || !data || data.error) {
