@@ -258,6 +258,12 @@ for room in ROOM_LIST:
                (r or {}).get("message", "")[:70], ms)
 
     if room == "the-floor":
+        r, code, ms = room_chat(room, "One sentence: what stands out in this chart?",
+                                images=[{"name": "chart.png", "mime": "image/png", "data": solid_png((212, 172, 95))}])
+        txt = (r or {}).get("text", "")
+        leak2 = has_any(txt, "CHART DESK READ", "vision analyst", "[END READ")
+        record(room, "Image via two-model desk", bool(txt) and not code and not leak2,
+               ("PLUMBING LEAKED: " if leak2 else "") + (r.get("message", "") if code else txt[:70]).replace("\n", " "), ms)
         r, code, ms = room_chat(room, "Is the Nasdaq at all time highs right now?")
         txt = (r or {}).get("text", "")
         leaks = has_any(txt, "provided context", "[LIVE", "LIVE MARKET CONTEXT", "KORVUS WIRE", "[END",

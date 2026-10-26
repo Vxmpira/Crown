@@ -802,8 +802,8 @@ app.post("/api/room-chat", async (req, res) => {
   // Images: only the Visual room runs a vision model; every other room is text.
   let images = [];
   if (Array.isArray(req.body.images) && req.body.images.length) {
-    if (room !== "visual-analysis")
-      return res.status(400).json({ error:"no_vision", message:"Only Visual Analysis (Room III) reads images. Switch rooms, or ask in Crown chat." });
+    if (room !== "visual-analysis" && room !== "the-floor")
+      return res.status(400).json({ error:"no_vision", message:"Images are read in Visual Analysis (Room III) and The Floor. Switch rooms, or ask in Crown chat." });
     const okMime = /^image\/(png|jpe?g|webp|gif)$/;
     let bytes = 0;
     for (const im of req.body.images.slice(0, 4)) {
@@ -820,9 +820,47 @@ app.post("/api/room-chat", async (req, res) => {
 
   // The Floor answers about the session you are actually in: prepend the cached Korvus feed.
   let outbound = message;
+  let visionTokens = 0;
   if (room === "the-floor") {
     const ctx = readFloorContext();
-    outbound = (ctx ? ctx + "\n\n[TRADER QUESTION]\n" : "") + message;
+    let chartRead = "";
+    // Two-model desk: the vision analyst reads the image in extreme detail,
+    // then the Floor's own model does the thinking with that read in hand.
+    if (images.length && OPENROUTER_KEY) {
+      try {
+        const vres = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: { "content-type":"application/json", "authorization":"Bearer " + OPENROUTER_KEY,
+                     "HTTP-Referer":"https://blackcrown-intelligence.com", "X-Title":"Crown Floor Chart Desk" },
+          body: JSON.stringify({
+            model: VISION_MODEL, max_tokens: 1400, temperature: 0.2,
+            messages: [
+              { role:"system", content: "You are the chart desk's eyes at a trading firm. Describe what is in the image in extreme, exhaustive detail for an analyst who cannot see it: the instrument and ticker if visible, timeframe, every readable price level and axis value, candle structure and notable patterns, trend lines, indicators and their readings, volume, annotations, and any text on screen. If it is not a chart, describe it with the same precision. Report only what is visible; no trading advice, no interpretation beyond what the image shows." },
+              { role:"user", content: [
+                  { type:"text", text: "Read this in full detail." + (message ? " The trader's question, for context only: " + message.slice(0, 400) : "") },
+                  ...images.map(im => ({ type:"image_url", image_url:{ url: im.contentString } }))
+              ] }
+            ]
+          })
+        });
+        const vdata = await vres.json().catch(() => null);
+        const vmsg = vdata && vdata.choices && vdata.choices[0] ? vdata.choices[0].message : null;
+        chartRead = vmsg ? String(vmsg.content || vmsg.reasoning || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim() : "";
+        visionTokens = (vdata && vdata.usage && vdata.usage.total_tokens) ? vdata.usage.total_tokens : images.length * 1200;
+        if (!vres.ok || !chartRead) {
+          console.error("[room-chat] floor vision failed (" + (vres && vres.status) + ")");
+          chartRead = "";
+        }
+      } catch (e) { console.error("[room-chat] floor vision error: " + e.message); }
+      images = []; // the engine never sees the raw image; the Floor model works from the desk read
+    }
+    const parts = [];
+    if (ctx) parts.push(ctx);
+    if (chartRead) parts.push("[CHART DESK READ · your own vision analyst examined the trader's image]\n" + chartRead + "\n[END READ · Treat this as what you saw with your own eyes. Analyze it directly; never mention an analyst, a description, or that an image was processed.]");
+    else if (req.body.images && Array.isArray(req.body.images) && req.body.images.length && !chartRead)
+      parts.push("[NOTE] The trader attached an image but it could not be read this time. Say so in one plain sentence, then answer what you can from the question itself.[END NOTE]");
+    parts.push("[TRADER QUESTION]\n" + message);
+    outbound = parts.join("\n\n");
   }
 
   try {
@@ -890,7 +928,7 @@ app.post("/api/room-chat", async (req, res) => {
 
     // Meter real usage through the existing token system. If the engine reports token metrics use them,
     // otherwise estimate at ~4 chars per token. Multiplier makes heavy rooms drain the pool faster.
-    const rawTokens = (data.metrics && data.metrics.total_tokens) ? data.metrics.total_tokens : Math.ceil((outbound.length + text.length) / 4) + images.length * 1100;
+    const rawTokens = ((data.metrics && data.metrics.total_tokens) ? data.metrics.total_tokens : Math.ceil((outbound.length + text.length) / 4) + images.length * 1100) + visionTokens;
     const spent = Math.ceil(rawTokens * (ROOM_MULT[room] || 1));
     logUse(u.id, "room:" + room, spent);
 
@@ -1005,6 +1043,50 @@ app.post("/api/image", async (req, res) => {
   }
 });
 
+
+// ---- The Floor commissions an image: the Floor model writes the detailed brief,
+// the image model renders it, the trader gets both ----
+app.post("/api/room-image", async (req, res) => {
+  if (rateLimited("img:"+clientIp(req), 20, 60000)) return res.status(429).json({ error:"rate", message:"You're generating images quickly. Give it a moment." });
+  if (!IMAGE_KEY) return res.status(503).json({ error:"image_unconfigured", message:"Image generation is not set up on the server yet." });
+  if (!ROOMS_KEY) return res.status(503).json({ error:"rooms_unconfigured", message:"The Rooms are not open yet." });
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in first." });
+  if (!u.floor && !isAdmin(u)) return res.status(403).json({ error:"floor_only", message:"The Floor is a private room." });
+  const ask = String(req.body.prompt || "").trim();
+  if (!ask) return res.status(400).json({ error:"no_prompt", message:"Describe the image you want." });
+  if (ask.length > 2000) return res.status(413).json({ error:"too_long", message:"Keep the request under 2000 characters." });
+  try {
+    // Step 1: the Floor writes the brief in its own voice and knowledge.
+    const brief = await fetch(`${ROOMS_BASE}/workspace/the-floor/chat`, {
+      method: "POST",
+      headers: { "content-type":"application/json", "authorization":"Bearer " + ROOMS_KEY },
+      body: JSON.stringify({
+        message: "[IMAGE COMMISSION] The trader asks for an image: \"" + ask + "\". Reply with ONLY a single image-generation brief, 120 words or fewer: subject, composition, every label, level and number that should appear, style, and palette. Use your market knowledge to make the content accurate. No preamble, no commentary, just the brief.",
+        mode:"chat", sessionId: `u${u.id}-the-floor-brief`
+      })
+    });
+    const bdata = await brief.json().catch(() => null);
+    let spec = bdata && bdata.textResponse ? String(bdata.textResponse).replace(/<think>[\s\S]*?<\/think>/g, "").trim() : "";
+    if (!brief.ok || !spec) return res.status(502).json({ error:"brief_failed", message:"The Floor could not draft the brief. Try rephrasing the request." });
+    spec = spec.slice(0, 1800);
+    // Step 2: the render.
+    const image = IMAGE_PROVIDER === "openai" ? await generateOpenAI(spec) : await generatePicsart(spec);
+    if (!image) return res.status(502).json({ error:"image_empty", message:"No image returned by the provider." });
+    // Meter the brief through the Floor's normal multiplier.
+    const specTokens = Math.ceil((ask.length + spec.length) / 4);
+    const spent = Math.ceil(specTokens * (ROOM_MULT["the-floor"] || 1));
+    const poolRoom = Math.max(0, userLimit(u) - u.tokens_used);
+    const fromPool = Math.min(spent, poolRoom);
+    if (fromPool > 0) q.addTokens.run(fromPool, u.id);
+    if (spent - fromPool > 0) q.addTopup.run(-(spent - fromPool), u.id);
+    logUse(u.id, "room:the-floor", spent);
+    res.json({ image, spec });
+  } catch (e) {
+    console.error("[room-image] " + e.message);
+    res.status(502).json({ error:"image_error", message:e.message });
+  }
+});
 
 async function resolvePriceId(){
   if (!STRIPE_PRICE) return null;

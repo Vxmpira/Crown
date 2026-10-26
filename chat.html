@@ -939,7 +939,9 @@ function renderChat(){
     const nm = u ? (S.account?.username || "You") : (m.room && ROOMS[m.room] ? ROOMS[m.room].label : "Crown");
     const av = u ? avInner("You") : CROWN_AV;
     let bubble, actions="";
-    if(m.choice){
+    if(m.fchoice){
+      bubble = `<div class="bubble">The Floor can have that rendered: it writes the brief from its own market read, the desk's image engine paints it.<div class="choice-row"><button class="cbtn gold" onclick="floorImage(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-4.5-4.5L5 21"/></svg> Commission the render</button><button class="cbtn" onclick="floorText(${i})">Answer in text instead</button></div></div>`;
+    } else if(m.choice){
       bubble = `<div class="bubble">That looks like an image request. Want the Crown to generate it?<div class="choice-row"><button class="cbtn gold" onclick="chooseImage(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-4.5-4.5L5 21"/></svg> Generate image${S.tier!=='pro'?' · Pro':''}</button><button class="cbtn" onclick="chooseText(${i})">Answer in text</button></div></div>`;
     } else if(m.image){
       bubble = `<div class="bubble bubble-img"><img src="${m.image}" alt="${esc(m.alt||'Generated image')}" loading="lazy">${m.alt?`<div class="img-cap">${esc(m.alt)}</div>`:""}</div>`;
@@ -1467,6 +1469,7 @@ function houseNote(slug, text, onlyImgs){
   if(onlyImgs){
     why = esc(R.name)+" works in text, so it can't look at "+(imgs>1?"these images":"this image")+" itself.";
     offer = `<button class="cbtn gold" onclick="takeAttsTo('visual-analysis')">Open Visual Analysis with ${imgs>1?"them":"it"}</button>`
+          + (S.floor?`<button class="cbtn" onclick="takeAttsTo('the-floor')">The Floor (charts)</button>`:"")
           + `<button class="cbtn" onclick="sendTextOnly()">Ask here in text only</button>`;
   } else {
     why = esc(R.name)+" works in text, and file reading lives in the Crown console"+(imgs?" (images belong to Visual Analysis)":"")+".";
@@ -1499,13 +1502,14 @@ function sendTextOnly(){
 function autosize(el){ if(!el) return; el.style.height="28px"; el.style.height=Math.min(150, el.scrollHeight)+"px"; }
 
 let busy=false;
+const IMG_RE = /\b(create|generate|make|draw|design|render|paint)\b[^.?!\n]{0,40}\b(image|picture|photo|logo|artwork|drawing|illustration|wallpaper|poster|icon|chart|diagram|infographic)\b/i;
 const est = s => Math.max(1, Math.ceil((s||"").length/4));
 async function send(){
   const text=$("input").value.trim();
   if((!text && !pendingAtts.length) || busy) return;
   if(S.room && S.room!=="crown" && pendingAtts.length){
     const onlyImgs = pendingAtts.every(a=>a.kind==="image");
-    if(!(S.room==="visual-analysis" && onlyImgs)){
+    if(!((S.room==="visual-analysis"||S.room==="the-floor") && onlyImgs)){
       houseNote(S.room, text, onlyImgs);   // gentle: explain, offer the right door, never force
       return;
     }
@@ -1519,15 +1523,18 @@ async function send(){
   c.messages.push(msg);
   if(c.title==="New chat"){ const base = text || atts[0]?.name || "Shared a file"; c.title = base.length>34 ? base.slice(0,34)+"…" : base; }
   $("input").value=""; $("input").style.height="28px";
-  // Room sends skip the image interception; rooms answer in text.
+  // Room sends: The Floor can also commission a render; other rooms answer in text.
   if(S.room && S.room!=="crown"){
-    if(S.tier!=="pro"){ render(); openUpgrade(); return; }
+    if(S.tier!=="pro" && !(S.room==="the-floor" && S.floor)){ render(); openUpgrade(); return; }
+    if(S.room==="the-floor" && !atts.length && IMG_RE.test(text)){
+      c.messages.push({role:"assistant", room:"the-floor", fchoice:{prompt:text}}); render(); return;
+    }
     render();
     await roomReply(c, text, atts.filter(a=>a.kind==="image"));
     return;
   }
   // If it reads like an image request (and nothing is attached), offer to generate instead.
-  const wantsImage = !atts.length && /\b(create|generate|make|draw|design|render|paint)\b[^.?!\n]{0,40}\b(image|picture|photo|logo|artwork|drawing|illustration|wallpaper|poster|icon)\b/i.test(text);
+  const wantsImage = !atts.length && IMG_RE.test(text);
   if(wantsImage){ c.messages.push({role:"assistant", choice:{prompt:text}}); render(); return; }
   render();
   await modelReply(c, text);
@@ -1575,6 +1582,30 @@ async function modelReply(c, lastText){
     else{ c.messages.push({role:"assistant",content:"⚠️ Couldn't reach the model backend.\n\nOn your live site this calls /api/chat. If you see this there, check: sudo systemctl status crown, and that your API key is set in /etc/crown/crown.env.\n\n("+err.message+")"}); render(); }
   }finally{ busy=false; $("send").disabled=false; renderHead(); $("input").focus(); }
 }
+/* ===== The Floor's image commission: Floor writes the brief, the engine renders ===== */
+async function floorText(i){
+  const c=activeChat(); if(!c||!c.messages[i]||!c.messages[i].fchoice) return;
+  const prompt=c.messages[i].fchoice.prompt; c.messages.splice(i,1); render();
+  await roomReply(c, prompt);
+}
+async function floorImage(i){
+  const c=activeChat(); if(!c||!c.messages[i]||!c.messages[i].fchoice) return;
+  const prompt=c.messages[i].fchoice.prompt;
+  c.messages[i]={role:"assistant", room:"the-floor", content:"", streaming:true}; render();
+  const chat=$("chat"); const node=chat.querySelectorAll(".msg")[i]; const bubble=node?node.querySelector(".bubble"):null;
+  if(bubble){ bubble.classList.remove("md"); bubble.innerHTML='<span class="searching"><span class="tdots"><i></i><i></i><i></i></span> The Floor is drafting the brief and commissioning the render\u2026</span>'; }
+  try{
+    const res=await fetch("/api/room-image",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({prompt})});
+    const d=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(d.message||"The render did not come back.");
+    c.messages[i]={role:"assistant", room:"the-floor", image:d.image, alt:(d.spec||prompt).slice(0,220)};
+    render();
+  }catch(err){
+    c.messages[i]={role:"assistant", room:"the-floor", content:"\u26a0\ufe0f "+(err.message||"The render did not come back.")+" You can try again, or ask for it in text."};
+    render();
+  }
+}
+
 /* ===== Four Rooms reply (Crowned): non-streaming POST to /api/room-chat, typewriter reveal ===== */
 async function roomReply(c, lastText, roomImgs){
   busy=true; $("send").disabled=true;
