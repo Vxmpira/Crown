@@ -1456,6 +1456,48 @@ function attHtml(atts){
 }
 
 
+/* ===== soft redirects: the house explains and offers, the user decides ===== */
+let heldText = "";
+function houseNote(slug, text, onlyImgs){
+  heldText = text || "";
+  const R = ROOMS[slug] || { name:"this room" };
+  const imgs = pendingAtts.filter(a=>a.kind==="image").length;
+  const docs = pendingAtts.length - imgs;
+  let why, offer;
+  if(onlyImgs){
+    why = esc(R.name)+" works in text, so it can't look at "+(imgs>1?"these images":"this image")+" itself.";
+    offer = `<button class="cbtn gold" onclick="takeAttsTo('visual-analysis')">Open Visual Analysis with ${imgs>1?"them":"it"}</button>`
+          + `<button class="cbtn" onclick="sendTextOnly()">Ask here in text only</button>`;
+  } else {
+    why = esc(R.name)+" works in text, and file reading lives in the Crown console"+(imgs?" (images belong to Visual Analysis)":"")+".";
+    offer = `<button class="cbtn gold" onclick="takeAttsTo('crown')">Open Crown with the file${pendingAtts.length>1?"s":""}</button>`
+          + (imgs?`<button class="cbtn" onclick="takeAttsTo('visual-analysis')">Visual Analysis (images)</button>`:"")
+          + `<button class="cbtn" onclick="sendTextOnly()">Ask here in text only</button>`;
+  }
+  const chat=$("chat");
+  const old=document.getElementById("houseNote"); if(old) old.remove();
+  const div=document.createElement("div");
+  div.className="msg bot"; div.id="houseNote";
+  div.innerHTML = `<div class="av">${CROWN_AV}</div><div class="mcol"><div class="mname">The House</div>
+    <div class="bubble">${why} Your message and attachments are still right here. Where would you like them to go?
+    <div class="choice-row">${offer}<button class="cbtn" onclick="dismissNote()">Never mind</button></div></div></div>`;
+  chat.appendChild(div); chat.scrollTop = chat.scrollHeight;
+}
+function dismissNote(){ const n=document.getElementById("houseNote"); if(n) n.remove(); if(heldText){ $("input").value=heldText; heldText=""; autosize($("input")); } }
+function takeAttsTo(slug){
+  const n=document.getElementById("houseNote"); if(n) n.remove();
+  if(heldText){ $("input").value=heldText; heldText=""; }
+  setRoom(slug); autosize($("input")); $("input").focus();
+  toast((slug==="crown"?"Crown":"Visual Analysis")+" has your attachments. Send when ready.");
+}
+function sendTextOnly(){
+  const n=document.getElementById("houseNote"); if(n) n.remove();
+  pendingAtts = []; renderAtts();
+  if(heldText){ $("input").value=heldText; heldText=""; send(); }
+  else toast("Attachments set aside. Ask away.");
+}
+function autosize(el){ if(!el) return; el.style.height="28px"; el.style.height=Math.min(150, el.scrollHeight)+"px"; }
+
 let busy=false;
 const est = s => Math.max(1, Math.ceil((s||"").length/4));
 async function send(){
@@ -1464,8 +1506,7 @@ async function send(){
   if(S.room && S.room!=="crown" && pendingAtts.length){
     const onlyImgs = pendingAtts.every(a=>a.kind==="image");
     if(!(S.room==="visual-analysis" && onlyImgs)){
-      toast(S.room==="visual-analysis" ? "Visual Analysis reads images. Other file types run in Crown chat."
-                                       : "Images go to Visual Analysis (Room III). Other files run in Crown chat.");
+      houseNote(S.room, text, onlyImgs);   // gentle: explain, offer the right door, never force
       return;
     }
   }
