@@ -10,3 +10,8 @@ crown.env
 # os / editor cruft
 .DS_Store
 *.log
+__pycache__/
+*.pyc
+node_modules/
+.env
+crown.env
