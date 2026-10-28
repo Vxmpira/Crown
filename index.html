@@ -80,19 +80,26 @@
 
   /* the seal */
   .sealcol{position:relative;display:flex;flex-direction:column;align-items:center;gap:.9rem}
-  .seal{width:min(430px,78vw);height:auto;display:block}
-  .seal .ring{fill:none;stroke:url(#au);stroke-width:.65;opacity:.85}
-  .seal .ring.f{opacity:.45;stroke-width:.5}
-  .seal .draw{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.5s ease forwards}
-  .seal .draw.d2{animation-delay:.15s}.seal .draw.d3{animation-delay:.3s}.seal .draw.d4{animation-delay:.45s}
-  .seal .draw.d5{animation-delay:.6s}.seal .draw.d6{animation-delay:.75s}.seal .draw.d7{animation-delay:.9s}
-  @keyframes draw{to{stroke-dashoffset:0}}
-  .seal .slow{transform-origin:260px 260px;animation:slow 140s linear infinite}
-  .seal .slow.rev{animation-direction:reverse;animation-duration:180s}
-  @keyframes slow{to{transform:rotate(360deg)}}
-  .sealcap{text-align:center;padding:0 .8rem;font-family:var(--serif);font-weight:500;font-size:.66rem;letter-spacing:.34em;text-transform:uppercase;color:var(--muted)}
-  .sealcap b{color:var(--gold);font-weight:500}
-  @media(prefers-reduced-motion:reduce){.seal .draw{animation:none;stroke-dashoffset:0}.seal .slow{animation:none}}
+  .mock{width:min(460px,88vw);background:linear-gradient(180deg,#0D0D11,#0A0A0D);border:1px solid rgba(255,45,149,.28);border-radius:14px;box-shadow:0 18px 60px rgba(0,0,0,.55),0 0 34px rgba(255,45,149,.10);overflow:hidden;font-size:.86rem;text-align:left}
+  .mock-bar{display:flex;align-items:center;gap:7px;padding:.65rem .9rem;border-bottom:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02)}
+  .md{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.14)}
+  .md:first-child{background:rgba(255,45,149,.75)}
+  .mock-t{margin-left:.5rem;font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:#85838F}
+  .mock-live{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.18em;color:#FF2D95;border:1px solid rgba(255,45,149,.35);border-radius:999px;padding:.14rem .5rem}
+  .mock-body{display:flex;flex-direction:column;gap:.7rem;padding:1rem .95rem}
+  .mline{line-height:1.55;color:#E8E8EF}
+  .mline.dim{color:#85838F}
+  .mtag{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.16em;color:#85838F;border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:.1rem .34rem;margin-right:.55rem}
+  .mtag.c{color:#FF2D95;border-color:rgba(255,45,149,.4)}
+  .caret{display:inline-block;width:7px;height:14px;background:#FF2D95;margin-left:4px;vertical-align:-2px;animation:blink 1.1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .mock-meter{display:flex;align-items:center;gap:.6rem;padding:.6rem .95rem;border-top:1px solid rgba(255,255,255,.07);font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.14em;color:#85838F}
+  .mock-meter i{flex:1;height:5px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;display:block}
+  .mock-meter b{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#C81E73,#FF2D95)}
+  .mock-meter .mm{color:#E8E8EF}
+  section.sec,.ctaband{content-visibility:auto;contain-intrinsic-size:auto 760px}
+  @media(max-width:720px){nav.top{backdrop-filter:none;background:rgba(5,5,7,.97)}}
+  @media(prefers-reduced-motion:reduce){.caret{animation:none}}
 
   /* ---------- ticker ---------- */
   .wire{position:relative;z-index:2;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);overflow:hidden;padding:.6rem 0;background:rgba(255,45,149,.025)}
@@ -252,11 +259,11 @@
   "publisher":{"@id":"https://blackcrown-intelligence.com/#org"},
   "offers":[
     {"@type":"Offer","name":"Standard","price":"0","priceCurrency":"USD","description":"The Crown console with a monthly allowance. Free, no card."},
-    {"@type":"Offer","name":"Crowned","price":"49.99","priceCurrency":"USD","description":"All four rooms with 5,000,000 tokens a month."}]},
+    {"@type":"Offer","name":"Crowned","price":"49.99","priceCurrency":"USD","description":"All four rooms with $100 of room credit a month."}]},
  {"@type":"FAQPage","mainEntity":[
   {"@type":"Question","name":"Is the free tier actually free?","acceptedAnswer":{"@type":"Answer","text":"Yes. No card, no trial clock. Standard gives you the Crown console with a monthly allowance that resets every 30 days. The four rooms are Crowned territory."}},
   {"@type":"Question","name":"What happens to my data?","acceptedAnswer":{"@type":"Answer","text":"Nothing you write, upload, or track in Crown is sold or used to train a model. That is the standard across every BlackCrownVxJ product."}},
-  {"@type":"Question","name":"What are tokens and why does Deep-Logic need them?","acceptedAnswer":{"@type":"Answer","text":"Deep-Logic runs a heavier reasoning model that costs real compute per answer. Top-ups start at $4.99 inside the console, never expire, and overflow into the other rooms."}},
+  {"@type":"Question","name":"How does usage work?","acceptedAnswer":{"@type":"Answer","text":"Crowned carries $100 of room credit a month, metered live. Deep-Logic draws more credit per answer because it runs a heavier reasoning model. Top-ups start at $4.99 inside the console, never expire, and overflow into the other rooms."}},
   {"@type":"Question","name":"How is this connected to Korvus and Eclipse-X?","acceptedAnswer":{"@type":"Answer","text":"Same house. BlackCrown Intelligence is the AI division of BlackCrownVxJ LLC, which also ships Korvus market intelligence, the LodeStone indicator, and runs the Eclipse-X community on Discord."}},
   {"@type":"Question","name":"Can I cancel Crowned any time?","acceptedAnswer":{"@type":"Answer","text":"Yes, from inside the console in two clicks. You keep Crowned until the end of the paid period, then land back on Standard."}}]}
 ]}
@@ -310,37 +317,16 @@
       <p class="houseline rise r5">A <b>BlackCrownVxJ</b> house product, from the desk that runs Korvus, LodeStone, and Eclipse&#8209;X.</p>
     </div>
     <div class="sealcol">
-      <svg class="seal" viewBox="0 0 520 520" aria-hidden="true">
-        <g id="sealrings"></g>
-        <defs>
-          <path id="tcirc" d="M260 260 m -238 0 a 238 238 0 1 1 476 0 a 238 238 0 1 1 -476 0"/>
-          <path id="tcirc2" d="M260 260 m -124 0 a 124 124 0 1 1 248 0 a 124 124 0 1 1 -248 0"/>
-        </defs>
-        <circle cx="260" cy="260" r="248" fill="none" stroke="url(#au)" stroke-width="1" opacity=".9"/>
-        <circle cx="260" cy="260" r="228" fill="none" stroke="url(#au)" stroke-width=".6" opacity=".6"/>
-        <circle cx="260" cy="260" r="136" fill="none" stroke="url(#au)" stroke-width=".9" opacity=".9"/>
-        <circle cx="260" cy="260" r="114" fill="#060608" stroke="url(#au)" stroke-width=".6" opacity=".95"/>
-        <circle cx="260" cy="260" r="106" fill="none" stroke="url(#au)" stroke-width=".5" opacity=".5" stroke-dasharray="1 4"/>
-        <circle cx="260" cy="260" r="98" fill="none" stroke="url(#au)" stroke-width=".4" opacity=".35" stroke-dasharray="1 6"/>
-        <text font-family="Space Grotesk,sans-serif" font-size="15.5" letter-spacing="6.5" fill="url(#au)" opacity=".95">
-          <textPath href="#tcirc" startOffset="0" textLength="1495" lengthAdjust="spacingAndGlyphs">BLACKCROWN INTELLIGENCE &#10022; PRIVATE BY DESIGN &#10022; BLACKCROWN INTELLIGENCE &#10022; EST MMXXVI &#10022;</textPath>
-        </text>
-        <text font-family="Space Grotesk,sans-serif" font-size="11" letter-spacing="4.5" fill="url(#au)" opacity=".8">
-          <textPath href="#tcirc2" startOffset="0" textLength="779" lengthAdjust="spacingAndGlyphs">UNFILTERED &#8226; DEEP-LOGIC &#8226; VISUAL &#8226; CREATIVITY &#8226; FOUR ROOMS &#8226; ONE CROWN &#8226;</textPath>
-        </text>
-        <g stroke="url(#au)" stroke-width="3" fill="none" stroke-linejoin="round" stroke-linecap="round">
-          <path class="draw d6" pathLength="1" d="M200 302 L200 228 L232 258 L260 210 L288 258 L320 228 L320 302 Z"/>
-          <line class="draw d7" pathLength="1" x1="210" y1="316" x2="310" y2="316"/>
-          <circle class="draw d7" pathLength="1" cx="232" cy="246" r="3"/>
-          <circle class="draw d7" pathLength="1" cx="260" cy="224" r="3"/>
-          <circle class="draw d7" pathLength="1" cx="288" cy="246" r="3"/>
-        </g>
-        <g fill="none" stroke="url(#au)" stroke-width=".8" opacity=".9">
-          <path d="M260 12 l6 10 h-12 Z"/><path d="M260 508 l6 -10 h-12 Z"/>
-          <path d="M12 260 l10 6 v-12 Z"/><path d="M508 260 l-10 6 v-12 Z"/>
-        </g>
-      </svg>
-      <div class="sealcap">THE SEAL OF THE HOUSE <b>&#10022;</b> FOUR ROOMS WITHIN</div>
+      <div class="mock" aria-hidden="true">
+        <div class="mock-bar"><span class="md"></span><span class="md"></span><span class="md"></span><span class="mock-t">CROWN &middot; DEEP-LOGIC</span><span class="mock-live">PRIVATE</span></div>
+        <div class="mock-body">
+          <div class="mline"><span class="mtag">YOU</span>Read my launch plan and tell me where it leaks.</div>
+          <div class="mline"><span class="mtag c">CROWN</span>Three leaks. Your refund terms contradict page 4, week two is double booked, and no one owns support. Fixes below.</div>
+          <div class="mline dim"><span class="mtag c">CROWN</span>Saved to your project. Nothing here trains a model.<span class="caret"></span></div>
+        </div>
+        <div class="mock-meter"><span>ROOM CREDIT</span><i><b style="width:84%"></b></i><span class="mm">$84.10 left</span></div>
+      </div>
+      <div class="sealcap">THE CROWN CONSOLE <b>&#10022;</b> FOUR ROOMS WITHIN</div>
     </div>
   </div>
 </header>
@@ -472,14 +458,14 @@
         <div class="per">Per month, cancel any time</div>
         <ul>
           <li><b>All four rooms</b> unlocked: Unfiltered, Deep-Logic, Visual, Creativity</li>
-          <li><b>5,000,000 tokens</b> a month, metered live to the exact token in your account</li>
+          <li><b>$100 of room credit</b> a month, metered live in your account</li>
           <li>File uploads read in full: PDFs, docs, code</li>
           <li>Priority lane when the house is busy</li>
         </ul>
         <a class="btn gold" href="/chat">Get Crowned</a>
       </div>
     </div>
-    <div class="topnote"><b>Top-ups:</b> Deep-Logic runs on tokens. Buy exactly what you need from inside the console, from $4.99. Top-up balances never expire and spill over to other rooms when your monthly allowance runs dry.</div>
+    <div class="topnote"><b>Top-ups:</b> Deep-Logic draws credit faster because it thinks harder. Buy exactly what you need from inside the console, from $4.99. Top-up balances never expire and spill over to other rooms when your monthly allowance runs dry.</div>
   </div>
 </section>
 
@@ -491,7 +477,7 @@
     </div>
     <div class="straight">
       <div class="st-item"><h4>Crown will not do your thinking for you.</h4><p>It sharpens yours. The rooms give you speed, memory, and a second set of eyes. The judgment stays with you.</p></div>
-      <div class="st-item"><h4>Deep-Logic costs tokens on purpose.</h4><p>Real reasoning burns real compute. You pay for exactly what you use instead of subsidizing everyone else's usage.</p></div>
+      <div class="st-item"><h4>Deep-Logic costs more on purpose.</h4><p>Real reasoning burns real compute. You pay for exactly what you use instead of subsidizing everyone else's usage.</p></div>
       <div class="st-item"><h4>Standard is genuinely useful.</h4><p>The free tier is not a demo with the good parts sawed off. The full console with a real monthly allowance you can work inside.</p></div>
       <div class="st-item"><h4>Built by an operator.</h4><p>Crown comes off the same desk that uses it every day: the desk that runs Korvus, LodeStone, and Eclipse&#8209;X.</p></div>
     </div>
@@ -506,15 +492,15 @@
     </div>
     <details>
       <summary>Is the free tier actually free? <span class="pm">+</span></summary>
-      <p>Yes. No card, no trial clock. Standard gives you the Crown console with a monthly allowance that resets every 30 days. The four rooms are Crowned territory. It only costs money when you choose Crowned or buy tokens for Deep-Logic.</p>
+      <p>Yes. No card, no trial clock. Standard gives you the Crown console with a monthly allowance that resets every 30 days. The four rooms are Crowned territory. It only costs money when you choose Crowned or top up credit for Deep-Logic.</p>
     </details>
     <details>
       <summary>What happens to my data? <span class="pm">+</span></summary>
       <p>Nothing you write, upload, or track in Crown is sold or used to train a model. That is the standard across every BlackCrownVxJ product, not a setting you go hunting for. The full detail lives in the <a href="/privacy">privacy policy</a>.</p>
     </details>
     <details>
-      <summary>What are tokens and why does Deep-Logic need them? <span class="pm">+</span></summary>
-      <p>Deep-Logic runs a heavier reasoning model that costs real compute per answer. Top-ups start at $4.99 inside the console. Balances never expire, and they overflow into the other rooms if your monthly allowance runs dry.</p>
+      <summary>How does usage work? <span class="pm">+</span></summary>
+      <p>Usage is a money balance, metered live. Crowned carries $100 of room credit a month, and Deep-Logic draws more per answer because it runs a heavier reasoning model. Top-ups start at $4.99 inside the console, balances never expire, and they overflow into the other rooms if your allowance runs dry.</p>
     </details>
     <details>
       <summary>How is this connected to Korvus and Eclipse-X? <span class="pm">+</span></summary>
@@ -522,7 +508,7 @@
     </details>
     <details>
       <summary>Can I cancel Crowned any time? <span class="pm">+</span></summary>
-      <p>Yes, from inside the console in two clicks. You keep Crowned until the end of the period you paid for, then land back on Standard. Any token balance you bought stays yours.</p>
+      <p>Yes, from inside the console in two clicks. You keep Crowned until the end of the period you paid for, then land back on Standard. Any top-up balance you bought stays yours.</p>
     </details>
   </div>
 </section>
@@ -621,23 +607,6 @@ document.querySelectorAll('.room').forEach(function(r){
       p.setAttribute("stroke-width",".6");
     }
     etch.appendChild(g);
-  }
-  // seal rosettes
-  var sr=document.getElementById("sealrings");
-  if(sr){
-    // ordered interference pairs: each radius drawn twice, half a wave apart,
-    // the way machine-turned engraving braids
-    var specs=[[216,4,36],[204,5,28],[190,6,22],[174,4,32],[158,6,18],[146,3,40]];
-    var g1=document.createElementNS(NS,"g"), g2=document.createElementNS(NS,"g");
-    g1.setAttribute("class","slow"); g2.setAttribute("class","slow rev");
-    specs.forEach(function(s,ix){
-      var host=ix<3?g1:g2;
-      [0,Math.PI].forEach(function(ph,j){
-        var p=path(host, ring(260,260,s[0],s[1],s[2],ph+ix*.5,260), "ring"+(j?" f":"")+" draw d"+((ix%6)+1));
-        p.setAttribute("pathLength","1");
-      });
-    });
-    sr.appendChild(g1); sr.appendChild(g2);
   }
 })();
 </script>
