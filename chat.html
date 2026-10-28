@@ -425,6 +425,16 @@
   }
   @media(max-width:560px){.frow{flex-direction:column;gap:0}}
   @media(prefers-reduced-motion:reduce){.msg{animation:none}.model-pill .dot{animation:none}.aurora i{animation:none}.door{transition:none}}
+  /* mobile composer: full-width input on top, tools tucked below; 16px fonts
+     so iOS never auto-zooms a focused field */
+  @media(max-width:640px){
+    .composer{flex-wrap:wrap;align-items:center;row-gap:4px}
+    .composer textarea{flex:1 1 100%;order:1;font-size:16px}
+    .composer .ic-btn{order:2;width:34px;height:34px}
+    .composer .send{order:3;margin-left:auto}
+    .field input,#input,textarea,select{font-size:16px !important}
+    .composer-wrap{padding:8px 12px 14px}
+  }
 
   /* ---------- v6 heraldic overrides: the house look from the landing page ---------- */
   .side-brand .name{letter-spacing:.06em;font-size:.98rem}
