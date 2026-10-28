@@ -7,20 +7,20 @@
 <title>Crown Admin</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 30' fill='none' stroke='%23D2AC5F' stroke-width='2.4' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z'/%3E%3Cline x1='7' y1='28' x2='29' y2='28'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 30' fill='none' stroke='%23FF2D95' stroke-width='2.4' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z'/%3E%3Cline x1='7' y1='28' x2='29' y2='28'/%3E%3C/svg%3E">
 <style>
   :root{
-    --black:#060504;--panel:#100D08;--panel2:#15110A;
-    --bone:#F0EBDF;--white:#FBF8F1;--muted:#B6AD99;--faint:#8B816D;
-    --bronze:#8A6A33;--gold:#D2AC5F;--bright:#F3E2B3;--pink:#FF2D95;
+    --black:#000000;--panel:#100D08;--panel2:#15110A;
+    --bone:#F0EBDF;--white:#FFFFFF;--muted:#B6AD99;--faint:#8B816D;
+    --bronze:#C81E73;--gold:#FF2D95;--bright:#FF6FB6;--pink:#FF2D95;
     --green:#58B88A;--red:#C0445A;
-    --rule:rgba(210,172,95,.25);--rule2:rgba(210,172,95,.55);--soft:rgba(210,172,95,.10);
-    --serif:'Cinzel',serif;--sans:'Hanken Grotesk',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+    --rule:rgba(255,45,149,.25);--rule2:rgba(255,45,149,.55);--soft:rgba(255,45,149,.10);
+    --serif:'Space Grotesk',sans-serif;--sans:'Manrope',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--black);color:var(--bone);font-family:var(--sans);font-size:15px;min-height:100vh;-webkit-font-smoothing:antialiased;
-    background-image:radial-gradient(120% 70% at 50% -12%,rgba(210,172,95,.08),transparent 55%)}
+    background-image:radial-gradient(120% 70% at 50% -12%,rgba(255,45,149,.08),transparent 55%)}
   a{color:var(--gold);text-decoration:none}
   .wrap{max-width:1200px;margin:0 auto;padding:22px 20px 60px}
   .gilt{background:linear-gradient(170deg,var(--bright) 8%,var(--gold) 45%,var(--bronze) 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -34,8 +34,8 @@
   .btn{font-family:var(--sans);font-weight:600;font-size:.84rem;border-radius:4px;padding:8px 15px;cursor:pointer;
     border:1px solid var(--rule2);background:transparent;color:var(--bone);transition:border-color .2s,color .2s}
   .btn:hover{border-color:var(--bright);color:var(--bright)}
-  .btn.gold{color:#17110A;border:1px solid var(--bright);background:linear-gradient(175deg,var(--bright),var(--gold) 55%,var(--bronze))}
-  .btn.gold:hover{color:#17110A;filter:brightness(1.06)}
+  .btn.gold{color:#0D0D11;border:1px solid var(--bright);background:linear-gradient(175deg,var(--bright),var(--gold) 55%,var(--bronze))}
+  .btn.gold:hover{color:#0D0D11;filter:brightness(1.06)}
 
   .label{font-family:var(--serif);font-weight:500;font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin:28px 0 11px;display:flex;align-items:center;gap:10px}
   .label:first-of-type{margin-top:4px}
@@ -73,7 +73,7 @@
   .bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--bronze),var(--gold),var(--bright))}
 
   .rev{border:1px solid var(--rule);position:relative;padding:20px 22px;background:linear-gradient(180deg,var(--panel2),var(--panel));display:flex;flex-wrap:wrap;gap:28px;align-items:flex-end}
-  .rev::after{content:"";position:absolute;inset:5px;border:1px solid rgba(210,172,95,.14);pointer-events:none}
+  .rev::after{content:"";position:absolute;inset:5px;border:1px solid rgba(255,45,149,.14);pointer-events:none}
   .rev .biglbl{font-family:var(--serif);font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--faint);margin-bottom:7px}
   .rev .big{font-family:var(--serif);font-weight:700;font-size:2.3rem;line-height:1}
   .rev .side{font-size:.88rem;color:var(--bone)}
@@ -85,11 +85,11 @@
   table.main th,table.main td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--soft)}
   table.main th{font-family:var(--serif);font-weight:500;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--faint);background:rgba(6,5,4,.6)}
   table.main tbody tr:last-child td{border-bottom:none}
-  table.main tbody tr:hover{background:rgba(210,172,95,.04)}
+  table.main tbody tr:hover{background:rgba(255,45,149,.04)}
   td.email{color:var(--muted);font-size:.84rem}
   td.num{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
   .badge{font-family:var(--serif);font-weight:500;font-size:.56rem;letter-spacing:.22em;padding:4px 9px;display:inline-block}
-  .badge.pro{background:linear-gradient(170deg,var(--bright),var(--gold) 60%,var(--bronze));color:#17110A}
+  .badge.pro{background:linear-gradient(170deg,var(--bright),var(--gold) 60%,var(--bronze));color:#0D0D11}
   .badge.free{color:var(--muted);border:1px solid var(--soft)}
   .badge.floor{color:var(--pink);border:1px solid rgba(255,45,149,.4);margin-left:6px}
   .search{width:100%;max-width:300px;background:var(--black);border:1px solid var(--rule);color:var(--bone);font-family:var(--sans);font-size:.86rem;padding:9px 12px;outline:none;margin-bottom:11px;border-radius:3px}
@@ -98,7 +98,7 @@
   /* ---- gate ---- */
   .gate{max-width:420px;margin:11vh auto 0;border:1px solid var(--rule);position:relative;
     background:linear-gradient(180deg,var(--panel2),var(--panel));padding:34px 30px;text-align:center}
-  .gate::after{content:"";position:absolute;inset:6px;border:1px solid rgba(210,172,95,.16);pointer-events:none}
+  .gate::after{content:"";position:absolute;inset:6px;border:1px solid rgba(255,45,149,.16);pointer-events:none}
   .gate .corn{position:absolute;width:14px;height:14px;border:1px solid var(--bright)}
   .gate .c1{top:-5px;left:-5px;border-right:0;border-bottom:0}.gate .c2{top:-5px;right:-5px;border-left:0;border-bottom:0}
   .gate .c3{bottom:-5px;left:-5px;border-right:0;border-top:0}.gate .c4{bottom:-5px;right:-5px;border-left:0;border-top:0}
@@ -120,7 +120,7 @@
 <div class="wrap">
   <header>
     <div class="brand">
-      <svg width="30" height="25" viewBox="0 0 36 30" fill="none" stroke="#D2AC5F" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg>
+      <svg width="30" height="25" viewBox="0 0 36 30" fill="none" stroke="#FF2D95" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg>
       <div>
         <h1>Crown Admin</h1>
         <div class="sub">BLACKCROWN INTELLIGENCE &#183; CONSOLE</div>
@@ -136,7 +136,7 @@
   <!-- gate -->
   <div class="gate hidden" id="gate">
     <span class="corn c1"></span><span class="corn c2"></span><span class="corn c3"></span><span class="corn c4"></span>
-    <svg width="40" height="33" viewBox="0 0 36 30" fill="none" stroke="#D2AC5F" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg>
+    <svg width="40" height="33" viewBox="0 0 36 30" fill="none" stroke="#FF2D95" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 24 L4 9 L12 16 L18 5 L24 16 L32 9 L32 24 Z"/><line x1="7" y1="28" x2="29" y2="28"/></svg>
     <h2>The Owner's Door</h2>
     <p id="gateMsg">This console is private. Sign in with the administrator account.</p>
     <div class="field"><label>Email</label><input id="gEmail" type="email" autocomplete="email"></div>
@@ -302,7 +302,7 @@ function drawBars(svg, series, keys, H){
     keys.forEach((k,j)=>{
       const v = s[k]||0, h = Math.round((v/max)*(H-30));
       const w = bw*0.6/keys.length, xo = x + bw*0.2 + j*w;
-      out += `<rect x="${xo.toFixed(1)}" y="${H-18-h}" width="${Math.max(1,w-1.5).toFixed(1)}" height="${h}" fill="${j===0?"#D2AC5F":"#F3E2B3"}" opacity="${j===0?1:.85}"><title>${s.d}: ${fmt(v)}</title></rect>`;
+      out += `<rect x="${xo.toFixed(1)}" y="${H-18-h}" width="${Math.max(1,w-1.5).toFixed(1)}" height="${h}" fill="${j===0?"#FF2D95":"#FF6FB6"}" opacity="${j===0?1:.85}"><title>${s.d}: ${fmt(v)}</title></rect>`;
     });
     if(n<=14) out += `<text x="${(x+bw/2).toFixed(1)}" y="${H-4}" text-anchor="middle" font-family="JetBrains Mono" font-size="8.5" fill="#8B816D">${s.d}</text>`;
   });
