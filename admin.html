@@ -94,6 +94,11 @@
   .badge.floor{color:var(--pink);border:1px solid rgba(255,45,149,.4);margin-left:6px}
   .search{width:100%;max-width:300px;background:var(--black);border:1px solid var(--rule);color:var(--bone);font-family:var(--sans);font-size:.86rem;padding:9px 12px;outline:none;margin-bottom:11px;border-radius:3px}
   .search:focus{border-color:var(--bright)}
+  .xdel{font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.04em;padding:5px 10px;border-radius:3px;cursor:pointer;
+    border:1px solid var(--soft);background:transparent;color:var(--faint);transition:color .2s,border-color .2s}
+  .xdel:hover{color:var(--red, #C0445A);border-color:rgba(192,68,90,.5)}
+  .xdel.arm{color:#fff;background:rgba(192,68,90,.25);border-color:rgba(192,68,90,.7)}
+  .xdel:disabled{opacity:.5;cursor:wait}
 
   /* ---- gate ---- */
   .gate{max-width:420px;margin:11vh auto 0;border:1px solid var(--rule);position:relative;
@@ -179,7 +184,7 @@
     <div class="label">Accounts <small id="acctCount"></small></div>
     <input class="search" id="filter" placeholder="Filter by username or email&hellip;" oninput="renderUsers()">
     <div class="tablewrap"><table class="main">
-      <thead><tr><th>Username</th><th>Email</th><th>Signed up</th><th>Status</th><th>Tokens used</th><th>Credit</th></tr></thead>
+      <thead><tr><th>Username</th><th>Email</th><th>Signed up</th><th>Status</th><th>Tokens used</th><th>Credit</th><th></th></tr></thead>
       <tbody id="userRows"></tbody>
     </table></div>
   </div>
@@ -288,8 +293,26 @@ function renderUsers(){
     <td>${esc(u.username)}</td><td class="email">${esc(u.email)}</td>
     <td class="num">${u.created_at?new Date(u.created_at).toLocaleDateString():""}</td>
     <td><span class="badge ${u.tier==="pro"?"pro":"free"}">${u.tier==="pro"?"CROWNED":"FREE"}</span>${u.floor?'<span class="badge floor">FLOOR</span>':""}</td>
-    <td class="num">${fmt(u.tokens_used)}</td><td class="num">${credit(u.topup_tokens)}</td></tr>`).join("")
-    || `<tr><td colspan="6" class="email">No accounts match.</td></tr>`;
+    <td class="num">${fmt(u.tokens_used)}</td><td class="num">${credit(u.topup_tokens)}</td>
+    <td style="text-align:right"><button class="xdel" title="Delete this account" onclick="delUser('${esc(u.email)}', this)">Delete</button></td></tr>`).join("")
+    || `<tr><td colspan="7" class="email">No accounts match.</td></tr>`;
+}
+
+async function delUser(email, btn){
+  if(btn.dataset.armed!=="1"){
+    btn.dataset.armed="1"; btn.classList.add("arm"); btn.textContent="Delete forever?";
+    setTimeout(()=>{ btn.dataset.armed=""; btn.classList.remove("arm"); btn.textContent="Delete"; }, 4000);
+    return;
+  }
+  btn.disabled=true; btn.textContent="Deleting\u2026";
+  try{
+    const r = await fetch("/api/admin/user-delete",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"include",body:JSON.stringify({email})});
+    const d = await r.json().catch(()=>({}));
+    if(!r.ok){ btn.disabled=false; btn.classList.remove("arm"); btn.dataset.armed=""; btn.textContent="Delete"; alert(d.message||"Delete failed."); return; }
+    USERS = USERS.filter(u=>(u.email||"").toLowerCase()!==email.toLowerCase());
+    $("acctCount").textContent = USERS.length + " accounts";
+    renderUsers();
+  }catch(e){ btn.disabled=false; btn.textContent="Delete"; alert("Could not reach the server."); }
 }
 
 function drawBars(svg, series, keys, H){

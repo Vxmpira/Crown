@@ -565,6 +565,27 @@ app.get("/api/beacon", (req, res) => {
 });
 
 // ---- admin portal (allowlisted by ADMIN_EMAILS) ----
+// ---- admin: permanently delete an account (spam/probe signups) ----
+const qdel = {
+  sessions:  db.prepare("DELETE FROM sessions WHERE user_id = ?"),
+  workspace: db.prepare("DELETE FROM workspaces WHERE user_id = ?"),
+  resets:    db.prepare("DELETE FROM password_resets WHERE user_id = ?"),
+  user:      db.prepare("DELETE FROM users WHERE id = ?")
+};
+app.post("/api/admin/user-delete", (req, res) => {
+  const me = getSessionUser(req);
+  if (!me) return res.status(401).json({ error:"auth_required", message:"Please log in." });
+  if (!isAdmin(me)) return res.status(403).json({ error:"forbidden", message:"Admin access only." });
+  const email = String(req.body.email || "").trim().toLowerCase();
+  const target = email ? q.userByEmail.get(email) : null;
+  if (!target) return res.status(404).json({ error:"not_found", message:"No account with that email." });
+  if (isAdmin(target)) return res.status(400).json({ error:"protected", message:"Administrator accounts cannot be deleted from here." });
+  // account, sessions, chats and reset tokens go; usage_log and payments stay as the historical ledger
+  qdel.sessions.run(target.id); qdel.workspace.run(target.id); qdel.resets.run(target.id); qdel.user.run(target.id);
+  console.log("[admin] account deleted: " + target.email + " (id " + target.id + ") by " + me.email);
+  res.json({ ok:true, deleted: target.email });
+});
+
 app.get("/api/admin/overview", (req, res) => {
   const u = getSessionUser(req);
   if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in." });
