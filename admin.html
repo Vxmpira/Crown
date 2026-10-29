@@ -250,7 +250,7 @@ function show(){
     [t.d7.views,"Views &#183; 7 days"],[t.d30.views,"Views &#183; 30 days"],[t.d30.uniques,"Visitors &#183; 30 days"]
   ].map(([n,c],i)=>`<div class="stat"><div class="n${i<2?" g":""}">${fmt(n)}</div><div class="c">${c}</div></div>`).join("");
   drawBars($("trafChart"), t.series, ["v","u"], 150);
-  $("topPaths").innerHTML = (t.topPaths.length?t.topPaths:[{path:"&#8212; no views recorded yet &#8212;",c:""}])
+  $("topPaths").innerHTML = (t.topPaths.length?t.topPaths:[{path:"No views recorded yet",c:""}])
     .map(p=>`<tr><td class="k">${esc(p.path)}</td><td class="v">${fmt(p.c)}</td></tr>`).join("");
   $("topRefs").innerHTML = (t.topRefs.length?t.topRefs:[{ref:"direct / none yet",c:""}])
     .map(p=>`<tr><td class="k">${esc(p.ref)}</td><td class="v">${fmt(p.c)}</td></tr>`).join("");
@@ -264,7 +264,7 @@ function show(){
   ].map(([n,c],i)=>`<div class="stat"><div class="n${i===0||i===2?" g":""}" style="font-size:1.45rem">${n}</div><div class="c">${c}</div></div>`).join("");
   drawBars($("useChart"), (d.traffic&&d.traffic.series)||[], ["t"], 130);
   const maxT = Math.max(1, ...(u.byKind30||[]).map(x=>x.t));
-  $("byRoom").innerHTML = (u.byKind30&&u.byKind30.length? u.byKind30 : [{kind:"&#8212;",t:0,c:0}]).map(x=>`
+  $("byRoom").innerHTML = (u.byKind30&&u.byKind30.length? u.byKind30 : [{kind:"No usage yet",t:0,c:0}]).map(x=>`
     <table class="mini"><tr><td class="k">${ROOMNAMES[x.kind]||esc(x.kind)}</td><td class="v">${credit(x.t)} &#183; ${fmt(x.c)} req</td></tr></table>
     <div class="bar"><i style="width:${Math.round(x.t/maxT*100)}%"></i></div><div style="height:9px"></div>`).join("");
 
@@ -278,7 +278,7 @@ function show(){
   $("payRecent").innerHTML = (rc.recent.length?rc.recent:[{}]).map(p=>p.ts?
     `<tr><td class="k">${new Date(p.ts).toLocaleDateString()} &#183; ${esc(p.kind)}</td><td class="v">${money(p.amount_cents)} <span style="color:var(--faint)">${esc(p.email||"")}</span></td></tr>`
     : `<tr><td class="k">No Stripe receipts recorded yet.</td><td class="v"></td></tr>`).join("");
-  $("payKinds").innerHTML = (rc.byKind30.length?rc.byKind30:[{kind:"&#8212;",s:0,c:0}]).map(p=>
+  $("payKinds").innerHTML = (rc.byKind30.length?rc.byKind30:[{kind:"No receipts yet",s:0,c:0}]).map(p=>
     `<tr><td class="k">${esc(p.kind)}</td><td class="v">${money(p.s)} &#183; ${fmt(p.c)}</td></tr>`).join("");
 
   // users

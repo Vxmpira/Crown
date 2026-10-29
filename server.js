@@ -580,8 +580,11 @@ app.post("/api/admin/user-delete", (req, res) => {
   const target = email ? q.userByEmail.get(email) : null;
   if (!target) return res.status(404).json({ error:"not_found", message:"No account with that email." });
   if (isAdmin(target)) return res.status(400).json({ error:"protected", message:"Administrator accounts cannot be deleted from here." });
+  // Paying customers: deleting the row would not stop Stripe from billing them.
+  if (target.tier === "pro" || target.floor)
+    return res.status(409).json({ error:"paying", message:"This account has an active paid plan" + (target.tier === "pro" ? " (Crowned)" : " (The Floor)") + ". Cancel it in the Stripe dashboard first, then delete." });
   // account, sessions, chats and reset tokens go; usage_log and payments stay as the historical ledger
-  qdel.sessions.run(target.id); qdel.workspace.run(target.id); qdel.resets.run(target.id); qdel.user.run(target.id);
+  db.transaction(() => { qdel.sessions.run(target.id); qdel.workspace.run(target.id); qdel.resets.run(target.id); qdel.user.run(target.id); })();
   console.log("[admin] account deleted: " + target.email + " (id " + target.id + ") by " + me.email);
   res.json({ ok:true, deleted: target.email });
 });
