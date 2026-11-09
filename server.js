@@ -18,6 +18,9 @@ const path     = require("path");
 const bcrypt   = require("bcryptjs");
 const Database = require("better-sqlite3");
 const nodemailer = require("nodemailer");
+const { runCowork }   = require("./cowork");
+const { makeSandbox } = require("./sandbox");
+const coworkSandbox   = makeSandbox();   // auto-detects Docker on the host; no-op (static review) if absent
 
 const KEY    = process.env.ANTHROPIC_API_KEY;
 const MODEL  = process.env.MODEL || "claude-sonnet-4-6";
@@ -67,6 +70,15 @@ const ROOMS_KEY  = process.env.ROOMS_API_KEY;
 let ROOM_MULT = { "unfiltered": 1, "deep-logic": 3, "visual-analysis": 2, "creativity": 1, "the-floor": 2 };
 try { if (process.env.ROOM_MULTIPLIERS) ROOM_MULT = Object.assign(ROOM_MULT, JSON.parse(process.env.ROOM_MULTIPLIERS)); } catch (_) { console.error("ROOM_MULTIPLIERS is not valid JSON; using defaults"); }
 const ROOM_SLUGS = Object.keys(ROOM_MULT);
+
+// Co-Work ("The Round Table"): a Lead model on the unfiltered workspace runs
+// three sub-agents (Builder/Reviewer/Tester) and hands back a finished product.
+// Billed in top-up credit, same as Deep-Logic. The sub-agents run UNFILTERED on
+// the engine; a single malware gate (see cowork.js) runs on Anthropic before the
+// product reaches the user. COWORK_WS lets you point the chain at a different
+// workspace; COWORK_MULT tunes how heavily Co-Work bills per raw token.
+const COWORK_WS   = (process.env.COWORK_WS || "unfiltered").trim().toLowerCase();
+const COWORK_MULT = parseFloat(process.env.COWORK_MULT || "1");
 
 // ---- The Floor (Room 05): hidden product, sold via Discord side purchase, never part of Crowned ----
 // Access is a per-user flag flipped by the Stripe webhook (payment link metadata kind=floor, or a
@@ -980,6 +992,121 @@ app.post("/api/room-chat", async (req, res) => {
     console.error("[room-chat] " + room + ": " + e.message);
     res.status(502).json({ error:"room_unreachable", message:"The room engine is not responding." });
   }
+});
+
+// ---- Co-Work ("The Round Table"): Lead + 3 sub-agents, charged in top-up credit ----
+// The sub-agents run UNFILTERED on the engine workspace. The ONE restriction is a
+// malware gate on the finished product, run on Anthropic (reliable, not the chain),
+// and it applies to every account, admin included. Normal work, games and security
+// research pass untouched. For fully ungated work, run the gateless build on the
+// segregated network — do not drop this gate from the public product.
+
+// Chain model: the unfiltered room engine. Fresh ephemeral session per call so
+// worker turns never thread memory into each other or pick up RAG from a real chat.
+async function coworkEngineCall(messages, opts = {}) {
+  let prompt = "";
+  if (opts.system) prompt += opts.system + "\n\n";
+  for (const m of (messages || [])) prompt += (m.role === "assistant" ? "ASSISTANT: " : "USER: ") + m.content + "\n\n";
+  if (opts.json) prompt += "Respond with ONLY the JSON object described above. No prose, no code fences, no commentary.";
+
+  const sid = "cowork-" + crypto.randomBytes(6).toString("hex");
+  const upstream = await fetch(`${ROOMS_BASE}/workspace/${COWORK_WS}/chat`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "authorization": "Bearer " + ROOMS_KEY },
+    body: JSON.stringify({ message: prompt, mode: "chat", sessionId: sid })
+  });
+  const data = await upstream.json().catch(() => null);
+  if (!upstream.ok || !data || data.error) {
+    const msg = (data && (data.error || data.message)) || ("Co-Work engine HTTP " + upstream.status);
+    throw new Error(typeof msg === "string" ? msg : "Co-Work engine error");
+  }
+  let text = String(data.textResponse || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+  const outTok = (data.metrics && data.metrics.total_tokens)
+    ? data.metrics.total_tokens
+    : Math.ceil((prompt.length + text.length) / 4);
+  return { text, inTok: 0, outTok };
+}
+
+// Gate model: Anthropic, non-streaming. Reliable yes/no on the narrow malware list.
+async function coworkClassify(messages, opts = {}) {
+  const body = {
+    model: MODEL, max_tokens: opts.maxTokens || 300,
+    system: opts.system || "", temperature: typeof opts.temperature === "number" ? opts.temperature : 0,
+    messages: (messages || []).map(m => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "") }))
+  };
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": KEY, "anthropic-version": "2023-06-01" },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error("gate model HTTP " + r.status);
+  const d = await r.json().catch(() => null);
+  const text = d && Array.isArray(d.content) ? d.content.filter(b => b.type === "text").map(b => b.text).join("") : "";
+  return { text };
+}
+
+app.post("/api/cowork", async (req, res) => {
+  if (rateLimited("cowork:" + clientIp(req), 6, 60000))
+    return res.status(429).json({ error: "rate", message: "Co-Work is heavy. Give the last run a moment." });
+  if (!ROOMS_KEY) return res.status(503).json({ error: "rooms_unconfigured", message: "The Round Table is not open yet." });
+  if (!KEY) return res.status(500).json({ error: "no_key", message: "Gate model key not set on the server." });
+
+  const u = getSessionUser(req);
+  if (!u) return res.status(401).json({ error: "auth_required", message: "Please log in to use Co-Work." });
+
+  // Co-Work lives in the Unfiltered room, which is Crowned-only. Admins pass.
+  if (effectiveTier(u) !== "pro")
+    return res.status(403).json({ error: "crowned_only", message: "Co-Work is a Crowned feature. Upgrade to convene the table." });
+
+  // Billed in top-up credit, like Deep-Logic.
+  const freshTopup = () => (q.userById.get(u.id).topup_tokens || 0);
+  if (freshTopup() <= 0)
+    return res.status(402).json({ error: "topup_required", topupTokens: 0,
+      message: "Co-Work runs on top-up credit. Add credit to convene the table." });
+
+  const task = String(req.body.task || "").trim();
+  if (!task) return res.status(400).json({ error: "empty", message: "Describe what you want built." });
+  const history = (Array.isArray(req.body.history) ? req.body.history : [])
+    .slice(-20)
+    .map(m => ({ role: m && m.role === "assistant" ? "assistant" : "user", content: String((m && m.content) || "").slice(0, 8000) }))
+    .filter(m => m.content);
+
+  res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  if (res.flushHeaders) res.flushHeaders();
+  const send = obj => { try { res.write("data: " + JSON.stringify(obj) + "\n\n"); } catch (_) {} };
+
+  let billed = 0;
+  const meter = {
+    remaining: () => freshTopup(),
+    charge: (tokens) => {
+      if (tokens > 0) {
+        const amt = Math.max(1, Math.ceil(tokens * COWORK_MULT));
+        q.addTopup.run(-amt, u.id);   // addTopup clamps at 0
+        billed += amt;
+      }
+    }
+  };
+
+  try {
+    const result = await runCowork({
+      task, history,
+      callModel: coworkEngineCall,
+      classify: coworkClassify,
+      meter,
+      sandbox: coworkSandbox,
+      emit: (ev) => send({ event: "status", ...ev }),
+    });
+    if (billed > 0) logUse(u.id, "cowork", billed);
+    send({ event: "result", result, creditLeft: freshTopup() });
+  } catch (e) {
+    if (billed > 0) logUse(u.id, "cowork", billed);
+    console.error("[cowork] " + (e && e.message));
+    send({ event: "result", result: { ok: false, error: "server_error", message: (e && e.message) || "Co-Work failed." } });
+  }
+  res.end();
 });
 
 // Keep only roles + content we trust; allow text plus image/PDF attachment blocks.
