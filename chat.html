@@ -259,6 +259,15 @@
     background:radial-gradient(130% 130% at 28% 18%,var(--champagne),var(--gold) 55%,var(--gold-deep));box-shadow:0 10px 24px -10px rgba(255,45,149,.7),inset 0 0 0 1px rgba(255,255,255,.16);transition:transform .2s,box-shadow .3s}
   .send:hover{transform:translateY(-1px) scale(1.04)}.send:disabled{opacity:.4;cursor:not-allowed;transform:none}
   .composer-foot{max-width:768px;margin:11px auto 0;text-align:center;font-size:.74rem;color:var(--muted-2);letter-spacing:.02em}
+  /* ---------- Co-Work · The Round Table ---------- */
+  #coworkBtn.on{background:var(--gold);color:#120a02;border-color:var(--gold)}
+  .cowork-status{font-family:var(--mono,ui-monospace,monospace);font-size:.82rem;line-height:1.6;color:var(--muted);white-space:pre-wrap}
+  .cowork-status b{color:var(--gold);font-weight:700}
+  .cowork-file{margin:10px 0;border:1px solid rgba(255,45,149,.22);border-radius:12px;overflow:hidden;background:rgba(0,0,0,.25)}
+  .cowork-file .fh{display:flex;justify-content:space-between;align-items:center;background:rgba(255,45,149,.08);padding:7px 12px;font:600 .8rem var(--mono,ui-monospace,monospace);color:var(--gold)}
+  .cowork-file .fh button{background:none;border:1px solid rgba(255,45,149,.4);color:var(--gold);border-radius:7px;padding:2px 10px;font-size:.74rem;cursor:pointer}
+  .cowork-file .fh button:hover{background:rgba(255,45,149,.15)}
+  .cowork-file pre{margin:0;padding:12px;overflow:auto;max-height:360px;font:.78rem/1.5 var(--mono,ui-monospace,monospace);color:var(--ivory)}
 
   /* ---------- room dock: the doors of the house, above the composer ---------- */
   .room-dock{display:flex;gap:7px;align-items:stretch;justify-content:flex-start;max-width:min(960px,100%);width:max-content;margin:0 auto 9px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 3px}
@@ -542,6 +551,7 @@
         <button class="ic-btn" id="webBtn" onclick="toggleWeb()" title="Web access (Pro)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></button>
         <button class="ic-btn" onclick="pickFiles()" title="Attach files (Pro)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05 12.25 20.24a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
         <button class="ic-btn" onclick="pickImages()" title="Add an image (Pro)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-4.5-4.5L5 21"/></svg></button>
+        <button class="ic-btn" id="coworkBtn" onclick="toggleCowork()" title="Co-Work · The Round Table: a lead convenes three sub-agents to build a finished product. Runs on top-up credit." style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="6" r="2.4"/><circle cx="5" cy="18" r="2.2"/><circle cx="19" cy="18" r="2.2"/><path d="M12 8.4v4M12 12.4 6.6 16M12 12.4 17.4 16"/></svg></button>
         <textarea id="input" placeholder="Speak, and the Crown shall answer…" rows="1"></textarea>
         <button class="send" id="send" aria-label="Send"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
       </div>
@@ -715,6 +725,14 @@ const ROOMS = {
   "the-floor":       { num:"V", name:"The Floor",       label:"Room V \u00b7 The Floor",       tease:"The trading room. Korvus wired in.", floor:true }
 };
 ROOMS["deep-logic"].topup = true;
+/* ===== Co-Work · The Round Table (lives in the Unfiltered room) ===== */
+const COWORK_ROOM = "unfiltered";
+let coworkOn = false;
+function toggleCowork(){
+  coworkOn = !coworkOn;
+  const b=$("coworkBtn"); if(b) b.classList.toggle("on", coworkOn);
+  toast(coworkOn ? "🛡️ Co-Work on · your next message convenes the Round Table" : "Co-Work off");
+}
 /* The Floor is a hidden product: it only exists in the UI for accounts carrying the floor flag. */
 function visibleRooms(){ return Object.keys(ROOMS).filter(sl => !ROOMS[sl].floor || S.floor); }
 S.room = "crown";
@@ -914,6 +932,8 @@ function renderHead(){
   const out = S.tier==="free" && S.tokensUsed>=S.freeLimit;
   $("lockedBar").classList.toggle("show", out);
   $("composer").style.display = out ? "none" : "flex";
+  const cwb=$("coworkBtn");
+  if(cwb){ const show=(S.room===COWORK_ROOM)&&!out; cwb.style.display=show?"":"none"; if(!show&&coworkOn){ coworkOn=false; cwb.classList.remove("on"); } }
   renderDock();
 }
 /* the room dock: every door of the house, one tap away */
@@ -951,7 +971,9 @@ function renderChat(){
     const nm = u ? (S.account?.username || "You") : (m.room && ROOMS[m.room] ? ROOMS[m.room].label : "Crown");
     const av = u ? avInner("You") : CROWN_AV;
     let bubble, actions="";
-    if(m.fchoice){
+    if(m.coworkStatus){
+      bubble = `<div class="bubble"><div class="cowork-status">${m.coworkStatus}</div></div>`;
+    } else if(m.fchoice){
       bubble = `<div class="bubble">${esc((ROOMS[m.fchoice&&m.fchoice.room]||{}).name||"This room")} can have that rendered: it writes the brief, the house's image engine paints it.<div class="choice-row"><button class="cbtn gold" onclick="floorImage(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-4.5-4.5L5 21"/></svg> Commission the render</button><button class="cbtn" onclick="floorText(${i})">Answer in text instead</button></div></div>`;
     } else if(m.choice){
       bubble = `<div class="bubble">That looks like an image request. Want the Crown to generate it?<div class="choice-row"><button class="cbtn gold" onclick="chooseImage(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-4.5-4.5L5 21"/></svg> Generate image${S.tier!=='pro'?' · Pro':''}</button><button class="cbtn" onclick="chooseText(${i})">Answer in text</button></div></div>`;
@@ -959,7 +981,7 @@ function renderChat(){
       bubble = `<div class="bubble bubble-img"><img src="${m.image}" alt="${esc(m.alt||'Generated image')}" loading="lazy">${m.alt?`<div class="img-cap">${esc(m.alt)}</div>`:""}</div>`;
       actions = `<div class="mactions"><a class="copy" href="${m.image}" download="crown-image.png"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Save</a></div>`;
     } else {
-      bubble = u ? `<div class="bubble">${attHtml(m.atts)}${esc(m.content)}</div>` : `<div class="bubble md">${mdToHtml(m.content)}</div>`;
+      bubble = u ? `<div class="bubble">${attHtml(m.atts)}${esc(m.content)}</div>` : `<div class="bubble md">${mdToHtml(m.content)}${m.coworkFilesHtml||""}</div>`;
       if(!u) actions = `<div class="mactions"><button class="copy" onclick="copyMsg(this,${i})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</button></div>`;
     }
     return `<div class="msg ${u?'user':'bot'}"><div class="av">${av}</div><div class="mcol"><div class="mname">${esc(nm)}</div>${bubble}${actions}${srcFooter(m)}</div></div>`;
@@ -1535,6 +1557,8 @@ async function send(){
   c.messages.push(msg);
   if(c.title==="New chat"){ const base = text || atts[0]?.name || "Shared a file"; c.title = base.length>34 ? base.slice(0,34)+"…" : base; }
   $("input").value=""; $("input").style.height="28px";
+  // Co-Work: on the Unfiltered room with the Round Table on, build a finished product.
+  if(S.room===COWORK_ROOM && coworkOn){ render(); await coworkReply(c, text); return; }
   // Room sends: The Floor can also commission a render; other rooms answer in text.
   if(S.room && S.room!=="crown"){
     if(S.tier!=="pro" && !(S.room==="the-floor" && S.floor)){ render(); openUpgrade(); return; }
@@ -1667,6 +1691,62 @@ async function roomReply(c, lastText, roomImgs){
     else if(err.code==="rate"){ c.messages.push({role:"assistant",room:slug,content:err.message}); render(); }
     else { c.messages.push({role:"assistant",room:slug,content:"\u26a0\ufe0f "+(err.message||"The room engine is not responding.")}); render(); }
   }finally{ busy=false; $("send").disabled=false; renderHead(); $("input").focus(); }
+}
+/* ===== Co-Work · The Round Table: SSE multi-agent build ===== */
+const COWORK_STEPS = { planning:"The Lead is drafting the work order", planned:"Work order set",
+  builder:"Builder is writing the first version", reviewer:"Reviewer is checking it against the spec",
+  tester:"Tester is running checks", revising:"Lead sent it back for a fix", gate:"Final safety check",
+  delivering:"The Lead is writing your handoff", done:"Done" };
+function coworkB64(str){ try{ return btoa(unescape(encodeURIComponent(str))); }catch(e){ return ""; } }
+function coworkDownload(name, b64){
+  try{ const txt=decodeURIComponent(escape(atob(b64)));
+    const a=document.createElement("a"); a.href="data:text/plain;charset=utf-8,"+encodeURIComponent(txt); a.download=name; a.click();
+  }catch(e){ toast("Download failed"); }
+}
+function coworkFilesHtml(files){
+  return (files||[]).map(f=>{ const b=coworkB64(f.content||"");
+    return `<div class="cowork-file"><div class="fh"><span>${esc(f.path)}</span><button onclick='coworkDownload(${JSON.stringify(f.path)},${JSON.stringify(b)})'>Download</button></div><pre><code>${esc(f.content||"")}</code></pre></div>`;
+  }).join("");
+}
+async function coworkReply(c, task){
+  busy=true; $("send").disabled=true;
+  const idx = c.messages.push({ role:"assistant", room:COWORK_ROOM, coworkStatus:"<b>Convening the Round Table…</b>", streaming:true }) - 1;
+  render();
+  const setStatus = html => { c.messages[idx].coworkStatus=html;
+    const node=$("chat").querySelectorAll(".msg")[idx]; const s=node?node.querySelector(".cowork-status"):null; if(s) s.innerHTML=html; if(nearBottom($("chat"))) $("chat").scrollTop=$("chat").scrollHeight; };
+  const history = c.messages.filter((m,j)=> j!==idx && !m.coworkStatus && m.content).slice(-16).map(m=>({role:m.role,content:m.content}));
+  const trail=[];
+  try{
+    const r = await fetch("/api/cowork", { method:"POST", headers:{"Content-Type":"application/json"}, credentials:"include", body:JSON.stringify({ task, history }) });
+    if(r.status===401){ c.messages.splice(idx,1); render(); openLogin(); return; }
+    if(r.status===403){ const d=await r.json().catch(()=>({})); c.messages.splice(idx,1); c.messages.push({role:"assistant",room:COWORK_ROOM,content:"👑 "+(d.message||"Co-Work is a Crowned feature.")}); render(); openUpgrade(); return; }
+    if(r.status===402){ const d=await r.json().catch(()=>({})); c.messages.splice(idx,1); c.messages.push({role:"assistant",room:COWORK_ROOM,content:"👑 "+(d.message||"Co-Work runs on top-up credit.")}); render(); openTopup(); return; }
+    if(!r.ok || !r.body){ c.messages.splice(idx,1); c.messages.push({role:"assistant",room:COWORK_ROOM,content:"⚠️ Couldn't convene the Round Table."}); render(); return; }
+    const reader=r.body.getReader(), dec=new TextDecoder(); let buf="";
+    while(true){
+      const {value,done}=await reader.read(); if(done) break;
+      buf+=dec.decode(value,{stream:true}); let nl;
+      while((nl=buf.indexOf("\n\n"))>=0){ const line=buf.slice(0,nl).trim(); buf=buf.slice(nl+2);
+        if(!line.startsWith("data:")) continue; let ev; try{ ev=JSON.parse(line.slice(5).trim()); }catch(e){ continue; }
+        if(ev.event==="status"){ const label=COWORK_STEPS[ev.status]||ev.status; const detail=ev.detail?(" — "+esc(ev.detail)):""; trail.push("<b>"+esc(label)+"</b>"+detail); setStatus(trail.slice(-6).join("\n")); }
+        else if(ev.event==="result"){ coworkRender(c, idx, ev.result, ev.creditLeft); }
+      }
+    }
+  }catch(err){ c.messages.splice(idx,1); c.messages.push({role:"assistant",room:COWORK_ROOM,content:"⚠️ Co-Work connection dropped. ("+(err&&err.message||"")+")"}); render(); }
+  finally{ busy=false; $("send").disabled=false; renderHead(); $("input").focus(); }
+}
+function coworkRender(c, idx, result, creditLeft){
+  if(typeof creditLeft==="number") S.topupTokens=creditLeft;
+  if(!result || !result.ok){
+    let msg;
+    if(result && result.blocked) msg="⛔ This build was stopped at the release gate.\n\n**"+(result.category||"blocked")+"** — "+(result.reason||"")+"\n\nEverything else the Round Table builds goes through untouched.";
+    else msg="⚠️ "+((result&&result.message)||"Co-Work failed.");
+    c.messages[idx]={role:"assistant",room:COWORK_ROOM,content:msg}; render(); return;
+  }
+  const d=result.deliverable||{}; const files=(d.files||[]).concat(d.tests||[]);
+  const testLine = d.testExecuted ? (d.testPassed ? "\n\n✅ Tests ran and passed in the sandbox." : "\n\n⚠️ Tests ran but did not all pass.") : (d.staticFindings ? "\n\n🔎 Static review (not executed): "+d.staticFindings : "");
+  c.messages[idx]={ role:"assistant", room:COWORK_ROOM, content:(result.reply||"Done.")+testLine, coworkFilesHtml:coworkFilesHtml(files) };
+  render();
 }
 /* user picked an option on the "looks like an image?" prompt */
 function chooseImage(i){
