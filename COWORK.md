@@ -35,14 +35,25 @@ COWORK_SANDBOX_TIMEOUT=45
 
 No new Stripe product: Co-Work spends the existing top-up balance. The Deep-Logic top-up packs already fund it.
 
-## Docker (for live test execution)
+## Docker (for live test execution) — Amazon Linux 2023
+
+The Crown host is Amazon Linux 2023, so Docker installs via `dnf`, not `apt`:
 
 ```
-sudo apt-get install -y docker.io
+sudo dnf install -y docker
 sudo systemctl enable --now docker
-sudo usermod -aG docker $(whoami)          # let the crown service run containers
+
+# The crown service runs the containers, so ITS user needs the docker group.
+SVC_USER=$(systemctl show -p User --value crown); [ -z "$SVC_USER" ] && SVC_USER=root
+echo "crown runs as: $SVC_USER"
+sudo usermod -aG docker ec2-user                         # for your interactive testing
+[ "$SVC_USER" != "root" ] && [ "$SVC_USER" != "ec2-user" ] && sudo usermod -aG docker "$SVC_USER"
+
 docker pull python:3.12-slim && docker pull node:20-slim
+sudo systemctl restart crown                             # pick up the new group
 ```
+
+If `crown runs as: root`, the service can already reach the Docker socket and no usermod is needed for it. After installing, confirm the daemon with `docker ps` (no sudo) in a fresh shell (`newgrp docker` or re-login).
 
 Without Docker, Co-Work still works — the Tester does a static review and nothing ever runs on the EC2 host. Generated code is **never** executed outside a container.
 
