@@ -601,6 +601,30 @@ app.post("/api/admin/user-delete", (req, res) => {
   res.json({ ok:true, deleted: target.email });
 });
 
+// ---- server-to-server numbers for the BlackCrown admin Board ----
+// The admin's agents kept stalling on "Crown post clicks and signups". Same
+// counts as the admin portal, minus anything personal, behind a shared secret:
+// CROWN_FEED_KEY in this box's .env and the admin box's .env. Off when unset.
+app.get("/api/feed/overview", (req, res) => {
+  const want = String(process.env.CROWN_FEED_KEY || "");
+  const got = String(req.get("x-feed-key") || "");
+  if (!want || got.length !== want.length || !crypto.timingSafeEqual(Buffer.from(got), Buffer.from(want)))
+    return res.status(403).json({ error:"forbidden" });
+  const DAY = 86400000, t = now();
+  const total = q.countAll.get().c, pro = q.countPro.get().c;
+  res.json({
+    accounts: { total, pro, free: total - pro, signups7d: q.countSince.get(t - 7*DAY).c, signupsPrior7d: q.countSince.get(t - 14*DAY).c - q.countSince.get(t - 7*DAY).c, signups30d: q.countSince.get(t - 30*DAY).c },
+    revenue: { mrr: Math.round(pro*PRO_PRICE_USD*100)/100, currency:"USD" },
+    traffic: {
+      d7: { views: qa.viewsSince.get(t-7*DAY).c, uniques: qa.uniqSince.get(t-7*DAY).c },
+      prior7: { views: qa.viewsRange.get(t-14*DAY, t-7*DAY).c, uniques: qa.uniqRange.get(t-14*DAY, t-7*DAY).c },
+      topPaths7d: qa.topPaths.all(t-7*DAY), topRefs7d: qa.topRefs.all(t-7*DAY)
+    },
+    usage: { active7d: qa.activeSince.get(t-7*DAY).c },
+    at: new Date(t).toISOString()
+  });
+});
+
 app.get("/api/admin/overview", (req, res) => {
   const u = getSessionUser(req);
   if (!u) return res.status(401).json({ error:"auth_required", message:"Please log in." });
