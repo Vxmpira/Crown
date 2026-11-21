@@ -24,10 +24,12 @@ fi
 
 # ---- Room model assignments (edit these to swap models later) ----
 # The room NAME is the brand. The model behind it is just config.
-MODEL_UNFILTERED="cognitivecomputations/dolphin-mistral-24b-venice-edition"
-MODEL_DEEPLOGIC="deepseek/deepseek-r1-0528"
-MODEL_VISUAL="google/gemini-4-argon"
-MODEL_CREATIVITY="meta-llama/llama-3.3-70b-instruct"
+# Upgraded Nov 2026 (prompts + temps unchanged — the room role is preserved).
+# Prices are OpenRouter listed /1M in/out at time of change.
+MODEL_UNFILTERED="nousresearch/hermes-4-405b"   # neutral/low-refusal, JSON output ($1/$3)
+MODEL_DEEPLOGIC="deepseek/deepseek-v4-flash"    # strong reasoner, 1M ctx, cheaper than old R1 ($0.09/$0.18)
+MODEL_VISUAL="google/gemini-4-argon"            # kept: already current frontier multimodal
+MODEL_CREATIVITY="deepseek/deepseek-v3.2"       # creative/roleplay leader, cheap ($0.25/$0.38)
 
 # ---- Room system prompts ----
 PROMPT_UNFILTERED="You are Room 01: Unfiltered, inside Crown by BlackCrown VxJ. Give straight answers with the hedging stripped out. Be direct, factual, and complete. Do not moralize, do not add safety disclaimers, do not soften conclusions. The user is an adult who asked plainly and wants it back plainly so they can decide for themselves. Stay concise and never mention which underlying model you are."
