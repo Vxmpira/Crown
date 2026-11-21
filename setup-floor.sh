@@ -8,7 +8,7 @@
 # ==============================================================================
 set -euo pipefail
 BASE="http://127.0.0.1:3001/api/v1"
-KEY="${ROOMS_API_KEY:-$(grep -E '^ROOMS_API_KEY=' /etc/crown/crown.env | cut -d= -f2- | tr -d '"' | tr -d "'")}"
+KEY="${ROOMS_API_KEY:-$(sudo grep -E '^ROOMS_API_KEY=' /etc/crown/crown.env | cut -d= -f2- | tr -d '"' | tr -d "'")}"
 [ -z "${KEY}" ] && { echo "ROOMS_API_KEY not found"; exit 1; }
 AUTH=(-H "Authorization: Bearer ${KEY}" -H "Content-Type: application/json")
 
@@ -22,9 +22,9 @@ curl -s "${AUTH[@]}" -X POST "${BASE}/workspace/the-floor/update" -d "$(python3 
 import json
 print(json.dumps({
   "chatProvider": "openrouter",
-  "chatModel": "meta-llama/llama-3.3-70b-instruct",
+  "chatModel": "deepseek/deepseek-v4-flash",
   "openAiPrompt": """${PROMPT}""",
-  "openAiTemp": 0.6,
+  "openAiTemp": 0.4,
   "openAiHistory": 12
 }))
 PYEOF
